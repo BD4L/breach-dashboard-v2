@@ -107,6 +107,8 @@ Source IDs: `massachusetts`, `hhs`, `california`, `indiana`, `iowa`, `maine`, `n
 
 The schedule is `:17` every four hours in UTC. GitHub can delay or drop scheduled runs. Manual and scheduled collection share one concurrency group, so durable writes cannot overlap. Each source job has a 12-minute Actions cap and a 10-minute worker deadline; one source's failure does not cancel another. Collector jobs have no database credentials or write permission.
 
+NH, NJ and SEC use the ordinary headed Chrome collector in separate standard Ubuntu jobs after the matched hosted diagnostic succeeded. Only those jobs install browser dependencies; the remaining 15 sources use HTTP and Wisconsin retains its standard macOS runner. Full collection keeps the existing page/window limits and reports partial coverage explicitly.
+
 A separate merge job downloads source results, restores public state from the `collection-state` branch, and applies valid records transactionally. Missing, malformed, empty, or failed results retain previous records and record a failure. Only an explicitly validated empty filtered feed may report no matches. A failed source or partial coverage keeps the workflow red, while the deploy job can still publish retained data and current source health. A summary service, email service, or pre-run database snapshot is never a prerequisite for collection.
 
 The state branch contains JSON Lines tables with full revisions and observation history, plus a checksum manifest. Restore rejects missing/corrupt history instead of silently resetting the database. Actions artifacts expire after one day and are only transport; caches hold dependencies. State is committed before the Pages build so a deployment failure cannot lose successful collection. Per-file/state size guards stop publication instead of deleting old history. All persisted state is public normalized source data.
@@ -121,7 +123,7 @@ Listing collection is separate from optional document enrichment: routine runs d
 
 Current recovery evidence and source limitations: [September 5 source rediscovery](docs/collector-rediscovery.md).
 
-The follow-up [current-coverage investigation](docs/current-coverage.md) distinguishes local browser collection from GitHub access and records the remaining publisher limitations. The manual **Publish preserved public history** workflow can rebuild Pages from verified `collection-state` history without running the scrapers or changing recorded source outcomes.
+The follow-up [current-coverage investigation](docs/current-coverage.md) records the initial local recovery and remaining publisher limitations. The later [source access diagnosis](docs/source-access-diagnosis.md) established that the same browser collector can reach NH, NJ and SEC on standard GitHub runners. The manual **Publish preserved public history** workflow can rebuild Pages from verified `collection-state` history without running the scrapers or changing recorded source outcomes.
 
 Optional [local Chrome collection](docs/local-browser-collection.md) produces independent NH, NJ and SEC result envelopes without changing GitHub or scheduling a background job.
 

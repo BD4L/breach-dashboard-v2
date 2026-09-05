@@ -65,10 +65,22 @@ jobs:
           python-version: '3.11'
           cache: pip
       - run: python -m pip install -r requirements.lock
-      - name: Collect one source with a hard deadline
+      - name: Install the verified browser transport for NH, NJ and SEC
+        if: contains(fromJSON('["new_hampshire","new_jersey","sec"]'), matrix.source)
+        run: python -m pip install -r requirements-browser.lock
+      - name: Prepare ordinary Chrome dependencies on Linux
+        if: contains(fromJSON('["new_hampshire","new_jersey","sec"]'), matrix.source)
+        run: python -m playwright install-deps chromium
+      - name: Collect one HTTP source with a hard deadline
+        if: ${{ !contains(fromJSON('["new_hampshire","new_jersey","sec"]'), matrix.source) }}
         env:
           SOURCE_ID: ${{ matrix.source }}
         run: python -m ingestion.runner fetch --source "$SOURCE_ID" --output "results/$SOURCE_ID.json" --timeout 600
+      - name: Collect one browser source with a hard deadline
+        if: contains(fromJSON('["new_hampshire","new_jersey","sec"]'), matrix.source)
+        env:
+          SOURCE_ID: ${{ matrix.source }}
+        run: xvfb-run -a python -m ingestion.local_browser fetch --source "$SOURCE_ID" --output "results/$SOURCE_ID.json" --timeout 600
       - name: Retain source result even when collection is incomplete
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

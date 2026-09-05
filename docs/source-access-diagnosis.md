@@ -1,6 +1,6 @@
 # Source access diagnosis — September 5, 2026
 
-The remaining NH, NJ and SEC automatic collection failures happen before parsing: the publishers refuse the requests or return a challenge instead of publication data. They are separate from the earlier worker timeouts and from successful Pages publication.
+The original NH, NJ and SEC automatic collection failures happened before parsing: the publishers refused the HTTP requests or returned a challenge instead of publication data. A matched browser diagnostic now retrieves valid first pages for all three on standard GitHub runners. The earlier blanket description of these sources as blocked from GitHub was too broad. The failures are separate from the earlier worker timeouts and from successful Pages publication.
 
 ## Observed responses
 
@@ -17,6 +17,16 @@ The publishers distinguish between request environments. Automated-client classi
 The earlier GitHub browser comparison was not equivalent to the successful local collector: it appended the project identifier to Chrome's User-Agent, enabled JavaScript, and used different first-page queries/routes. The new `matched-browser` mode of **Probe official publishing endpoints** reuses the exact local browser client and production URL builders. It makes one request per source and leaves collection history and publication untouched. Fixed metadata and parser counts are retained for one day; response bodies, headers and network addresses are not exported.
 
 The local matched run at `2026-09-05T23:33:53Z` returned HTTP 200 and valid production-parser results for all three sources: NH 25 rows of 9,937; NJ 20 rows of 21 current notices; SEC 100 document hits of 5,425. Each made exactly one request and completed in 1.2–1.7 seconds. These are first-page transport/schema checks, not complete collections. The runtime was ordinary headed Chrome 152.0.7977.82 and Playwright 1.62.0 on macOS arm64, with JavaScript disabled and no supplied profile, proxy, credentials or User-Agent override. GitHub runs the same script on standard Ubuntu and macOS runners.
+
+[Matched GitHub diagnostic 33999088632](https://github.com/BD4L/breach-dashboard-v2/actions/runs/33999088632) passed on both standard Ubuntu and macOS runners at 23:35–23:36 UTC. Every source returned HTTP 200 and valid production-parser results, with the same URL, UTC window and declared counts as the local run. Each made exactly one request. Ubuntu used Chrome 152.0.7977.64; hosted macOS used 152.0.7977.65; all used Playwright 1.62.0.
+
+| Source | Local Chrome | GitHub Ubuntu Chrome | GitHub macOS Chrome |
+| --- | --- | --- | --- |
+| New Hampshire | 200; 25 rows of 9,937 | 200; 25 rows of 9,937 | 200; 25 rows of 9,937 |
+| New Jersey | 200; 20 rows of 21 current | 200; 20 rows of 21 current | 200; 20 rows of 21 current |
+| SEC | 200; 100 document hits of 5,425 | 200; 100 document hits of 5,425 | 200; 100 document hits of 5,425 |
+
+This establishes that GitHub access is possible with the tested browser collector. The original HTTP configuration is refused while the ordinary browser configuration is accepted; the particular filtering feature, such as User-Agent classification or browser protocol characteristics, remains unisolated. These checks justify a full hosted collection trial, not a claim of complete pagination or permanent access.
 
 ## Hosting and SEC policy
 

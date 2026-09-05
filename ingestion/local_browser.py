@@ -1,4 +1,4 @@
-"""Optional local Chrome collection for NH, NJ and SEC; never publishes results.
+"""Bounded Chrome collection for NH, NJ and SEC; never publishes results itself.
 
 Chrome uses a new nonpersistent context, JavaScript disabled and strict TLS.
 CDP pauses every page request before network: only one approved main-frame GET
@@ -12,6 +12,7 @@ from dataclasses import asdict
 from datetime import date,datetime,timezone
 import json
 import math
+import os
 from pathlib import Path
 import re
 import sys
@@ -27,6 +28,18 @@ from .validation import timestamp
 LOCAL_SOURCES = ('new_hampshire', 'new_jersey', 'sec')
 TRANSPORT = 'local_headed_chrome_javascript_disabled'
 _CHALLENGE = re.compile(rb'<title[^>]*>\s*(?:Access Denied|Request Rejected|Just a moment)|Request unsuccessful\. Incapsula|Your Request Originates from an Undeclared Automated Tool', re.I)
+
+
+def transport_context():
+    """Describe execution only; never change browser/network behavior."""
+    if os.environ.get('GITHUB_ACTIONS') == 'true':
+        runner = os.environ.get('RUNNER_OS')
+        runner = runner if runner in ('Linux', 'macOS', 'Windows') else 'unspecified'
+        return ({'transport': 'github_actions_headed_chrome_javascript_disabled',
+                 'executionEnvironment': 'github_actions', 'runnerOS': runner},
+                f' Collected in GitHub Actions ({runner}) in a fresh ordinary headed Chrome session with JavaScript disabled.')
+    return ({'transport': TRANSPORT, 'executionEnvironment': 'local'},
+            ' Collected locally in a fresh ordinary Chrome session with JavaScript disabled; this does not establish GitHub runner access.')
 
 
 def approved_url(source, url):
@@ -241,8 +254,9 @@ def collect_local(source, *, max_pages=None):
                 result = collect_with_client(client,max_pages=max_pages,today=datetime.now(timezone.utc).date())
             result.evidence.update({'requests':client.requests,'bytes':client.bytes})
         finally: client.close()
-    result.evidence['transport'] = TRANSPORT
-    result.message += ' Collected locally in a fresh ordinary Chrome session with JavaScript disabled; this does not establish GitHub runner access.'
+    evidence, message = transport_context()
+    result.evidence.update(evidence)
+    result.message += message
     return result
 
 
@@ -265,7 +279,7 @@ def fetch(source, output, *, timeout=600, max_pages=None):
     except Exception as exc:
         envelope['error']=f'{type(exc).__name__}: {exc}'[:2000];code=1
     envelope['completedAt']=timestamp();atomic_json(Path(output),envelope)
-    print(f'{source}: local artifact saved to {output}; nothing published')
+    print(f'{source}: browser result artifact saved to {output}; this command does not publish')
     return code
 
 

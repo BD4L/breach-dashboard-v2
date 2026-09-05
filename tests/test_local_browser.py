@@ -71,11 +71,40 @@ class BoundaryTests(unittest.TestCase):
     def test_local_parser_injection_records_transport_and_closes_client(self):
         result=Collection('new_hampshire',[Report('new_hampshire','1','Example','https://www.doj.nh.gov/')],1,complete=False)
         client=Mock(requests=1,bytes=100)
-        with patch.object(p,'LocalBrowserClient',return_value=client),patch('ingestion.rediscovered_northeast.collect_nh_documents',return_value=result) as collect:
+        with patch.dict(os.environ,{'GITHUB_ACTIONS':'false'}),patch.object(p,'LocalBrowserClient',return_value=client),patch('ingestion.rediscovered_northeast.collect_nh_documents',return_value=result) as collect:
             actual=p.collect_local('new_hampshire',max_pages=1)
         collect.assert_called_once_with(client,max_pages=1,today=datetime.now(timezone.utc).date());client.close.assert_called_once()
         self.assertEqual(actual.evidence['transport'],p.TRANSPORT)
         self.assertIn('does not establish GitHub runner access',actual.message)
+
+    def test_hosted_collection_identifies_actions_without_changing_transport_or_coverage(self):
+        result=Collection('new_hampshire',[Report('new_hampshire','1','Example','https://www.doj.nh.gov/')],1,
+                          complete=False,message='More published pages remain.')
+        client=Mock(requests=1,bytes=100)
+        with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_OS':'Linux'}), \
+                patch.object(p,'LocalBrowserClient',return_value=client) as factory, \
+                patch('ingestion.rediscovered_northeast.collect_nh_documents',return_value=result):
+            actual=p.collect_local('new_hampshire',max_pages=1)
+        factory.assert_called_once_with('new_hampshire')
+        client.close.assert_called_once()
+        self.assertEqual(actual.evidence['transport'],'github_actions_headed_chrome_javascript_disabled')
+        self.assertEqual(actual.evidence['executionEnvironment'],'github_actions')
+        self.assertEqual(actual.evidence['runnerOS'],'Linux')
+        self.assertIn('Collected in GitHub Actions (Linux)',actual.message)
+        self.assertNotIn('Collected locally',actual.message)
+        self.assertIn('More published pages remain.',actual.message)
+        self.assertFalse(actual.complete)
+
+    def test_execution_context_uses_only_fixed_labels_and_never_environment_payloads(self):
+        with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_OS':'untrusted arbitrary text'}):
+            evidence,message=p.transport_context()
+        self.assertEqual(evidence['runnerOS'],'unspecified')
+        self.assertNotIn('untrusted',message)
+        with patch.dict(os.environ,{'GITHUB_ACTIONS':'false','RUNNER_OS':'Linux'}):
+            evidence,message=p.transport_context()
+        self.assertEqual(evidence['transport'],p.TRANSPORT)
+        self.assertEqual(evidence['executionEnvironment'],'local')
+        self.assertNotIn('runnerOS',evidence)
 
     def test_nj_collection_uses_utc_date_when_local_day_is_earlier(self):
         current=(Path(__file__).parent/'fixtures/rediscovered_nj_current.html').read_bytes()

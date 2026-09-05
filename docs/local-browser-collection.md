@@ -1,11 +1,24 @@
-# Optional local browser collection
+# Browser collection for NH, NJ and SEC
 
-New Hampshire, New Jersey and SEC currently load in an ordinary local Chrome
-session with JavaScript disabled. This does not prove unattended GitHub access.
-The regular scheduled collectors and workflows continue to use public HTTP.
+New Hampshire, New Jersey and SEC use ordinary headed Chrome with JavaScript
+disabled in the four-hour collection workflow. A matched diagnostic verified
+each production first-page URL locally and on standard Ubuntu and macOS GitHub
+runners ([run 33999088632](https://github.com/BD4L/breach-dashboard-v2/actions/runs/33999088632)).
+The full collectors retain their existing page/window limits and report partial
+coverage honestly. The other 15 sources continue to use public HTTP; Wisconsin
+retains its standard macOS runner.
 
-Install the normal Python requirements and then the separate optional browser
-lock. An installed Google Chrome is required; no profile or login is reused.
+Each browser source remains an independent Ubuntu matrix job, with separate
+result artifacts and a 600-second supervised collection deadline inside the
+12-minute job budget. Only these three jobs install the separate browser lock
+and Chrome runtime dependencies. `xvfb-run` supplies Linux's display; browser
+headers, request guards and source parsers are the same as local collection.
+The existing merge preserves history and publishes usable results even when
+another source fails or remains partial.
+
+For a manual local run, install the normal Python requirements and then the
+separate browser lock. An installed Google Chrome is required; no profile or
+login is reused.
 
 ```sh
 python -m pip install -r requirements.lock -r requirements-browser.lock
@@ -33,8 +46,12 @@ CDP Fetch request-stage interception permits only one approved main-frame GET
 per navigation. Redirect hops, additional frames and subresources are blocked
 before their HTTP request proceeds. Only the three fixed source path/query
 contracts are accepted; the CLI has no arbitrary-URL option. Denials stop without
-retry. HTML/JSON response bytes feed the existing source parsers, and envelopes
-explicitly identify the local-browser transport.
+retry. HTML/JSON response bytes feed the existing source parsers. Envelopes
+identify local or GitHub Actions execution. `GITHUB_ACTIONS=true` selects only
+the evidence/message label, and the runner OS is limited to fixed known labels;
+neither environment value changes request behavior or browser configuration.
+The supervisor's worker inherits that environment. Ordinary local invocations
+retain the existing `local_headed_chrome_javascript_disabled` transport value.
 
 Pure boundary tests run in the regular test suite without importing Playwright.
 The separate opt-in local network proof uses a controlled loopback server to
@@ -46,5 +63,5 @@ BREACH_RUN_BROWSER_TESTS=1 python -m unittest tests.test_local_browser -v
 ```
 
 The `_worker` command is internal to the deadline supervisor. Use `fetch` for
-collection. The optional dependency lock is never installed by the default
-GitHub collection workflow.
+collection. This CLI only writes its source envelope; the GitHub workflow's
+separate merge and deployment jobs handle durable history and publication.

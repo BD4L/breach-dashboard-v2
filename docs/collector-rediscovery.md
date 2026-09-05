@@ -2,6 +2,8 @@
 
 This pass re-established publication locations and record formats for the nine failed sources, then investigated a Delaware timeout uncovered by the repaired GitHub run. It changed only `BD4L/breach-dashboard-v2`; the original `BD4L/Breaches` application and database were not used or modified.
 
+For later transport results, see the [matched source access diagnosis](source-access-diagnosis.md). Its successful Chrome checks on standard GitHub runners supersede this earlier phase's broad GitHub-access limitation for NH, NJ and SEC.
+
 ## Recovered publishing surfaces
 
 | Source | Verified records | Recovery and remaining coverage limit |

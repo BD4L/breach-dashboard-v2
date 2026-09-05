@@ -2,6 +2,8 @@
 
 This follow-up checks current publication coverage after the initial [source rediscovery](collector-rediscovery.md). All code, state and deployment changes belong to `BD4L/breach-dashboard-v2`.
 
+Later on September 5, the [matched access diagnosis](source-access-diagnosis.md) established that NH, NJ and SEC first pages are accessible in ordinary Chrome on standard GitHub runners. The local-only access conclusions below describe the earlier collection phase and are superseded by that follow-up.
+
 ## Verified publication limits
 
 Maine's current public database remains withdrawn. Its live [Data Breach Notices menu destination](https://www.maine.gov/ag/news-and-library/data-breach-notices) redirects to the [official offline notice](https://www.maine.gov/ag/consumer-protection/data-security-breaches). The linked [June 12 statement](https://www.maine.gov/ag/news-and-library/press-releases/statement-office-maine-attorney-general-abuse-data-breach-reporting) explains the withdrawal following false submissions; the current site does not announce a reopened database. The [archives](https://www.maine.gov/ag/news-and-library/archives) still provide only the two workbooks ending in September 2020. Insurance reporting pages expose intake forms and an older advisory, not a current public register. The existing 2,981 reviewed historical records remain retained. Retired pages and search-engine snippets were not used to reconstruct the withdrawn database.
