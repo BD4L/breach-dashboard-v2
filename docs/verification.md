@@ -77,3 +77,5 @@ Added the UTC notification-date Today counter and a corresponding view. Historic
 - The header and report view fit desktop width 1167 px and mobile widths 390 / 320 px; the mobile manual-refresh target measures 44 px.
 
 Remote checks are available in [GitHub Actions](https://github.com/BD4L/breach-dashboard-v2/actions). This step publishes repository source and validation only. Pages hosting and unattended source collection remain pending; browser snapshot checks alone do not collect new source data.
+
+The first GitHub validation run exposed an npm 10 clean-install mismatch in the inherited lock: React's Vite required its own compatible esbuild peer entry. Added the missing esbuild 0.28.2 subtree and platform entries, preserving every existing dependency version and libc selector. A clean temporary install passed with the same Node 22.23.2 / npm 10.9.8 versions used by GitHub. This repair changes the lockfile only; the dependency manifest and CI runtime remain unchanged.
