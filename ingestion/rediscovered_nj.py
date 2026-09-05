@@ -193,13 +193,13 @@ def finalize(reports, parsed, rejected, *, complete, message, evidence):
                       empty_is_valid=complete and parsed == 0)
 
 
-def collect(source_id='new_jersey', *, max_pages=None):
+def collect(source_id='new_jersey', *, max_pages=None, client_factory=None, today=None):
     if source_id not in SOURCES:
         raise SourceError(f'Unknown NJCCIC source: {source_id}')
     limit = 40 if max_pages is None else max_pages
     if type(limit) is not int or not 1 <= limit <= 200:
         raise SourceError('max_pages must be an integer between 1 and 200')
-    client = PublicClient(max_requests=limit + 4, max_bytes=20_000_000, deadline_seconds=240)
+    client = (client_factory or PublicClient)(max_requests=limit + 4, max_bytes=20_000_000, deadline_seconds=240)
     reports, parsed, rejected, pages = [], 0, 0, 0
     scope_totals, scope_ends, finished = {}, {}, set()
     archive_url = None
@@ -213,7 +213,7 @@ def collect(source_id='new_jersey', *, max_pages=None):
             visited.add(url)
             try:
                 response = client.request(url)
-                page = parse_page(response.text, response.url)
+                page = parse_page(response.text, response.url, today=today)
                 if listing_identity(response.url) != listing_identity(url):
                     raise SourceError('New Jersey: navigation changed requested page or archive scope')
                 scope = 'archive' if page.archived else 'current'

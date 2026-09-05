@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { type Dataset } from "../lib/dashboard";
 import { createSnapshotLoader, EMPTY_SNAPSHOT } from "../lib/snapshot";
 
 export const SNAPSHOT_POLL_INTERVAL = 5 * 60_000;
@@ -6,6 +7,8 @@ export const SNAPSHOT_POLL_INTERVAL = 5 * 60_000;
 export function useSnapshot(url: string) {
   const [snapshot, setSnapshot] = useState(EMPTY_SNAPSHOT);
   const refreshRef = useRef<() => Promise<void>>(() => Promise.resolve());
+
+  const archiveRef = useRef<() => Promise<Dataset | null>>(() => Promise.resolve(null));
 
   useEffect(() => {
     const loader = createSnapshotLoader({ url, onChange: setSnapshot });
@@ -30,6 +33,7 @@ export function useSnapshot(url: string) {
     }
 
     refreshRef.current = check;
+    archiveRef.current = loader.loadArchive;
     document.addEventListener("visibilitychange", onVisibility);
     void check();
     return () => {
@@ -37,10 +41,12 @@ export function useSnapshot(url: string) {
       clearTimeout(poll);
       document.removeEventListener("visibilitychange", onVisibility);
       refreshRef.current = () => Promise.resolve();
+      archiveRef.current = () => Promise.resolve(null);
       loader.dispose();
     };
   }, [url]);
 
   const refresh = useCallback(() => refreshRef.current(), []);
-  return { ...snapshot, refresh };
+  const loadArchive = useCallback(() => archiveRef.current(), []);
+  return { ...snapshot, refresh, loadArchive };
 }

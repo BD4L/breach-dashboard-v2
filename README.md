@@ -89,7 +89,7 @@ While visible, the browser checks the same-origin JSON snapshot every five minut
 - Source corrections create a new revision while preserving first-seen time. The detail pane shows changed fields and before/after values. The fingerprint describes normalized fields, not an archived document.
 - HHS covers **HIPAA Under Investigation**, including pagination. Archived cases and Part 2 reports are outside this adapter.
 - California follows the listing through its verified last page, with a configurable 120-page default budget. A September 5 run fetched 106 pages / 5,295 rows in about a minute; malformed or conflicting rows are reported separately. Counts and notice enrichment absent from the listing remain unknown.
-- Massachusetts discovers current/prior-year annual reports. Its parser is fixture-tested, but the live index returned HTTP 403 during this pilot. Real PDF fidelity remains unverified until an accessible current report can be tested. Even a parsed PDF remains partial until an independent annual report count is validated; table/text agreement alone does not prove completeness. There is no access-control workaround.
+- Massachusetts collects the current/prior-year annual PDFs: 3,705 verified rows in the September 5 recovery. Independent ID-column extraction checks each page, including observed table-border and wrapped-ID problems. Earlier years are outside this collection window. Letter fallback can add new identities without replacing richer stored evidence.
 
 These are public research records. Source links support review; the dashboard does not establish legal deadlines or automatically merge organizations. It does not remove reports merely because they disappear from a source's current listing.
 
@@ -120,3 +120,9 @@ For an isolated source artifact without touching a database:
 Listing collection is separate from optional document enrichment: routine runs do not download every notice PDF, invoke AI, or fetch SEC XBRL. Indiana and Massachusetts use their annual source reports because those documents are the listings themselves.
 
 Current recovery evidence and source limitations: [September 5 source rediscovery](docs/collector-rediscovery.md).
+
+The follow-up [current-coverage investigation](docs/current-coverage.md) distinguishes local browser collection from GitHub access and records the remaining publisher limitations. The manual **Publish preserved public history** workflow can rebuild Pages from verified `collection-state` history without running the scrapers or changing recorded source outcomes.
+
+Optional [local Chrome collection](docs/local-browser-collection.md) produces independent NH, NJ and SEC result envelopes without changing GitHub or scheduling a background job.
+
+The dashboard initially loads up to 200 complete reports from a small snapshot index. Counts describe the whole published snapshot; the report list explicitly identifies its loaded subset. All reports, search, filters, saved records and full download fetch and validate the complete archive on demand. The original full JSON URL remains compatible. See [snapshot loading and compatibility](frontend/SNAPSHOTS.md).

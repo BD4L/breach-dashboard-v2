@@ -1,0 +1,68 @@
+name: Publish preserved public history
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Share the lock with collection so the deployed snapshot has one state writer.
+concurrency:
+  group: collection-and-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'BD4L/breach-dashboard-v2' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - name: Restore validated public history
+        run: |
+          git fetch --depth=1 origin collection-state
+          git worktree add --detach state/branch FETCH_HEAD
+          python -m ingestion.archive restore --directory state/branch --db state/collection.sqlite
+      - name: Export the preserved snapshot without collecting or changing history
+        run: |
+          python - <<'PY'
+          from ingestion.store import Store
+          with Store('state/collection.sqlite', 'live') as store:
+              store.export('frontend/public/data/dashboard.json')
+          PY
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+        env:
+          BASE_PATH: /breach-dashboard-v2/
+      - run: python scripts/check_public_boundary.py
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: frontend/dist
+          retention-days: 1
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish preserved records and source outcomes
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

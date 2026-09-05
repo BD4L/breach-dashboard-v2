@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   Clock3,
   Database,
+  Download,
   FileText,
   FolderSearch,
   Info,
@@ -53,6 +54,7 @@ import {
   type View,
 } from "../lib/dashboard";
 import { useSnapshot } from "../hooks/useSnapshot";
+import { needsArchive, snapshotRecentCount } from "../lib/snapshot-format";
 
 const PAGE_SIZE = 10;
 const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
@@ -478,7 +480,7 @@ function SourcesView({ data, now }: { data: Dataset; now: number }) {
 }
 
 export default function Dashboard() {
-  const { data, error, refreshing, lastCheckedAt, refresh } = useSnapshot(`${BASE}data/dashboard.json`);
+  const { data, index, error, refreshing, lastCheckedAt, refresh, archiveStatus, archiveError, loadArchive } = useSnapshot(`${BASE}data/snapshot.json`);
   const [now, setNow] = useState(() => Date.now());
   const [localPreview, setLocalPreview] = useState(false);
   const [view, setView] = useState<View>("recent");
@@ -488,6 +490,7 @@ export default function Dashboard() {
   const [mobileDetail, setMobileDetail] = useState(false);
   const [saved, setSaved] = useState<Set<string>>(new Set());
   const [saveMessage, setSaveMessage] = useState("");
+  const [exporting, setExporting] = useState(false);
   const [storageAvailable, setStorageAvailable] = useState(true);
   const searchRef = useRef<HTMLInputElement>(null);
   const detailRef = useRef<HTMLElement>(null);
@@ -544,9 +547,16 @@ export default function Dashboard() {
     return () => window.removeEventListener("keydown", onKey);
   }, [view, mobileDetail]);
 
+  const archiveLoaded = !!data && archiveStatus === "loaded";
+  const archiveRequired = needsArchive(view, filters);
+  const waitingForArchive = !!data && archiveRequired && !archiveLoaded;
+  const totalReports = index?.totalReports ?? data?.reports.length ?? 0;
+  useEffect(() => {
+    if (archiveRequired && data && !archiveLoaded) void loadArchive();
+  }, [archiveRequired, data?.generatedAt, index?.id, loadArchive]);
   const filtered = useMemo(
-    () => filterReports(data?.reports || [], view, filters, saved, now),
-    [data, view, filters, saved, now],
+    () => waitingForArchive ? [] : filterReports(data?.reports || [], view, filters, saved, now),
+    [data, view, filters, saved, now, waitingForArchive],
   );
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount - 1);
@@ -559,11 +569,12 @@ export default function Dashboard() {
   const sourceMap = new Map(
     data?.sources.map((source) => [source.id, source]) || [],
   );
-  const recentCount =
-    data?.reports.filter((report) => isRecent(report, now)).length || 0;
-  const todayCount = useMemo(() => countTodayReports(data?.reports || [], now), [data, now]);
-  const savedCount =
-    data?.reports.filter((report) => saved.has(report.id)).length || 0;
+  const recentCount = index && !archiveLoaded ? snapshotRecentCount(index, now)
+    : data?.reports.filter((report) => isRecent(report, now)).length || 0;
+  const todayCount = useMemo(() => index && !archiveLoaded ? index.sourceDateCounts[utcDay(now)] || 0
+    : countTodayReports(data?.reports || [], now), [data, index, archiveLoaded, now]);
+  // Before the archive loads this is a device bookmark count, not a matched-report count.
+  const savedCount = archiveLoaded ? data?.reports.filter((report) => saved.has(report.id)).length || 0 : saved.size;
   const unhealthy =
     data?.sources.filter((source) => sourceHealth(source, now).tone !== "good")
       .length || 0;
@@ -582,6 +593,21 @@ export default function Dashboard() {
       ? data ? `Update check failed. Showing snapshot from ${formatDate(data.generatedAt, { hour: "numeric", minute: "2-digit" })} UTC.` : "Snapshot check failed."
       : lastCheckedAt ? `Last checked ${relativeTime(new Date(lastCheckedAt).toISOString(), now).toLowerCase()}.` : "Loading published snapshot…";
 
+  async function exportSnapshot() {
+    setExporting(true);
+    try {
+      const full = await loadArchive();
+      if (!full) return;
+      const href = URL.createObjectURL(new Blob([JSON.stringify(full)], { type: "application/json" }));
+      const link = document.createElement("a");
+      link.href = href;
+      link.download = `breach-watch-${full.generatedAt.slice(0, 10)}.json`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(href), 1000);
+    } finally { setExporting(false); }
+  }
   function updateFilter(key: keyof Filters, value: string) {
     setFilters((current) => ({ ...current, [key]: value }));
     setPage(0);
@@ -739,7 +765,7 @@ export default function Dashboard() {
                   {
                     id: "all",
                     label: "All reports",
-                    count: data.reports.length,
+                    count: totalReports,
                   },
                   { id: "saved", label: "Saved", count: savedCount },
                   {
@@ -754,7 +780,7 @@ export default function Dashboard() {
                   className={`${view === tab.id ? "active" : ""} ${tab.id === "saved" || tab.id === "sources" ? "icon-tab" : ""}`}
                   aria-current={view === tab.id ? "page" : undefined}
                   aria-label={`${tab.label} ${tab.count}`}
-                  title={tab.id === "saved" ? "Saved on this device" : tab.label}
+                  title={tab.id === "saved" ? archiveLoaded ? "Saved reports present in this snapshot" : "Bookmarks on this device; load Saved to check the full archive" : tab.label}
                   onClick={() => changeView(tab.id)}
                 >
                   {tab.id === "saved" && <Bookmark size={16} aria-hidden="true" />}
@@ -802,6 +828,23 @@ export default function Dashboard() {
                   : "All sources current"}
                 <ChevronRight size={13} />
               </button>
+            </div>
+            <div className={`snapshot-update-bar archive-bar ${archiveError ? "update-error" : ""}`}>
+              <span className="archive-status" role="status" aria-live="polite">
+                {archiveLoaded
+                  ? `Full archive loaded · ${totalReports.toLocaleString()} reports.`
+                  : `${data.reports.length.toLocaleString()} of ${totalReports.toLocaleString()} reports loaded. Report totals include the full archive.`}
+                {archiveStatus === "loading" && " Loading the full archive…"}
+                {archiveError && ` Archive unavailable: ${archiveError}`}
+              </span>
+              <div className="archive-actions">
+                {!archiveLoaded && <button className="secondary-button" disabled={archiveStatus === "loading" || refreshing} onClick={() => void loadArchive()}>
+                  {archiveStatus === "loading" ? "Loading archive…" : archiveError || archiveStatus === "error" ? "Retry full archive" : "Load full archive"}
+                </button>}
+                <button className="icon-button" disabled={exporting || refreshing || archiveStatus === "loading"} onClick={() => void exportSnapshot()} aria-label={exporting ? "Preparing full snapshot download" : "Download full snapshot"} title={exporting ? "Preparing download…" : "Download full snapshot"}>
+                  <Download size={18} aria-hidden="true" />
+                </button>
+              </div>
             </div>
             {view === "sources" ? (
               <SourcesView data={data} now={now} />
@@ -886,8 +929,8 @@ export default function Dashboard() {
                 </div>
                 <div className="result-toolbar">
                   <p role="status" aria-live="polite">
-                    <strong>{filtered.length.toLocaleString()}</strong> source{" "}
-                    {filtered.length === 1 ? "report" : "reports"}
+                    {waitingForArchive ? "Results require the full archive" : <><strong>{filtered.length.toLocaleString()}</strong> {archiveLoaded ? "source" : "loaded"}{" "}
+                    {filtered.length === 1 ? "report" : "reports"}</>}
                     {filtersActive && (
                       <button className="reset-filters" onClick={clearFilters}>
                         Reset filters
@@ -924,6 +967,7 @@ export default function Dashboard() {
                     <span>
                       Saved on this device. Bookmarks contain report IDs only
                       and do not sync.
+                      {archiveLoaded && saved.size > savedCount && ` ${saved.size - savedCount} saved IDs are not present in this snapshot; their bookmarks are retained.`}
                     </span>
                     {!storageAvailable && (
                       <strong>Storage unavailable — this session only.</strong>
@@ -939,7 +983,16 @@ export default function Dashboard() {
                     tabIndex={-1}
                     aria-label="Report list"
                   >
-                    {filtered.length ? (
+                    {waitingForArchive || (!archiveLoaded && !filtered.length) ? (
+                      <div className="empty-state" role="status">
+                        <FolderSearch size={31} strokeWidth={1.2} />
+                        <h2>{archiveStatus === "loading" ? "Loading the full archive" : "Full archive needed"}</h2>
+                        <p>{archiveError || "Load the full archive to search all reports."}</p>
+                        <button className="secondary-button" disabled={archiveStatus === "loading" || refreshing} onClick={() => void loadArchive()}>
+                          {archiveStatus === "loading" ? "Loading…" : "Load full archive"}
+                        </button>
+                      </div>
+                    ) : filtered.length ? (
                       <>
                         <table className="reports-table">
                           <caption className="sr-only">
@@ -1084,7 +1137,7 @@ export default function Dashboard() {
                               (currentPage + 1) * PAGE_SIZE,
                               filtered.length,
                             )}{" "}
-                            of {filtered.length} reports
+                            of {filtered.length} {archiveLoaded ? "reports" : "loaded reports"}
                           </span>
                           <div className="pagination">
                             <button
