@@ -1,0 +1,50 @@
+name: Probe official publishing endpoints
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: official-source-discovery-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    if: github.repository == 'BD4L/breach-dashboard-v2' && github.ref == 'refs/heads/main'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 26
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -r requirements.lock
+      - name: Install ordinary Chromium for six browser probes
+        if: runner.os == 'Linux'
+        run: |
+          python -m pip install playwright==1.62.0
+          python -m playwright install --with-deps chromium
+      - name: Compare fixed official HTTP endpoints
+        if: runner.os != 'Linux'
+        run: python scripts/discovery_probe.py --output artifacts/discovery-probe.json
+      - name: Compare fixed official HTTP and browser endpoints
+        if: runner.os == 'Linux'
+        run: python scripts/discovery_probe.py --browsers --output artifacts/discovery-probe.json
+      - name: Keep diagnostic metadata for one day
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: discovery-probe-${{ matrix.os }}
+          path: artifacts/discovery-probe.json
+          if-no-files-found: warn
+          retention-days: 1
