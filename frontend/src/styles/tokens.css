@@ -1,0 +1,98 @@
+/* Open Props 1.7.23. Imported from npm and bundled locally; no runtime CDN. */
+@import "open-props/gray";
+@import "open-props/teal";
+@import "open-props/orange";
+@import "open-props/red";
+@import "open-props/fonts";
+@import "open-props/sizes";
+@import "open-props/borders";
+@import "open-props/shadows";
+@import "open-props/easings";
+@import "open-props/durations";
+@import "open-props/zindex";
+
+:root {
+  color-scheme: light;
+
+  /* Semantic roles: components never choose palette steps themselves. */
+  --color-page: var(--gray-1);
+  --color-surface: var(--gray-0);
+  --color-subtle: var(--gray-1);
+  --color-hover: var(--gray-2);
+  --color-selected: var(--teal-0);
+  --color-text: var(--gray-9);
+  --color-secondary: var(--gray-7);
+  --color-muted: var(--gray-7);
+  --color-disabled: var(--gray-6);
+  --color-border: var(--gray-3);
+  --color-border-subtle: var(--gray-2);
+  --color-border-control: var(--gray-6);
+  --color-border-strong: var(--gray-7);
+  --color-accent: var(--teal-10);
+  --color-accent-hover: var(--teal-11);
+  --color-on-accent: var(--gray-0);
+  --color-focus: var(--teal-9);
+  --color-success-text: var(--teal-10);
+  --color-success-bg: var(--teal-0);
+  --color-success-border: var(--teal-3);
+  --color-warning-text: var(--orange-10);
+  --color-warning-bg: var(--orange-0);
+  --color-warning-border: var(--orange-3);
+  --color-danger-text: var(--red-9);
+  --color-danger-bg: var(--red-0);
+  --color-danger-border: var(--red-3);
+
+  /* Keep the approved local font families; use the pack's scales/fallbacks. */
+  --type-ui: "DM Sans", var(--font-sans);
+  --type-display: "Newsreader", var(--font-serif);
+  --type-mono: var(--font-mono);
+  --text-xs: var(--font-size-0);
+  /* Dense-table intermediate step: midpoint of the pack's 12px/16px steps. */
+  --text-sm: calc((var(--font-size-0) + var(--font-size-1)) / 2);
+  --text-base: var(--font-size-1);
+  --text-lg: var(--font-size-3);
+  --text-xl: var(--font-size-4);
+  --text-2xl: var(--font-size-5);
+  --text-3xl: var(--font-size-6);
+  --weight-normal: var(--font-weight-4);
+  --weight-medium: var(--font-weight-5);
+  --weight-semibold: var(--font-weight-6);
+  --weight-bold: var(--font-weight-7);
+  --leading-heading: var(--font-lineheight-0);
+  --leading-tight: var(--font-lineheight-1);
+  --leading-normal: var(--font-lineheight-3);
+  --leading-relaxed: var(--font-lineheight-4);
+  --tracking-tight: calc(var(--font-letterspacing-0) / 2);
+  --tracking-label: var(--font-letterspacing-3);
+
+  --space-1: var(--size-1);
+  --space-2: var(--size-2);
+  --space-3: calc(var(--size-1) + var(--size-2));
+  --space-4: var(--size-3);
+  --space-5: var(--size-4);
+  --space-6: var(--size-5);
+  --space-7: var(--size-7);
+  --space-8: calc(var(--size-7) + var(--size-2));
+  --space-9: var(--size-8);
+  --space-10: var(--size-9);
+  --radius-small: var(--radius-1);
+  --radius-control: var(--radius-2);
+  --radius-panel: var(--radius-2);
+  --radius-pill: var(--radius-round);
+  --stroke: var(--border-size-1);
+  --stroke-strong: var(--border-size-2);
+  --control-height: calc(var(--size-7) + var(--size-2));
+  --control-height-touch: calc(var(--size-7) + var(--size-2) + var(--size-1));
+  --icon-small: var(--size-3);
+  --icon-base: var(--size-4);
+  --icon-large: var(--size-7);
+  --elevation-low: var(--shadow-1);
+  --elevation-floating: var(--shadow-3);
+  --motion-fast: var(--duration-quick-2);
+  --motion-normal: var(--duration-moderate-1);
+  --motion-ease: var(--ease-out-3);
+  --layer-sticky: var(--layer-2);
+  --layer-overlay: var(--layer-4);
+  --layer-toast: var(--layer-5);
+  --opacity-disabled: .5;
+}

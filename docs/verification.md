@@ -48,3 +48,11 @@ Final review hardened the collector against ambient `.netrc` authentication and 
 ## Scope
 
 The original application is preserved. There is no remote repository, push, publication, migration, authenticated firm workspace, email service, or AI integration in this milestone. GitHub Actions workflow syntax/configuration has only local review until the workflow runs in a future repository.
+
+## UI token pass
+
+Replaced the ad hoc palette and accumulated CSS overrides with Open Props 1.7.23 and the semantic roles documented in `docs/design-tokens.md`. The component stylesheet now contains no literal palette colors. Working text renders at 14 px and metadata at 12 px; mobile inputs render at 16 px with 44 px controls. Pack imports, variable aliases, and the build-time favicon were independently reviewed.
+
+Typechecking passed with zero project diagnostics. Root and `/breach-dashboard-v2/` static builds passed, as did the public-boundary check and whitespace checks. npm reported zero known vulnerabilities after installation. Existing upstream Vite deprecation notices remain.
+
+Browser checks confirmed the rendered type/color values and no page-wide horizontal overflow at desktop width 1167 px or mobile widths 390 px and 320 px. All four view tabs fit at 390 px; narrower navigation remains horizontally scrollable. At 320 px, the save target and its column both measure 44 px and the target is contained. Source-status colors, mobile evidence navigation, and Escape-to-return were visually checked. The exact 1,033-report live preview snapshot was retained, and the checked-in demo export was restored byte-for-byte after building.

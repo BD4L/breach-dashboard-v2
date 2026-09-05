@@ -72,6 +72,8 @@ npm run preview
 
 The static output is `frontend/dist/`. Use the same `BASE_PATH` when previewing a build that requires it. A local root build needs no `BASE_PATH`. The included GitHub workflow only validates code and the public boundary; it neither collects data nor publishes a site.
 
+The UI uses the locally bundled [Open Props token pack](docs/design-tokens.md). Color, typography, spacing, and interaction decisions live in `frontend/src/styles/tokens.css`; component styles consume semantic roles from that file.
+
 ## Data meaning and current coverage
 
 - Rows are **source reports**, not deduplicated incidents. A first collection marks historical reports as newly observed; “new” does not establish a recent breach date.
