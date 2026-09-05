@@ -15,7 +15,7 @@ OFFICIAL_HOSTS = {
     'www.in.gov', 'www.iowaattorneygeneral.gov', 'www.maine.gov', 'www1.maine.gov',
     'attorneygeneral.nd.gov', 'oag.maryland.gov', 'oklahoma.gov',
     'www.cyber.nj.gov', 'datcp.wi.gov', 'dojmt.gov', 'www.atg.wa.gov',
-    'consumer.sc.gov', 'attorneygeneral.delaware.gov', 'www.doj.nh.gov',
+    'consumer.sc.gov', 'attorneygeneral.delaware.gov', 'data.delaware.gov', 'www.doj.nh.gov',
     'oag.my.site.com', 'www.sec.gov', 'efts.sec.gov',
 }
 PROJECT_USER_AGENT = 'BreachDashboard/2.0 (+https://github.com/BD4L/breach-dashboard-v2)'

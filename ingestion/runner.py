@@ -26,6 +26,7 @@ DEFAULT_TIMEOUT = 600
 
 def dispatch(source_id: str, *, max_pages: int | None = None) -> Collection:
     groups = {
+        'rediscovered_delaware': {'delaware'},
         'rediscovered_nj': {'new_jersey'},
         'rediscovered_northeast': {'massachusetts', 'new_hampshire'},
         'rediscovered_sec': {'sec'},
@@ -33,7 +34,7 @@ def dispatch(source_id: str, *, max_pages: int | None = None) -> Collection:
         'rediscovered_midatlantic': {'maryland', 'wisconsin'},
         'adapters': {'california', 'hhs'},
         'state_portals': {'indiana', 'north_dakota', 'oklahoma'},
-        'other_portals': {'montana', 'washington', 'south_carolina', 'delaware'},
+        'other_portals': {'montana', 'washington', 'south_carolina'},
         'special_portals': {'texas'},
     }
     for name, sources in groups.items():

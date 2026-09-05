@@ -1,0 +1,48 @@
+[
+  {
+    ":id": "row-3grp.9krd~n7ri",
+    "company_name": "90 Degree Benefits, Inc.",
+    "date_of_breach": "2022-01-28T00:00:00.000",
+    "breach_discovered": "2022-04-21T00:00:00.000",
+    "date_of_notice": "2022-06-09T00:00:00.000",
+    "de_residents_affected": "14",
+    "total_affected": "163483",
+    "supplemental_de_residents_affected": "NULL",
+    "supplemental_total_affected": "NULL",
+    "information_breached": "Social Security number, Medical treatment by a healthcare professional, Health insurance policy number, subscriber ID number, or any other unique identifier used by health insurer to identify person, Medical history",
+    "sample_of_notice": {
+      "url": "https://attorneygeneral.delaware.gov/wp-content/uploads/sites/50/2022/06/Pages-from-90-Degree-Benefits-Delaware-AG-002.pdf"
+    }
+  },
+  {
+    ":id": "row-rt4x_g6re~d39e",
+    "company_name": "Wilmer Cutler Pickering Hale and Dorr, LLC",
+    "date_of_breach": "2026-05-08T00:00:00.000",
+    "breach_discovered": "2026-07-14T00:00:00.000",
+    "date_of_notice": "2026-08-12T00:00:00.000",
+    "de_residents_affected": "3138",
+    "total_affected": "911658",
+    "supplemental_de_residents_affected": "NULL",
+    "supplemental_total_affected": "NULL",
+    "information_breached": "SSN",
+    "sample_of_notice": {
+      "url": "https://attorneygeneral.delaware.gov/wp-content/uploads/sites/50/2026/08/Sample-Consumer-Notice.pdf"
+    }
+  },
+  {
+    ":id": "row-f4p5~knsb_xfqu",
+    "company_name": "Artisans' Bank",
+    "date_of_breach": "2024-01-28T00:00:00.000",
+    "breach_discovered": "2024-05-30T00:00:00.000",
+    "date_of_notice": "2024-07-24T00:00:00.000",
+    "de_residents_affected": "1375",
+    "total_affected": "1690",
+    "supplemental_notification_date": "2024-10-11T00:00:00.000",
+    "supplemental_de_residents_affected": "15",
+    "supplemental_total_affected": "NULL",
+    "information_breached": "Social Security number, Individual taxpayer ID number, Medical treatment by a healthcare professional, Health insurance policy number, subscriber ID number, or any other unique identifier used by health insurer to identify person, Account number, credit card account number, or debit card number, in combination with any required security code, access code, or password that would permit access to a financial account, Username or email address, in combination with password or security question and answer to access online account, Driver's license number, and Diagnosis of mental/physical condition by healthcare professional",
+    "sample_of_notice": {
+      "url": "https://attorneygeneral.delaware.gov/wp-content/uploads/sites/50/2024/11/Artisans_-Bank-Supplemental-Notice-of-Data-Event-DE-Consumer-Notice.pdf"
+    }
+  }
+]

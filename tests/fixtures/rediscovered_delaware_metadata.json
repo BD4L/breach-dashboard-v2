@@ -1,0 +1,52 @@
+{
+  "id": "dir6-wx8v",
+  "name": "Data Security Breach Database",
+  "viewType": "tabular",
+  "rowsUpdatedAt": 1786988840,
+  "columns": [
+    {
+      "fieldName": "company_name",
+      "dataTypeName": "text"
+    },
+    {
+      "fieldName": "date_of_breach",
+      "dataTypeName": "calendar_date"
+    },
+    {
+      "fieldName": "breach_discovered",
+      "dataTypeName": "calendar_date"
+    },
+    {
+      "fieldName": "date_of_notice",
+      "dataTypeName": "calendar_date"
+    },
+    {
+      "fieldName": "de_residents_affected",
+      "dataTypeName": "number"
+    },
+    {
+      "fieldName": "total_affected",
+      "dataTypeName": "number"
+    },
+    {
+      "fieldName": "supplemental_notification_date",
+      "dataTypeName": "calendar_date"
+    },
+    {
+      "fieldName": "supplemental_de_residents_affected",
+      "dataTypeName": "text"
+    },
+    {
+      "fieldName": "supplemental_total_affected",
+      "dataTypeName": "text"
+    },
+    {
+      "fieldName": "information_breached",
+      "dataTypeName": "text"
+    },
+    {
+      "fieldName": "sample_of_notice",
+      "dataTypeName": "url"
+    }
+  ]
+}

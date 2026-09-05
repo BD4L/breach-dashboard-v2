@@ -1,0 +1,1235 @@
+{
+  "row-25by.ye6m_h7hf": {
+    "affected_count": 2075,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-02-01",
+    "match_key": "e6e47c90c7702ec38597670026adc76a",
+    "native_id": "97664505df4d34441d8ff6f40934ff3c",
+    "reported_date": null
+  },
+  "row-2fuz-je5s~8txq": {
+    "affected_count": 547,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2023-09-09",
+    "match_key": "6215f13205f63b32155c97e7d37fd7f2",
+    "native_id": "27ce9ba79a71aa30b88f0665361654cd",
+    "reported_date": "2023-10-23"
+  },
+  "row-2m5k-8xdd-ksds": {
+    "affected_count": 2043,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-12-22",
+    "match_key": "0a30fbab5c0366f8ff1cb2335742625c",
+    "native_id": "80b3328340f80bc48b6475b3c83e52f6",
+    "reported_date": "2025-03-03"
+  },
+  "row-2rpy.ibs4~kmcv": {
+    "affected_count": 792,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-08-01",
+    "match_key": "9015ce885d493e8bb5aab704e84d1b9d",
+    "native_id": "7fa277a2b6b8c25ef77496c18424d637",
+    "reported_date": "2021-09-27"
+  },
+  "row-2vzi-gadw.5nz5": {
+    "affected_count": 15847,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2023-04-20",
+    "match_key": "8f71899db521580e74f8b09e8eedeb78",
+    "native_id": "22ec1077301fa2104d7af20eb698fe1f",
+    "reported_date": "2023-05-11"
+  },
+  "row-3grp.9krd~n7ri": {
+    "affected_count": 14,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-02-28",
+    "breach_start": "2022-01-28",
+    "match_key": "b5e7472a57dcffd2ba7da7c9f1542a79",
+    "native_id": "a5462f2ae165f7fb9f75b417750f1622",
+    "reported_date": "2022-04-21"
+  },
+  "row-3rsq_iuyj~bws3": {
+    "affected_count": 1733,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2022-05-25",
+    "match_key": "a77c3ccb175bab0aa8bba4c52859b024",
+    "native_id": "9a5ad6220313cbcff5c16b8d42147f23",
+    "reported_date": "2022-12-22"
+  },
+  "row-3xc8-ym5k_3rw6": {
+    "affected_count": 900,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-02-24",
+    "match_key": "2c6507aa1689a1afad00b3baabf64045",
+    "native_id": "6fb13d1a474d7331e16d68c43c19e65e",
+    "reported_date": "2021-04-01"
+  },
+  "row-42km-j7nz.8y4e": {
+    "affected_count": 1421,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-01-27",
+    "breach_start": "2022-01-17",
+    "match_key": "f8115e66edbd966ea27b971236425228",
+    "native_id": "45f36beefeffe3b0a3e23d2830bb5d79",
+    "reported_date": "2022-03-14"
+  },
+  "row-4tez~bufj~h5c3": {
+    "affected_count": 1358,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-05-09",
+    "breach_start": "2023-05-07",
+    "match_key": "cd468c32f7637ab316827ac6c8f65649",
+    "native_id": "cb551c46af73459de34853e07b9ad33c",
+    "reported_date": "2024-02-28"
+  },
+  "row-4uby_dpjd-agnc": {
+    "affected_count": 5142,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-04-14",
+    "breach_start": "2023-03-29",
+    "match_key": "de1dc6b0b9f8b0516fc50cd92a515510",
+    "native_id": "0798a1aa6c741029b7e1e3f88b3939bd",
+    "reported_date": "2023-04-28"
+  },
+  "row-4vij_8zc2~85ei": {
+    "affected_count": 1038,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-04-17",
+    "breach_start": "2023-04-16",
+    "match_key": "8639973d57635503a7d9cda62fa22765",
+    "native_id": "d0913feb7f1ba5acea3533310d6c9a53",
+    "reported_date": "2024-04-02"
+  },
+  "row-4z4t.v4cr-fsyv": {
+    "affected_count": 2600,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-04-17",
+    "match_key": "c5db8db49d442322b11280377fd36987",
+    "native_id": "115336c518865ec78959600e491670fe",
+    "reported_date": "2021-04-29"
+  },
+  "row-535g_a4ts~pxyc": {
+    "affected_count": 5061,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-06-17",
+    "breach_start": "2024-05-13",
+    "match_key": "e4daae550d12a23299b26099ea5fbf80",
+    "native_id": "5136061fd17c359fc2ac4128004f2cb1",
+    "reported_date": "2024-10-23"
+  },
+  "row-56qm.n28s-xv3t": {
+    "affected_count": 1416,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "4be4bf57f936bbad06a3043d7d7864fc",
+    "native_id": "1d7513d95c1c6658b2edddccd0f713cd",
+    "reported_date": "2021-12-16"
+  },
+  "row-59d9~7kt8-mxfv": {
+    "affected_count": 8253,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-08-08",
+    "breach_start": "2023-08-07",
+    "match_key": "533ed948059bde461ec513bb09e522e4",
+    "native_id": "e029d0f3fd55ad910ef46b5ff8018c48",
+    "reported_date": "2023-11-27"
+  },
+  "row-5i24~vr5j-b89u": {
+    "affected_count": 3,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "2fdabd3a8f7b081eabca0413882af4e8",
+    "native_id": "8dfa34a52ee8d9dd2b0a4ae02fd99afb",
+    "reported_date": null
+  },
+  "row-5kpg-445j_26di": {
+    "affected_count": 2288,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-06-07",
+    "breach_start": "2021-05-28",
+    "match_key": "4c338c646469061568b03187c799ea81",
+    "native_id": "d1fb1ac1e0eaa6e95712175122f8ed0e",
+    "reported_date": "2021-12-17"
+  },
+  "row-5vhr-z2b5-tyxs": {
+    "affected_count": 8002,
+    "affected_qualifier": "exact",
+    "breach_end": "2025-05-13",
+    "breach_start": "2025-02-14",
+    "match_key": "0da6a1366d59284f6523b05da562f23f",
+    "native_id": "de10402857663dd96e2606800e2086bd",
+    "reported_date": "2025-07-11"
+  },
+  "row-6gxg_6zdf-5ky3": {
+    "affected_count": 8480,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-02-21",
+    "match_key": "38483628fc5d1c5edae6f405834acb8f",
+    "native_id": "51b593cd8c6505f5a6a77722963f2283",
+    "reported_date": "2024-05-17"
+  },
+  "row-6jdf_h4u8-idem": {
+    "affected_count": 317,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2023-12-29",
+    "match_key": "3ef5c74e1e5064b1b46ab3ac37cf22b7",
+    "native_id": "da6f1262f56154bbe2146684045ef5f3",
+    "reported_date": "2025-01-07"
+  },
+  "row-6nnr-xv5m-cy77": {
+    "affected_count": 3309,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-02-21",
+    "match_key": "fd76f11e5a6121d1212f88643c2cf140",
+    "native_id": "b4bb86ffcf60ee92a20fe89960739f9a",
+    "reported_date": "2024-05-24"
+  },
+  "row-6p27~fn65.fiv4": {
+    "affected_count": 813,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2023-02-13",
+    "match_key": "8f011e55eec624b88ef50aa6feda87a0",
+    "native_id": "041a4973725adf1587b9e7722115f4aa",
+    "reported_date": "2024-05-01"
+  },
+  "row-6q42~9v4x.n4xt": {
+    "affected_count": 1239,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2023-05-18",
+    "match_key": "55f8ba4beda2de2d0aa8aff9f0cee3c2",
+    "native_id": "1657cfc971784c5a60c6650a896a0bc6",
+    "reported_date": "2023-08-01"
+  },
+  "row-72xd_y8pi~zgpi": {
+    "affected_count": 1009,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-06-07",
+    "match_key": "eb761ddc31093dea287de6e9790c0798",
+    "native_id": "3ef765bb070b6b1f099ff59bbecf7998",
+    "reported_date": "2022-06-02"
+  },
+  "row-77fz_5rn5~55zr": {
+    "affected_count": 770,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "d913302eaef710fdec79671b538f7655",
+    "native_id": "6ca9b04b931720b60d2c8ad16c974836",
+    "reported_date": "2024-06-17"
+  },
+  "row-786m~ce8c~iy7g": {
+    "affected_count": 1093,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-05-14",
+    "match_key": "8fd55e486a27bf959304bce74745de47",
+    "native_id": "e1ef12a0d10748c2fee49042242c442c",
+    "reported_date": "2021-05-27"
+  },
+  "row-7948.j2v7~eweq": {
+    "affected_count": 8491,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-02-21",
+    "match_key": "1a21cfc1acd9f47ecc62fbc124fd9659",
+    "native_id": "8f7b39f7169ce2f2e6dd3d9403cb1376",
+    "reported_date": "2024-05-30"
+  },
+  "row-7buy~8g24~wunv": {
+    "affected_count": 4569,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-05-21",
+    "match_key": "69888f63db116fbf8b5ecc18bcf6c4e6",
+    "native_id": "618628df0f30234cc26ba9a2f4caab75",
+    "reported_date": "2024-11-08"
+  },
+  "row-7g7m-ma87.cwdu": {
+    "affected_count": 6693,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-05-24",
+    "breach_start": "2024-04-14",
+    "match_key": "6b021f1f56ef942d04414bc1197543c5",
+    "native_id": "31f90f7c1bfa4de214c3551be2bd004e",
+    "reported_date": "2024-07-10"
+  },
+  "row-7m62-gk5v~cv5m": {
+    "affected_count": 587,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-11-29",
+    "breach_start": "2024-11-21",
+    "match_key": "4cbc09dfa2fb9fe214586526c8303ce8",
+    "native_id": "0807c251d7cc325c073e7e8ab3b5b7bb",
+    "reported_date": "2025-03-21"
+  },
+  "row-7vjy_sd8q-ygjs": {
+    "affected_count": 1357,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-12-20",
+    "breach_start": "2021-12-06",
+    "match_key": "6078eb6b4a107f647bbe56dda6865bd8",
+    "native_id": "f8d732510fa67db09da603b9250aa300",
+    "reported_date": "2022-03-11"
+  },
+  "row-8yji.63ip.7wit": {
+    "affected_count": 2,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2023-09-17",
+    "match_key": "79bdeed96abcb6e7e37ab94b0dbb068c",
+    "native_id": "c68e84f56f7979c47aa1d52b2af24ebb",
+    "reported_date": "2023-10-25"
+  },
+  "row-93kj~dajp.dyx4": {
+    "affected_count": 537,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "97d88bb064c37f68e68607c2f8d77760",
+    "native_id": "3ae2f81ad63ad95bcb303c0ca5de14a2",
+    "reported_date": null
+  },
+  "row-94jn~84rv-gvjf": {
+    "affected_count": 1071,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-02-02",
+    "breach_start": "2019-11-01",
+    "match_key": "a09bd54b805a936b257c51c505e03b0d",
+    "native_id": "73ed052f6a772291c01089a9a53e17f7",
+    "reported_date": null
+  },
+  "row-97th-9ux3-yf2d": {
+    "affected_count": 606,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-06-11",
+    "breach_start": "2024-02-29",
+    "match_key": "b8b55407734493e60ab328794523b78c",
+    "native_id": "2d35303accd1a14c04cd7e61903f3ff6",
+    "reported_date": "2024-12-19"
+  },
+  "row-9fq4.gxjv~3yxy": {
+    "affected_count": 1,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-05-10",
+    "match_key": "55321a2868703d92e183a1e6fce511aa",
+    "native_id": "75cc02cb8235ba52dbd01029ceba6a53",
+    "reported_date": "2021-05-25"
+  },
+  "row-9geh.j9uc~jjpd": {
+    "affected_count": 1393,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-12-25",
+    "match_key": "fe5f7018e7acc09c08b0bf0a46f67522",
+    "native_id": "84ed33280b0b5784891b4df81719ead5",
+    "reported_date": "2025-05-27"
+  },
+  "row-9wsd.qxz9-dfff": {
+    "affected_count": 13,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-08-27",
+    "breach_start": "2021-07-14",
+    "match_key": "74d14a6045a8efec878fe221bc52ff80",
+    "native_id": "8a092ea5f8cda51f9e4ea567071325d5",
+    "reported_date": "2022-02-04"
+  },
+  "row-9xp6-mxg8_7yys": {
+    "affected_count": 2,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-06-06",
+    "breach_start": "2022-02-28",
+    "match_key": "2ac086a6c4945a69520545dce9f4cfdd",
+    "native_id": "e5c9273723c05242cb149adeb00eb92e",
+    "reported_date": "2022-08-18"
+  },
+  "row-aat4-yybu~9r7s": {
+    "affected_count": 1,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-09-22",
+    "breach_start": "2024-09-20",
+    "match_key": "83a4449479a8b75cbd92c86f6cbd9bb0",
+    "native_id": "6f58b6c2d5d93afc5864d1a09492a5a9",
+    "reported_date": "2024-10-07"
+  },
+  "row-aen4_uv9k_utza": {
+    "affected_count": null,
+    "affected_qualifier": "unknown",
+    "breach_end": null,
+    "breach_start": "2024-12-11",
+    "match_key": "e5289eb7424f5de473b6fa79869266a2",
+    "native_id": "2827aa88559493996183c27f84d6b71b",
+    "reported_date": "2024-12-23"
+  },
+  "row-anrt~yr9f~kknq": {
+    "affected_count": 1667,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-07-06",
+    "match_key": "06775fbac4c1ce13a6372f977bc0b68c",
+    "native_id": "daf58ae19b07e3f9628e15e6a2db22e5",
+    "reported_date": "2025-03-18"
+  },
+  "row-aufd~3u4v.7y37": {
+    "affected_count": 3,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "1613dcea47f298094a5246591ae04a8f",
+    "native_id": "2e96abdb8d459ce73c1e9fa16be895e3",
+    "reported_date": "2022-12-14"
+  },
+  "row-azkj_xpwg_2kez": {
+    "affected_count": 519,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-10-30",
+    "match_key": "ee8b3756a17f33e84d31e79c64619511",
+    "native_id": "11730462224255be8b95296a4ce3048d",
+    "reported_date": null
+  },
+  "row-bctg.nb8x.b8wc": {
+    "affected_count": 19433,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-02-14",
+    "breach_start": "2024-02-04",
+    "match_key": "5588f556b9ca0210add85ba5172b3bbb",
+    "native_id": "27a6d787e8c34bd7ed5efe101bc639af",
+    "reported_date": "2024-03-29"
+  },
+  "row-bhgm-h54t-v52f": {
+    "affected_count": 13732,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2023-12-13",
+    "match_key": "a34e8a2579699f717543406c58a06e4b",
+    "native_id": "4ca67e7e6213e92189729ae3f869f6df",
+    "reported_date": "2025-01-13"
+  },
+  "row-by79-a9vt-fyme": {
+    "affected_count": 501,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-07-08",
+    "breach_start": "2024-07-05",
+    "match_key": "de194eb4daa4dd9221826a8e67d8b0d0",
+    "native_id": "3abecf5ca96ae3c9ddaf92595398b419",
+    "reported_date": "2025-01-28"
+  },
+  "row-c4ua_wxqz.awhd": {
+    "affected_count": 4188,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-04-20",
+    "match_key": "149068647c4f842fb77bddb853298f36",
+    "native_id": "ea14d65d20686ae6f94286e2f6a67d45",
+    "reported_date": null
+  },
+  "row-c8g3-xjvs_3j76": {
+    "affected_count": 559,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-12-15",
+    "breach_start": "2022-12-13",
+    "match_key": "1fe364989f5726b7e304084b71255dbc",
+    "native_id": "5a2763e78c08b9a1dc858ab304cf7608",
+    "reported_date": "2023-02-10"
+  },
+  "row-d2kz_vp2f.bwbv": {
+    "affected_count": 538,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-05-22",
+    "breach_start": "2022-04-07",
+    "match_key": "642f7aa3b36deddd788095433897892e",
+    "native_id": "8d40a16791c6828bca526798c5c0d656",
+    "reported_date": "2022-05-31"
+  },
+  "row-d3t4_73xk_sesr": {
+    "affected_count": 2007,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-02-21",
+    "match_key": "62edce1ffe2dfec93b393d167f2c428b",
+    "native_id": "5cb9ee2ae03ae65738adf21a5ed9dd16",
+    "reported_date": "2024-05-21"
+  },
+  "row-d5w5.hmsv-nuzg": {
+    "affected_count": 624,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-04-17",
+    "breach_start": "2023-03-28",
+    "match_key": "b3c6ff094df14919048f0245ce0d9d3c",
+    "native_id": "ba1070eb8e1fcf5e1d9a3b9a175c3c7a",
+    "reported_date": "2023-06-15"
+  },
+  "row-d7id~wq5s_wzsw": {
+    "affected_count": 578,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2023-01-13",
+    "match_key": "4cf98884a2cf36ed7721ba2982c62fc3",
+    "native_id": "fb425e51529eae50fd2bc1f09c16c619",
+    "reported_date": "2023-04-14"
+  },
+  "row-d8c6~yycm_t26s": {
+    "affected_count": 699,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-07-18",
+    "breach_start": "2022-06-16",
+    "match_key": "92e0710be7c60a7aa00fbc0b24e89863",
+    "native_id": "8676df51d52e212d872768f21c92f1e6",
+    "reported_date": "2023-04-14"
+  },
+  "row-d9br-rbic-regv": {
+    "affected_count": 6479,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-12-07",
+    "breach_start": "2021-10-27",
+    "match_key": "bb5a9987a9f0fe9245c8d9d4235774c3",
+    "native_id": "9ec175757c515a5cd6880db1dac0be77",
+    "reported_date": "2022-04-06"
+  },
+  "row-div6~z35q.998k": {
+    "affected_count": 30022,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-09-09",
+    "match_key": "30b193ff69384c0446eaf640ce6d4c65",
+    "native_id": "6643808b6ae58b5ac59c82dabb6361c3",
+    "reported_date": "2021-09-30"
+  },
+  "row-dunk.5uis-utpz": {
+    "affected_count": null,
+    "affected_qualifier": "unknown",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "f6a465e2e857258c84006c308afda6bf",
+    "native_id": "7bd2bd4197d5706fca6f5e653e7d85bd",
+    "reported_date": null
+  },
+  "row-duy4_5h4g_hej8": {
+    "affected_count": null,
+    "affected_qualifier": "unknown",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "30a0ac9c78b276a344787ffcd19b35c9",
+    "native_id": "3a2a618eaf852cbcc1e5a7f5bb77127a",
+    "reported_date": "2023-08-27"
+  },
+  "row-egpr_nxuh.7gvy": {
+    "affected_count": 64509,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-01-05",
+    "breach_start": "2024-01-03",
+    "match_key": "5a4d7363c791e5cb0e58705fe009f94a",
+    "native_id": "802facc69307fd90e5b67cdd7aa0d83c",
+    "reported_date": "2024-02-23"
+  },
+  "row-ehr4-qg3y_xw8b": {
+    "affected_count": 620,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-05-12",
+    "breach_start": "2021-01-16",
+    "match_key": "d1260a99e1f5f19f6fad71a850eb2e7a",
+    "native_id": "106839fde289d0b68dad78f5877984a9",
+    "reported_date": "2021-12-14"
+  },
+  "row-ek5p.xad4~wzpw": {
+    "affected_count": 1483,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2022-06-17",
+    "match_key": "54429978b91bde7f3edb04d8b92f3916",
+    "native_id": "b51807d866ce398141d75e8df78863ad",
+    "reported_date": "2022-10-26"
+  },
+  "row-enyr-d6mw.g6d2": {
+    "affected_count": 521,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "a396f2b09ad36f9916e2438e97a6fa20",
+    "native_id": "88fcdccc5ed7c73be382464ddf341edf",
+    "reported_date": "2022-02-23"
+  },
+  "row-evju_xk9n~aepe": {
+    "affected_count": 24,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2022-03-15",
+    "match_key": "eb5472ace0f005f9234ae33a6f604581",
+    "native_id": "7eeebdb0f8faccaae8dfc45b99755703",
+    "reported_date": "2022-03-31"
+  },
+  "row-exgc~ivtn.bj5f": {
+    "affected_count": 657,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-02-15",
+    "match_key": "b36cb2cd2906bc0b620104054e6d6a08",
+    "native_id": "b73e9156228ad7c6f416047c28689ab0",
+    "reported_date": "2024-06-05"
+  },
+  "row-f63u~92r5-2jr3": {
+    "affected_count": 6313,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-02-21",
+    "match_key": "967578cdccfa169ef20c3e96293a6cf6",
+    "native_id": "418b9d0e143ce3e3b36c9c03ac59e28b",
+    "reported_date": "2024-05-30"
+  },
+  "row-f9ku_vua4~bc9p": {
+    "affected_count": 34067,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-04-06",
+    "breach_start": "2023-03-27",
+    "match_key": "ddfe165c6035a1656b0907f48a35d045",
+    "native_id": "336cd6d8d77118c38053a1aeb9b098f3",
+    "reported_date": "2023-12-20"
+  },
+  "row-g8ii.ahuj~cudb": {
+    "affected_count": 719,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "d767a2cad35e4376bd4301c5cc48ea2b",
+    "native_id": "366569c1c93372840c44d87bbb869f63",
+    "reported_date": "2024-08-27"
+  },
+  "row-ghqh.aa2k~dyvm": {
+    "affected_count": 1070,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "5aa9339d014b8c59895a2eef766ab30c",
+    "native_id": "ed871c6dc346bf24bcdff490ec902e6d",
+    "reported_date": null
+  },
+  "row-gia3~hn8s~hycf": {
+    "affected_count": 6094,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-07-08",
+    "breach_start": "2022-06-23",
+    "match_key": "24cb421b4c6856c9fedc2e9e800ee3eb",
+    "native_id": "bc82b5a0f5838fcf7c3105d06e24ce33",
+    "reported_date": "2022-10-24"
+  },
+  "row-h37g_ejpx~iazf": {
+    "affected_count": 3649,
+    "affected_qualifier": "exact",
+    "breach_end": "2020-12-03",
+    "breach_start": "2020-11-08",
+    "match_key": "e69c376224235a609c8b7e9af8e5a7f5",
+    "native_id": "6e93a006f7748c9bebe51d3506fb222e",
+    "reported_date": "2022-05-27"
+  },
+  "row-h9sp.khcd.wf8t": {
+    "affected_count": 6219,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-01-29",
+    "breach_start": "2023-01-20",
+    "match_key": "6e829e22767b3727adc775c349df66f3",
+    "native_id": "33635095e99c5b47f73a91fa1b5a5b16",
+    "reported_date": "2023-03-24"
+  },
+  "row-hjr7_526f.43un": {
+    "affected_count": 1,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "85b19596f523c8dbf1290699341d98cd",
+    "native_id": "630f3d1cd656a42ec0bc7f931732e7ba",
+    "reported_date": "2022-10-03"
+  },
+  "row-htdd.7vpv~wfhe": {
+    "affected_count": 17787,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "d956ecc58d93433d870d38bc03192ee9",
+    "native_id": "9f0afba4d07cbc5e4d4db0a2690b2d89",
+    "reported_date": "2024-07-15"
+  },
+  "row-htig~5k2n.yp4p": {
+    "affected_count": 1078,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-02-21",
+    "match_key": "4b5b56530dc776bbe64027d070d2ae42",
+    "native_id": "ef5cf2408a46d808d30508e6bdca6ded",
+    "reported_date": "2024-05-24"
+  },
+  "row-iewe_5bzs-j7v7": {
+    "affected_count": 7948,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-03-27",
+    "breach_start": "2023-03-20",
+    "match_key": "c466c2fcf649df7b9112fea822cf50b3",
+    "native_id": "a88712cbc8c1270789f836a8c0b00bd6",
+    "reported_date": "2023-06-09"
+  },
+  "row-iq5g-gwkt~gu9v": {
+    "affected_count": 6367,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-02-21",
+    "match_key": "21a281832ade84c182d7e0ff871bc56b",
+    "native_id": "5032c76f7c3dc730c420bf851274bae9",
+    "reported_date": "2024-05-22"
+  },
+  "row-itbj~9zuu~6i8u": {
+    "affected_count": 4903,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-04-05",
+    "breach_start": "2021-11-05",
+    "match_key": "cfce9f12bf340e00e6d311d1df3459bb",
+    "native_id": "0df6200fb34fdbf61175f8bb05e9d0d6",
+    "reported_date": "2022-09-09"
+  },
+  "row-izgj-un8c-42gw": {
+    "affected_count": 6846,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-12-27",
+    "breach_start": "2022-12-12",
+    "match_key": "df6dd2787d0e3a4a0d17bf9b1b04d2bd",
+    "native_id": "f9a9800d57c87303f77c15eb3fcb2c5b",
+    "reported_date": "2023-04-10"
+  },
+  "row-jrvy_epsm-47dx": {
+    "affected_count": 154611,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-09-06",
+    "breach_start": "2023-08-23",
+    "match_key": "257caae51303fc8f426a155bba60fa77",
+    "native_id": "f808d68b675c95cee27e0c47e5542962",
+    "reported_date": "2023-10-06"
+  },
+  "row-jyf3-v82z~2yty": {
+    "affected_count": 1820,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "3a0d33267b94686f9f729b9536f101b0",
+    "native_id": "2bb0eb3b7661638203de1e179e749c29",
+    "reported_date": "2021-12-16"
+  },
+  "row-k6i3_ncj9~vzk9": {
+    "affected_count": 5384,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-02-06",
+    "breach_start": "2023-02-01",
+    "match_key": "2131f4980696b1381f1acc9f46d958f8",
+    "native_id": "a0518ea6debd96f44f7e39fa4a513b7e",
+    "reported_date": "2023-05-19"
+  },
+  "row-k9dv.j45r.6ria": {
+    "affected_count": 534,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-02-21",
+    "match_key": "69437d533a18e71683dbe9a91742e073",
+    "native_id": "6df28d2ffe596a7ef1096131d5b5d408",
+    "reported_date": "2024-05-22"
+  },
+  "row-kdzj.ifev_vy23": {
+    "affected_count": 3731,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "b92dfadcad56c500017009db6df98eae",
+    "native_id": "62fe7fbae8ed83e9a635fe6fdf53706c",
+    "reported_date": "2024-05-31"
+  },
+  "row-khzn-w278.ds6k": {
+    "affected_count": 815,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-12-14",
+    "breach_start": "2021-12-10",
+    "match_key": "becc96d09d12877c2a670d51e0bade03",
+    "native_id": "1c4889dfd7bf0971f1a0bd0332492394",
+    "reported_date": "2022-01-27"
+  },
+  "row-kmmx-ywiu~m5zm": {
+    "affected_count": 536,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2022-03-08",
+    "match_key": "3719e2e837bc9ffb5ff526906ad2c39d",
+    "native_id": "3db296eb64fd4ea79531bc0c8347417b",
+    "reported_date": "2022-03-25"
+  },
+  "row-mr24.g4ar-hksf": {
+    "affected_count": 942,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2022-08-13",
+    "match_key": "840807ab5124912145d4cde9aef11240",
+    "native_id": "5414c2e9874d09ef9fa0c73abdf49c43",
+    "reported_date": "2022-10-26"
+  },
+  "row-mu7t_2mcw.y8j9": {
+    "affected_count": 163,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-05-30",
+    "breach_start": "2023-05-27",
+    "match_key": "5e16a56eaa5c3b102a8ac20fd2a1ec3d",
+    "native_id": "2ef11bc956fa2f0d0f57adb7e7a7e15f",
+    "reported_date": "2023-08-23"
+  },
+  "row-n3pb-i8wz~j6mi": {
+    "affected_count": 3162,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-10-10",
+    "breach_start": "2023-10-03",
+    "match_key": "9c0500123107f9ed4f22673bef3cf4d3",
+    "native_id": "8eb16fcb6ce2ca1fa57efa307f27f301",
+    "reported_date": "2024-05-24"
+  },
+  "row-n3t8.vbe2-akgz": {
+    "affected_count": 11189,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-05-12",
+    "breach_start": "2021-04-08",
+    "match_key": "8e6071c0b825ed0cea69d43000cc6eb1",
+    "native_id": "ea909e5a5535c9e75c58ecfc5b6eedbb",
+    "reported_date": "2022-10-02"
+  },
+  "row-nept_6fba-nux9": {
+    "affected_count": 678,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-12-07",
+    "breach_start": "2021-10-27",
+    "match_key": "46c8f2aa278465b0e5f14a3f5821cebe",
+    "native_id": "9a83b8afa152dcc9074887f176db4644",
+    "reported_date": "2022-08-19"
+  },
+  "row-nrrn_em6e_khej": {
+    "affected_count": 2021,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-03-21",
+    "breach_start": "2023-01-05",
+    "match_key": "54a7e43ae2d6e52eda87cf09104c1c52",
+    "native_id": "691fe7556e92dccbdb6b10a7a631bdad",
+    "reported_date": null
+  },
+  "row-nser~34h2~gkhs": {
+    "affected_count": 500,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-05-18",
+    "breach_start": "2024-04-02",
+    "match_key": "b7eb983f2560a8c154bd212a66d2c9d9",
+    "native_id": "a0082a98666c5b863c3ffb063bf9c9eb",
+    "reported_date": "2024-07-08"
+  },
+  "row-nx57.8j37-fg8y": {
+    "affected_count": 662,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-09-22",
+    "breach_start": "2024-09-20",
+    "match_key": "8f6136e2dc679a08855bb728c183e0aa",
+    "native_id": "5f8b66001d31e15dafb8c513dd5ad116",
+    "reported_date": "2024-10-07"
+  },
+  "row-p2y2_4d8c.r754": {
+    "affected_count": 5989,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2022-04-28",
+    "match_key": "de5153948656898350b313374d0105f2",
+    "native_id": "ede406d4b50ef3b83e3b556ff1f1ab07",
+    "reported_date": "2022-04-28"
+  },
+  "row-pb3b_reyr.zs9g": {
+    "affected_count": 5057,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "c4359fe3464c0e32fe115df101c60cf4",
+    "native_id": "695e4540c040e813acabb062b606f76c",
+    "reported_date": "2024-11-14"
+  },
+  "row-pd8t~eq63_fqnh": {
+    "affected_count": null,
+    "affected_qualifier": "unknown",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "ba5c157a54acd65405714d0b0fb749c0",
+    "native_id": "8c913b058f44d40c4b12e82b15879ca7",
+    "reported_date": "2021-05-13"
+  },
+  "row-phj6-r2zf_8xa2": {
+    "affected_count": 691,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-08-03",
+    "breach_start": "2022-06-01",
+    "match_key": "4b23dd039c6332f44e02aff85a12e2bd",
+    "native_id": "1bd3fd8678fa46e2eec5e916ebfc4fd9",
+    "reported_date": "2022-09-29"
+  },
+  "row-pki6~sybt~96pj": {
+    "affected_count": 1326,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-06-05",
+    "breach_start": "2021-05-19",
+    "match_key": "ca3e0aee4650ae285083a0ee2c2f5200",
+    "native_id": "b9865d6b22cfc9a2f1d8309954eefbd4",
+    "reported_date": "2021-12-21"
+  },
+  "row-ps55.qner.p6hn": {
+    "affected_count": 17021,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-02-27",
+    "match_key": "f8372b590ea016932a9350f5b737e4f4",
+    "native_id": "f072a8fc37e03f722e938e4b54d0a962",
+    "reported_date": "2021-05-10"
+  },
+  "row-q35e-xxxr-6ztm": {
+    "affected_count": 1532,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "f285b1fc6c8f431aa99ccce4f95d20d0",
+    "native_id": "9f2e6486acf4790906ece636d7f489ba",
+    "reported_date": "2021-12-16"
+  },
+  "row-qen2~2th6_7p2e": {
+    "affected_count": 621,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-11-12",
+    "breach_start": "2021-11-09",
+    "match_key": "c6719d12db122b2e1c71f04c44eaa573",
+    "native_id": "af6e80acac5714f9fec11140ed5e2b2f",
+    "reported_date": "2022-07-29"
+  },
+  "row-qifx.8qsk.eutt": {
+    "affected_count": 9,
+    "affected_qualifier": "exact",
+    "breach_end": "2023-07-28",
+    "breach_start": "2023-06-08",
+    "match_key": "93e40bf26032693d6e07bc327f729c07",
+    "native_id": "5929d8cc41de7c6281ac4ecf958d9bad",
+    "reported_date": "2023-07-26"
+  },
+  "row-qrsu.465x~et3e": {
+    "affected_count": 815,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-09-03",
+    "match_key": "aa31b6b7b4aedfe52aee8a43a61d7ec4",
+    "native_id": "6e31bb4c42531d50455d25aa69cfefe6",
+    "reported_date": "2021-09-17"
+  },
+  "row-qzkz.f487-yrcx": {
+    "affected_count": 3748,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "5ef4ba68c156fec15d3a7029555306a2",
+    "native_id": "fab79d2798f7dd69cc743558844723c2",
+    "reported_date": "2024-07-26"
+  },
+  "row-r28v.4azw-vmdh": {
+    "affected_count": 5,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-05-01",
+    "breach_start": "2022-04-30",
+    "match_key": "83944cb9baffb8cf0d44b2f48783b039",
+    "native_id": "31eb4fdaed1d9a233c92f07b1bac6f3a",
+    "reported_date": "2022-05-30"
+  },
+  "row-rc2n.qnqq_jqke": {
+    "affected_count": 1107,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-09-11",
+    "breach_start": "2021-09-06",
+    "match_key": "43fd1465ae319d15c6cd15a2aa5a2f62",
+    "native_id": "5f6df15da5f666e7991b679e1435ef1d",
+    "reported_date": "2021-11-07"
+  },
+  "row-rg4b-rne6~srpv": {
+    "affected_count": 921,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-08-06",
+    "breach_start": "2024-08-03",
+    "match_key": "67a214c76cf5ec6a38814f0512d741fe",
+    "native_id": "b690bd523d53f584d7d16908b72cbbf7",
+    "reported_date": "2024-09-05"
+  },
+  "row-rmee~b9uj~rsbv": {
+    "affected_count": null,
+    "affected_qualifier": "unknown",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "31e62fc94f2bad10095db6f2d389a695",
+    "native_id": "565ee51d42cf054d3282ed4c37bb82e4",
+    "reported_date": "2022-08-29"
+  },
+  "row-rncc~jwgx_s5ma": {
+    "affected_count": 500,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2023-07-25",
+    "match_key": "484ff4f2aa9fe29f06fefa71d8a66e8c",
+    "native_id": "d567f6e626a7ac68205a77c56bb8f587",
+    "reported_date": null
+  },
+  "row-rrub-a426.wpay": {
+    "affected_count": 2,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-11-22",
+    "breach_start": "2022-11-15",
+    "match_key": "48ccf24cf28316227a67097d261537e3",
+    "native_id": "c9ea9ee1f8766231b880574ab54ee656",
+    "reported_date": "2023-02-24"
+  },
+  "row-sbwt-p3us_puqe": {
+    "affected_count": 5119,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-10-10",
+    "breach_start": "2019-04-05",
+    "match_key": "7b120869c95b4c2e2df7580a76e30fbb",
+    "native_id": "27ee494a96635c2b58f812c86d4b2cf6",
+    "reported_date": "2023-05-22"
+  },
+  "row-sfk9-wv7a.bz2p": {
+    "affected_count": 597,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2024-10-17",
+    "match_key": "ce4a746636222b126f4f5dbd711167e4",
+    "native_id": "e0bef87f6d11b20cc3a5394049fa0173",
+    "reported_date": "2025-06-11"
+  },
+  "row-sfs3_i783~z5ve": {
+    "affected_count": 619,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-02-22",
+    "breach_start": "2021-01-26",
+    "match_key": "6c26bc2609545f36c86ac7cb3758a411",
+    "native_id": "1f3d98279abd0e6ddab99901f8ec72ac",
+    "reported_date": "2021-12-14"
+  },
+  "row-sgrq_qygy-b2np": {
+    "affected_count": 515,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-04-01",
+    "breach_start": "2022-03-26",
+    "match_key": "aa00af657c1d7c3ab6815f74eee7e48d",
+    "native_id": "32bb6ac4a3719e06366b44e0bf026eb9",
+    "reported_date": "2022-05-25"
+  },
+  "row-sh5m-s4g6.2bjt": {
+    "affected_count": null,
+    "affected_qualifier": "unknown",
+    "breach_end": null,
+    "breach_start": "2021-08-17",
+    "match_key": "0eb4d4353d0d5b092f31494ed96934a9",
+    "native_id": "dbb6bfa937d660dcca0e56fe854bbd92",
+    "reported_date": "2021-08-19"
+  },
+  "row-sjjv.ts75.2spf": {
+    "affected_count": 584,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "8f52021950adf317ccd13c3b5d7eba48",
+    "native_id": "006603241efa434c982f74c41c0f8cf5",
+    "reported_date": null
+  },
+  "row-spyh.b292.xvns": {
+    "affected_count": 12116,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-12-07",
+    "breach_start": "2021-10-27",
+    "match_key": "592b2d130190765e99c4d437147c202c",
+    "native_id": "d4855e74f2a620de7b6c29593ae2c11b",
+    "reported_date": "2022-03-18"
+  },
+  "row-tc8u_3p6u-rc6e": {
+    "affected_count": 815,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-07-11",
+    "match_key": "fa01eedcfbf6608c423c2536fc5d4675",
+    "native_id": "fe8afae667731a7c4fd91dc98bafdc21",
+    "reported_date": "2021-08-06"
+  },
+  "row-tepr-js85_cspi": {
+    "affected_count": 1023,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-05-04",
+    "match_key": "9feba932f7fe5aa1adab7c1bf0747451",
+    "native_id": "6e03ba856abc0756498bc661cc16b5b8",
+    "reported_date": "2021-05-28"
+  },
+  "row-tju2~zg9c~88du": {
+    "affected_count": 14780,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2025-02-09",
+    "match_key": "624364239cad98d3609351fcbfa1c383",
+    "native_id": "dd35b941bccc68a05559403e6d8a6491",
+    "reported_date": "2025-05-21"
+  },
+  "row-u9ey-x462_guvm": {
+    "affected_count": 1,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2022-06-13",
+    "match_key": "92f8fd2af0924a7054894cfa40973709",
+    "native_id": "32c45f82b0e56479a3af1a51f0d4d93f",
+    "reported_date": "2022-10-24"
+  },
+  "row-uasg_xwa6-7xek": {
+    "affected_count": 564,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-09-15",
+    "match_key": "06b02c6583b8df34a011a96ae82f2ec5",
+    "native_id": "1f3fab2dca43713741ba2bac0b2da098",
+    "reported_date": "2021-11-15"
+  },
+  "row-vhuy~c8zy.cnyk": {
+    "affected_count": 719,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-10-01",
+    "match_key": "fa0ee3a1ef088a1906e0fb158feb9e4a",
+    "native_id": "6bf7a86ab264072f7c6e5ebbab39cca6",
+    "reported_date": "2021-12-16"
+  },
+  "row-wb3a-wbds_iftv": {
+    "affected_count": 707,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-12-28",
+    "breach_start": "2024-12-19",
+    "match_key": "1356880dfed1b4e47d6f669a1be8d63c",
+    "native_id": "56c54e30f51f3058a17eac23617bfb01",
+    "reported_date": "2025-01-29"
+  },
+  "row-wdqc.62ha~dfw2": {
+    "affected_count": 2056,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-01-19",
+    "match_key": "a9b5366e10c20a613f25f161741e24a2",
+    "native_id": "f558192e3af9c018c0d2ef1905bb34f1",
+    "reported_date": "2021-01-29"
+  },
+  "row-wim2-4h96_n3ak": {
+    "affected_count": 2,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-04-08",
+    "match_key": "b1ccf508fc4d1961f01650b70ba3b535",
+    "native_id": "4e0e4d0dac884c4b314075c0fe3ba8c0",
+    "reported_date": "2021-06-09"
+  },
+  "row-wj49~aqqi~788c": {
+    "affected_count": 1287,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-07-02",
+    "breach_start": "2020-08-17",
+    "match_key": "5f9fd1017d9394b4198bda31f8298baa",
+    "native_id": "dd9e9426c8d6574f51f5335e331296bb",
+    "reported_date": "2021-10-20"
+  },
+  "row-wp3h_eeiw_67hu": {
+    "affected_count": 6964,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2023-02-07",
+    "match_key": "b22fb05d1cdad35337c81ca12c1e1283",
+    "native_id": "18dc529d50fcf6c76225b07a71a40ccd",
+    "reported_date": "2023-08-14"
+  },
+  "row-x375_22s2-zd3e": {
+    "affected_count": 618,
+    "affected_qualifier": "exact",
+    "breach_end": "2024-03-05",
+    "breach_start": "2024-03-02",
+    "match_key": "b7a3b338b4c352068671d570b4c9c36b",
+    "native_id": "36ac6d277eaeb5d81f84ab9b30f88dba",
+    "reported_date": null
+  },
+  "row-x3zr_9fbe_6tyg": {
+    "affected_count": 929,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2022-03-14",
+    "match_key": "c278c7e5e3a0635bea25035b1785ec72",
+    "native_id": "88a3ecf5d8ef83f6e5cdf649f6eb601b",
+    "reported_date": null
+  },
+  "row-xb34-ux2e-zerr": {
+    "affected_count": 8425,
+    "affected_qualifier": "exact",
+    "breach_end": "2022-07-22",
+    "breach_start": "2022-06-01",
+    "match_key": "686e79f2c27fcdcefe06555f18fb4531",
+    "native_id": "c14ed6e10a0e02f10d6625e41d10e94b",
+    "reported_date": "2022-08-26"
+  },
+  "row-y4kr_tuzq-vdrk": {
+    "affected_count": 2136,
+    "affected_qualifier": "exact",
+    "breach_end": "2021-09-11",
+    "breach_start": "2021-09-10",
+    "match_key": "dc63d6189c8fdcd1405e0c33b657769b",
+    "native_id": "2e04d152b8e4f2da2618439ec65d0bcf",
+    "reported_date": "2022-05-17"
+  },
+  "row-ybai-rhnf.eta2": {
+    "affected_count": 518,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2020-12-17",
+    "match_key": "c3aa7d0159d232b0b865a9960ba46eb1",
+    "native_id": "f05a7388b4d7df43ceb55fcf3573fb48",
+    "reported_date": "2021-06-07"
+  },
+  "row-yunv-f4vg.xavj": {
+    "affected_count": 902,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": null,
+    "match_key": "28654587e16fc8fc2f1486e339d4e52c",
+    "native_id": "22d422a54e6ab74d7ad232cdc828a978",
+    "reported_date": "2023-11-15"
+  },
+  "row-zn3r.seb4-96bv": {
+    "affected_count": 533,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-03-10",
+    "match_key": "58757955506901a04dce28d5bcc35e23",
+    "native_id": "81cd313e1229c750e637729881acba9c",
+    "reported_date": "2021-06-11"
+  },
+  "row-zt2m-e6av-v866": {
+    "affected_count": 7793,
+    "affected_qualifier": "exact",
+    "breach_end": null,
+    "breach_start": "2021-11-09",
+    "match_key": "2ddf77bb02879c22c0fdfb7bcf661583",
+    "native_id": "162559326d581dfb4c391719095397bd",
+    "reported_date": "2022-04-08"
+  }
+}

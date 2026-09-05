@@ -32,10 +32,12 @@ class RunnerTests(unittest.TestCase):
     def test_catalog_matches_adapter_contracts_without_loading_them_for_planning(self):
         from ingestion import (state_portals, other_portals, special_portals,
                                rediscovered_states, rediscovered_midatlantic,
-                               rediscovered_northeast, rediscovered_sec, rediscovered_nj)
+                               rediscovered_northeast, rediscovered_sec, rediscovered_nj,
+                               rediscovered_delaware)
         active = {}
         for module in (state_portals, other_portals, special_portals, rediscovered_states,
-                       rediscovered_midatlantic, rediscovered_northeast, rediscovered_sec, rediscovered_nj):
+                       rediscovered_midatlantic, rediscovered_northeast, rediscovered_sec, rediscovered_nj,
+                       rediscovered_delaware):
             active.update(module.SOURCES)
         for source, metadata in active.items():
             self.assertEqual(SOURCES[source], metadata)
@@ -45,7 +47,8 @@ class RunnerTests(unittest.TestCase):
                                ('new_hampshire', 'rediscovered_northeast'),
                                ('iowa', 'rediscovered_states'), ('maine', 'rediscovered_states'),
                                ('maryland', 'rediscovered_midatlantic'), ('wisconsin', 'rediscovered_midatlantic'),
-                               ('new_jersey', 'rediscovered_nj'), ('sec', 'rediscovered_sec')]:
+                               ('new_jersey', 'rediscovered_nj'), ('sec', 'rediscovered_sec'),
+                               ('delaware', 'rediscovered_delaware')]:
             with self.subTest(source=source), patch('ingestion.runner.import_module') as importer:
                 dispatch(source)
                 importer.assert_called_once_with('ingestion.' + module)
