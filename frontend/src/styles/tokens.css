@@ -1,5 +1,4 @@
 /* Open Props 1.7.23. Imported from npm and bundled locally; no runtime CDN. */
-@import "open-props/gray";
 @import "open-props/teal";
 @import "open-props/orange";
 @import "open-props/red";
@@ -14,24 +13,24 @@
 :root {
   color-scheme: light;
 
-  /* Semantic roles: components never choose palette steps themselves. */
-  --color-page: var(--gray-1);
-  --color-surface: var(--gray-0);
-  --color-subtle: var(--gray-1);
-  --color-hover: var(--gray-2);
-  --color-selected: var(--teal-0);
-  --color-text: var(--gray-9);
-  --color-secondary: var(--gray-7);
-  --color-muted: var(--gray-7);
-  --color-disabled: var(--gray-6);
-  --color-border: var(--gray-3);
-  --color-border-subtle: var(--gray-2);
-  --color-border-control: var(--gray-6);
-  --color-border-strong: var(--gray-7);
-  --color-accent: var(--teal-10);
-  --color-accent-hover: var(--teal-11);
-  --color-on-accent: var(--gray-0);
-  --color-focus: var(--teal-9);
+  /* Brand primitives come from lib/theme.ts; all other scales use Open Props. */
+  --color-page: var(--brand-canvas);
+  --color-surface: var(--brand-paper);
+  --color-subtle: var(--brand-canvas);
+  --color-hover: color-mix(in srgb, var(--brand-ink) 3%, var(--brand-paper));
+  --color-selected: color-mix(in srgb, var(--brand-ink) 6%, var(--brand-paper));
+  --color-text: var(--brand-ink);
+  --color-secondary: color-mix(in srgb, var(--brand-ink) 68%, var(--brand-paper));
+  --color-muted: var(--color-secondary);
+  --color-disabled: color-mix(in srgb, var(--brand-ink) 45%, var(--brand-paper));
+  --color-border: color-mix(in srgb, var(--brand-ink) 16%, var(--brand-paper));
+  --color-border-subtle: color-mix(in srgb, var(--brand-ink) 8%, var(--brand-paper));
+  --color-border-control: color-mix(in srgb, var(--brand-ink) 50%, var(--brand-paper));
+  --color-border-strong: var(--color-secondary);
+  --color-accent: var(--brand-ink);
+  --color-accent-hover: color-mix(in srgb, var(--brand-ink) 85%, var(--brand-paper));
+  --color-on-accent: var(--brand-paper);
+  --color-focus: var(--brand-ink);
   --color-success-text: var(--teal-10);
   --color-success-bg: var(--teal-0);
   --color-success-border: var(--teal-3);
@@ -75,9 +74,9 @@
   --space-8: calc(var(--size-7) + var(--size-2));
   --space-9: var(--size-8);
   --space-10: var(--size-9);
-  --radius-small: var(--radius-1);
-  --radius-control: var(--radius-2);
-  --radius-panel: var(--radius-2);
+  --radius-small: var(--size-2);
+  --radius-control: calc(var(--radius-3) - var(--size-1));
+  --radius-panel: var(--radius-3);
   --radius-pill: var(--radius-round);
   --stroke: var(--border-size-1);
   --stroke-strong: var(--border-size-2);

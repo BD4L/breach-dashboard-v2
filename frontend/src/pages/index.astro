@@ -1,22 +1,23 @@
 ---
 import Dashboard from '../components/Dashboard';
-import colors from 'open-props/src/colors';
+import { brand, brandVariables } from '../lib/theme';
 import '@fontsource/dm-sans/latin-400.css';
 import '@fontsource/dm-sans/latin-500.css';
 import '@fontsource/dm-sans/latin-600.css';
+import '@fontsource/dm-sans/latin-700.css';
 import '@fontsource/dm-sans/latin-700.css';
 import '@fontsource/newsreader/latin-400.css';
 import '../styles/tokens.css';
 import '../styles/dashboard.css';
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" style={brandVariables}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="A source-backed workspace for reviewing public breach notifications, report revisions, and collection health." />
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="theme-color" content={colors['--gray-1']} />
+    <meta name="theme-color" content={brand.canvas} />
     <title>Breach Watch — public notification review</title>
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
   </head>

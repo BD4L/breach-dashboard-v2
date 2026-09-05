@@ -9,11 +9,15 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle as CircleAlert,
+  AlertTriangle,
   Clock3,
   Database,
   FileText,
   FolderSearch,
   Info,
+  Pause,
+  Plus,
+  RotateCcw,
   Search,
   SlidersHorizontal,
   X,
@@ -48,7 +52,14 @@ import {
 const PAGE_SIZE = 10;
 const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const shortSource = (source?: Source) =>
-  source?.id === "hhs" ? "HHS · OCR" : source?.label || "Unknown source";
+  source?.id === "hhs" ? "HHS OCR" : source?.label || "Unknown source";
+
+function displayChangeValue(value: unknown, field: string): string {
+  const formatted = changeValue(value, field);
+  return field === "affected" && typeof value === "object" && value !== null
+    ? formatted.replace(" · ", ", ")
+    : formatted;
+}
 
 function ExternalLink({
   url,
@@ -77,9 +88,16 @@ function ExternalLink({
 
 function HealthLabel({ source, now }: { source: Source; now: number }) {
   const health = sourceHealth(source, now);
+  const HealthIcon = source.status === "disabled"
+    ? Pause
+    : health.label === "Stale"
+      ? Clock3
+      : health.tone === "good"
+        ? Check
+        : AlertTriangle;
   return (
     <span className={`health-label ${health.tone}`}>
-      <span className="status-dot" />
+      <HealthIcon size={14} aria-hidden="true" />
       {health.label}
     </span>
   );
@@ -88,12 +106,13 @@ function HealthLabel({ source, now }: { source: Source; now: number }) {
 function ReportBadge({ report, now }: { report: Report; now: number }) {
   if (report.revision > 1)
     return (
-      <span className="report-badge revised">
-        Updated <span className="revision-number">· {report.revision}</span>
+      <span className="report-badge revised" role="img" aria-label={`Updated report, revision ${report.revision}`} title={`Updated report, revision ${report.revision}`}>
+        <RotateCcw size={13} aria-hidden="true" />
+        <span className="revision-number">{report.revision}</span>
       </span>
     );
   if (isRecent(report, now))
-    return <span className="report-badge new">New</span>;
+    return <span className="report-badge new" role="img" aria-label="Newly collected" title="Newly collected"><Plus size={13} aria-hidden="true" /></span>;
   return <span className="report-badge archived">Collected</span>;
 }
 
@@ -127,13 +146,24 @@ function DetailPane({
         <span className="eyebrow">
           <FileText size={13} /> Report evidence
         </span>
-        <button
-          className="icon-button close-detail"
-          onClick={onClose}
-          aria-label="Return to reports"
-        >
-          <X size={17} />
-        </button>
+        <div className="detail-actions">
+          <button
+            className={`icon-button save-detail ${saved ? "is-saved" : ""}`}
+            onClick={onSave}
+            aria-pressed={saved}
+            aria-label={saved ? "Saved on this device" : "Save on this device"}
+            title={saved ? "Saved on this device" : "Save on this device"}
+          >
+            <Bookmark size={16} fill={saved ? "currentColor" : "none"} aria-hidden="true" />
+          </button>
+          <button
+            className="icon-button close-detail"
+            onClick={onClose}
+            aria-label="Return to reports"
+          >
+            <X size={17} />
+          </button>
+        </div>
       </div>
       <div className="detail-content">
         <div className="detail-kicker">
@@ -153,15 +183,6 @@ function DetailPane({
             </span>
           </div>
         )}
-        <button
-          className={`save-detail ${saved ? "is-saved" : ""}`}
-          onClick={onSave}
-          aria-pressed={saved}
-        >
-          <Bookmark size={14} fill={saved ? "currentColor" : "none"} />
-          {saved ? "Saved on this device" : "Save on this device"}
-          {saved && <Check size={13} />}
-        </button>
         {report.qualityFlags.length > 0 && (
           <div className="quality-callout">
             <CircleAlert size={16} />
@@ -180,7 +201,7 @@ function DetailPane({
           >
             {affectedCount(report.affected)}
           </div>
-          <p className="scope-note">{affectedScope(report.affected)}</p>
+          <p className="scope-note">{affectedScope(report.affected).replace(" · ", ", ")}</p>
           {report.affected.scope === "state" && (
             <p className="detail-hint">
               This state count is not a nationwide total.
@@ -273,7 +294,6 @@ function DetailPane({
           <ol className="history-list">
             {recentHistory(report).map((history, i) => (
               <li key={`${history.observedAt}-${i}`}>
-                <span className="history-point" />
                 <time dateTime={history.observedAt}>
                   {formatDate(history.observedAt)}
                 </time>
@@ -288,15 +308,14 @@ function DetailPane({
                     className="history-change"
                     key={`${change.field}-${index}`}
                   >
-                    <span>{changeValue(change.before, change.field)}</span>
-                    <ArrowDown size={11} />
-                    <strong>{changeValue(change.after, change.field)}</strong>
+                    <span>{displayChangeValue(change.before, change.field)}</span>
+                    <ArrowDown size={11} aria-hidden="true" />
+                    <strong>{displayChangeValue(change.after, change.field)}</strong>
                   </div>
                 ))}
               </li>
             ))}
             <li>
-              <span className="history-point initial" />
               <time dateTime={report.firstSeen}>
                 {formatDate(report.firstSeen)}
               </time>
@@ -373,20 +392,12 @@ function SourcesView({ data, now }: { data: Dataset; now: number }) {
           return (
             <article className="source-item" key={source.id}>
               <div className="source-item-heading">
-                <div className="source-monogram" aria-hidden="true">
-                  {source.id === "hhs"
-                    ? "US"
-                    : source.jurisdiction === "Massachusetts"
-                      ? "MA"
-                      : source.jurisdiction === "California"
-                        ? "CA"
-                        : source.jurisdiction.slice(0, 2).toUpperCase()}
-                </div>
+                <Database className="source-icon" size={18} aria-hidden="true" />
                 <div>
                   <h3>{source.label}</h3>
-                  <span>
-                    {source.jurisdiction}{" "}
-                    <span className="separator-dot">·</span> {source.method}
+                  <span className="source-description">
+                    <span>{source.jurisdiction}</span>
+                    <span>{source.method}</span>
                   </span>
                 </div>
                 <HealthLabel source={source} now={now} />
@@ -643,21 +654,11 @@ export default function Dashboard() {
     <div className="app-shell">
       <header className="app-header">
         <a className="brand" href={BASE} aria-label="Breach Watch home">
-          <span className="brand-mark" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </span>
-          <span>
-            Breach Watch
-            <span className="brand-divider" />
-            <small>Public notification monitor</small>
-          </span>
+          <FileText className="brand-icon" size={22} aria-hidden="true" />
+          <span>Breach Watch</span>
         </a>
         <div className="header-context">
-          <span className="workspace-dot" />
-          Research workspace
-          <span className="environment-label">LOCAL PREVIEW</span>
+          <span className="environment-label">Local preview</span>
         </div>
       </header>
       <main id="main-content" className="main-content">
@@ -696,14 +697,13 @@ export default function Dashboard() {
             )}
             {data.mode === "live" && (
               <div className="live-banner">
-                <span className="status-dot" />
+                <Database size={14} aria-hidden="true" />
                 Collected public reports{" "}
-                <span>Snapshot only · verify original sources before use</span>
+                <span>Snapshot only. Verify original sources before use.</span>
               </div>
             )}
             <div className="page-heading">
               <div>
-                <div className="eyebrow">The research desk</div>
                 <h1>Breach reports</h1>
                 <p>Find what changed. Follow the evidence.</p>
               </div>
@@ -744,13 +744,15 @@ export default function Dashboard() {
               ).map((tab) => (
                 <button
                   key={tab.id}
-                  className={view === tab.id ? "active" : ""}
+                  className={`${view === tab.id ? "active" : ""} ${tab.id === "saved" || tab.id === "sources" ? "icon-tab" : ""}`}
                   aria-current={view === tab.id ? "page" : undefined}
+                  aria-label={`${tab.label} ${tab.count}`}
+                  title={tab.id === "saved" ? "Saved on this device" : tab.label}
                   onClick={() => changeView(tab.id)}
                 >
-                  {tab.id === "saved" && <Bookmark size={14} />}
-                  {tab.id === "sources" && <Activity size={14} />}
-                  {tab.label}
+                  {tab.id === "saved" && <Bookmark size={16} aria-hidden="true" />}
+                  {tab.id === "sources" && <Activity size={16} aria-hidden="true" />}
+                  {tab.id !== "saved" && tab.id !== "sources" && tab.label}
                   <span
                     className={`tab-count ${tab.id === "sources" && unhealthy ? "attention-count" : ""}`}
                   >
@@ -771,12 +773,12 @@ export default function Dashboard() {
                     : `Snapshot generated ${relativeTime(data.generatedAt, now)}`}
                 {view === "recent" && (
                   <span className="freshness-context">
-                    · Showing the last 7 days
+                    Showing the last 7 days
                   </span>
                 )}
                 {view === "saved" && (
                   <span className="freshness-context">
-                    · Saved on this device
+                    Saved on this device
                   </span>
                 )}
               </span>
@@ -988,12 +990,12 @@ export default function Dashboard() {
                                         <CircleAlert size={12} />
                                       </span>
                                     )}
+                                    <span className="mobile-source">
+                                      {shortSource(
+                                        sourceMap.get(report.sourceId),
+                                      )}
+                                    </span>
                                   </div>
-                                  <span className="mobile-source">
-                                    {shortSource(
-                                      sourceMap.get(report.sourceId),
-                                    )}
-                                  </span>
                                 </td>
                                 <td className="source-column">
                                   <span className="source-short">
@@ -1018,8 +1020,8 @@ export default function Dashboard() {
                                     {affectedCount(report.affected)}
                                   </span>
                                   <span className="cell-subtext">
-                                    {affectedScope(report.affected)}
-                                    {report.affected.count !== null && report.affected.qualifier === "unknown" && " · Bound unknown"}
+                                    {affectedScope(report.affected).replace(" · ", ", ")}
+                                    {report.affected.count !== null && report.affected.qualifier === "unknown" && ", bound unknown"}
                                   </span>
                                 </td>
                                 <td className="observed-column">
@@ -1167,11 +1169,8 @@ export default function Dashboard() {
               </>
             )}
             <footer className="page-footer">
-              <span>
-                <span className="footer-brand">Breach Watch</span> · Public
-                notification research
-              </span>
-              <span>Source evidence first. All dates shown in UTC.</span>
+              <span>Public notification research</span>
+              <span>Dates shown in UTC</span>
             </footer>
           </>
         )}
