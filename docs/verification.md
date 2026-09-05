@@ -104,3 +104,15 @@ The bounded local source smoke merged **17,420 public reports** into a separate 
 CA's two rejected rows are `sb24-194945` and `sb24-183108`: both listing and detail pages omit an organization name. Washington's eight repeats occur across page boundaries, so health remains partial even though every numbered page was requested. South Carolina's two rows share organization, date, and notice URL but disagree on count; no count was arbitrarily selected. These are data-quality limits, not silently swallowed failures.
 
 The original application remains unchanged. See [repair scope and per-source limits](collector-repair.md). Wisconsin public-notification dates are retained as report context and excluded from publication/receipt fields and the Today counter. Root and project-path builds passed with the full live dataset; the tracked 12-report demo was restored byte-for-byte. The public-boundary regression distinguishes official South Carolina notice URLs containing a Breaches directory from actual original-application coupling. Browser verification rendered all 17,420 reports and 18 source entries. Remote deployment evidence is recorded after the first actual Actions execution.
+
+### GitHub runner and Pages proof
+
+[Validation run 33991423853](https://github.com/BD4L/breach-dashboard-v2/actions/runs/33991423853) passed on commit `6937622`, using GitHub's clean Node 22 / Python 3.11 environment.
+
+[First collection run 33991456254](https://github.com/BD4L/breach-dashboard-v2/actions/runs/33991456254) ran all 18 source jobs. Every result artifact uploaded, and all returned row counts matched the bounded local reads. Collector steps took 0–56 seconds; California fetched 106 pages in 56 seconds. No worker approached its hard deadline.
+
+The merge job and Pages deployment **succeeded**. Overall collection health intentionally remained failed because unavailable/partial sources are not marked healthy. Two runner-specific availability failures were observed: Maryland returned 403 and Wisconsin timed out after 41 seconds. The published snapshot retained their 257 and 21 previously collected records.
+
+The [live site](https://bd4l.github.io/breach-dashboard-v2/) and its JSON both returned HTTP 200, serving 17,420 reports and 18 source entries in live mode. A fresh restore from the actual remote state branch preserved every first-seen timestamp for the original 1,033 pilot records; full state contained 17,441 revisions after the Wisconsin date correction.
+
+[Texas-only follow-up run 33991654414](https://github.com/BD4L/breach-dashboard-v2/actions/runs/33991654414) completed successfully, including merge and deployment. It restored the prior Actions state, accepted the same 625 reports, and recorded **zero new / zero changed**. Comparing both published snapshots confirmed all 17,420 report identities, first-seen timestamps, and revision numbers were preserved. This verifies persistence across separate actual Actions runs, not only a local round-trip test.

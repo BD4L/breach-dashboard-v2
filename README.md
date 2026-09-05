@@ -2,6 +2,8 @@
 
 A static public-source review dashboard for a law firm's breach research. This isolated repository replaces the original dashboard's large summary cards with a searchable report table, evidence details, changed-field history, source health, and device-local bookmarks. A Python collector retains source records and revisions in local SQLite, then exports a public JSON snapshot for Astro/React.
 
+**Live dashboard:** [Breach Watch](https://bd4l.github.io/breach-dashboard-v2/).
+
 **Repository:** [BD4L/breach-dashboard-v2](https://github.com/BD4L/breach-dashboard-v2). This is the isolated successor repository. The original application is preserved; see [baseline](docs/BASELINE.md). GitHub Actions validates changes and runs independent public collectors every four hours, with manual dispatch. The collection workflow persists history to `collection-state` and explicitly deploys snapshots to GitHub Pages.
 
 New clones start with 12 synthetic demo reports. Public-source collection is available through the CLI below; collected state and locally built previews are ignored by Git.
