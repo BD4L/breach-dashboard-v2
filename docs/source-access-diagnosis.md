@@ -35,3 +35,21 @@ GitHub documents that [standard hosted runners are free for public repositories]
 SEC's [developer guidance](https://www.sec.gov/about/developer-resources) describes automated-client classification and a maximum of 10 requests per second. Its [access documentation](https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data) asks automated collectors to declare their operator and contact in the User-Agent. The project's HTTP client identifies the project URL; no contact has been invented or added. Permission to collect and recognition by a publisher's request filter are separate technical considerations. SEC's [FAQ](https://www.sec.gov/about/webmaster-frequently-asked-questions#developers) directs access-denial reports to its webmaster; no external message has been sent.
 
 Previously verified records remain available. A denied request cannot erase retained reports, establish that a source has no new reports, or count as a successful automated refresh.
+
+## Full hosted collection and publication
+
+The four-hour workflow now uses this browser collector for NH, NJ and SEC in independent standard Ubuntu jobs. Other sources retain their existing transports and runner selection. No paid runner, proxy, imported browser profile, credentials or challenge interaction was introduced.
+
+[Full collection run 33999269354](https://github.com/BD4L/breach-dashboard-v2/actions/runs/33999269354) verified NJ and SEC beyond the first page:
+
+- NJ reconciled all 56 current/archive notices across four pages, with no rejected records, in 13 seconds.
+- SEC inspected all 5,425 document hits across 55 pages in the August 6–September 5 window, finding two primary Item 1.05 filings with no rejected qualifying reports, in 77 seconds. Rolling-window coverage remains explicitly partial.
+- The first NH worker reached the 15-second Chrome launch timeout before requesting source data. This was browser startup failure, not another publisher denial. The startup allowance was increased to at most 60 seconds within the existing 600-second supervisor deadline; page navigation retains its 30-second limit and no additional retry was added.
+
+[Isolated NH rerun 33999510458](https://github.com/BD4L/breach-dashboard-v2/actions/runs/33999510458) then collected 30 pages in 34 seconds: 750 rows, 747 accepted reports and three unresolved document links withheld. All 747 NH report identities and fields match the reviewed local collection. NJ's 56 and SEC's two reports also match their reviewed local results exactly. NH's declared archive remains 9,937 rows over 398 pages, so its 30-page coverage stays partial.
+
+Both runs successfully merged durable history and deployed Pages. Their health checks remain red because partial coverage and the outstanding North Dakota failure are reported separately from publication success; NH's isolated run is partial even after collecting its entire configured window. North Dakota is now the only source whose latest collection status is failed. Maine still provides historical archives rather than its withdrawn current database, and a current Maryland replacement remains unverified.
+
+The final live snapshot is dated `2026-09-05T23:46:48Z`, with **27,894 reports**. All 27,894 prior identities, first-seen timestamps, revision numbers and existing history entries survive unchanged. There are no added or changed report revisions in this phase. NH, NJ and SEC's published source messages now explicitly identify collection in GitHub Actions on Linux.
+
+The page, 552,058-byte bootstrap and 31,159,199-byte full archive each returned HTTP 200. Bootstrap/full generation, source metadata, initial records, byte count and archive SHA-256 all reconcile. Durable `collection-state` is `63e65e28fcd8a85342f01b92d32a4d6fc6bf5fcc`. [CI 33999510943](https://github.com/BD4L/breach-dashboard-v2/actions/runs/33999510943) passed on startup-fix commit `a3762ee`; the suite has 240 Python tests (two existing opt-in browser checks skipped), plus frontend checks and build validation. The original dashboard repository and deployment were not changed.

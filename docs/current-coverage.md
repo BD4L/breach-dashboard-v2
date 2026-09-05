@@ -2,7 +2,7 @@
 
 This follow-up checks current publication coverage after the initial [source rediscovery](collector-rediscovery.md). All code, state and deployment changes belong to `BD4L/breach-dashboard-v2`.
 
-Later on September 5, the [matched access diagnosis](source-access-diagnosis.md) established that NH, NJ and SEC first pages are accessible in ordinary Chrome on standard GitHub runners. The local-only access conclusions below describe the earlier collection phase and are superseded by that follow-up.
+Later on September 5, the [matched access diagnosis and full hosted collection](source-access-diagnosis.md#full-hosted-collection-and-publication) verified NH, NJ and SEC collection in ordinary Chrome on standard GitHub runners and connected them to the four-hour workflow. The local-only access conclusions below describe the earlier collection phase and are superseded by that follow-up.
 
 ## Verified publication limits
 
