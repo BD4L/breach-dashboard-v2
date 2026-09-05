@@ -195,7 +195,8 @@ def browser_probe(endpoint):
     result = {'endpoint': endpoint, 'mode': 'browser', 'status': None, 'contentType': None,
               'bytes': 0, 'sha256': None, 'pageTitle': None}
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(headless=True, timeout=15_000)
+        browser = playwright.chromium.launch(headless=os.environ.get('PROBE_NORMAL_BROWSER') != '1',
+                                              channel='chrome' if os.environ.get('PROBE_NORMAL_BROWSER') == '1' else None, timeout=15_000)
         context = browser.new_context(accept_downloads=False)
         page = context.new_page()
         # Keep Chromium's real User-Agent and append the truthful operator identity.
@@ -273,6 +274,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--browsers', action='store_true')
+    parser.add_argument('--normal-browser-only', action='store_true')
     parser.add_argument('--endpoint', choices=tuple(ENDPOINTS))
     parser.add_argument('--mode', choices=('http', 'browser'), default='http')
     args = parser.parse_args(argv)
@@ -291,7 +293,14 @@ def main(argv=None):
               'runnerOS': os.environ.get('RUNNER_OS', ''), 'python': platform.python_version(),
               'identity': USER_AGENT, 'maxBytesPerEndpoint': MAX_BYTES, 'hardDeadlineSeconds': DEADLINE, 'results': []}
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    for mode, endpoints in [('http', ENDPOINTS), ('browser', BROWSER_ENDPOINTS if args.browsers else ())]:
+    if args.normal_browser_only:
+        os.environ['PROBE_NORMAL_BROWSER'] = '1'
+        selected = ('new-hampshire-current', 'new-hampshire-api', 'new-jersey-current', 'sec-search-html', 'sec-full-text-query')
+        batches = [('browser', selected)]
+        report['browser'] = 'ordinary headed Chrome'
+    else:
+        batches = [('http', ENDPOINTS), ('browser', BROWSER_ENDPOINTS if args.browsers else ())]
+    for mode, endpoints in batches:
         for endpoint in endpoints:
             result = bounded_probe(endpoint, mode)
             report['results'].append(result)
