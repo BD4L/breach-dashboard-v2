@@ -13,6 +13,8 @@ result artifacts and a 600-second supervised collection deadline inside the
 12-minute job budget. Only these three jobs install the separate browser lock
 and Chrome runtime dependencies. `xvfb-run` supplies Linux's display; browser
 headers, request guards and source parsers are the same as local collection.
+Chrome startup may use up to 60 seconds of the existing worker budget; each
+subsequent page retains its separate 30-second limit. No startup retry is added.
 The existing merge preserves history and publishes usable results even when
 another source fails or remains partial.
 

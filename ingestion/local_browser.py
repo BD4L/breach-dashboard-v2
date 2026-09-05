@@ -154,7 +154,9 @@ class LocalBrowserClient:
             raise SourceError('Optional browser dependencies are missing; install requirements-browser.lock') from exc
         try:
             self._manager = sync_playwright().start()
-            self._browser = self._manager.chromium.launch(channel='chrome',headless=False,timeout=min(15000,int(self._remaining()*1000)))
+            # A fresh hosted Chrome can exceed 15 seconds before its first request.
+            # Startup shares the worker budget; each later navigation still has 30s.
+            self._browser = self._manager.chromium.launch(channel='chrome',headless=False,timeout=min(60000,int(self._remaining()*1000)))
             self._context = self._browser.new_context(java_script_enabled=False,service_workers='block',
                                                       accept_downloads=False,ignore_https_errors=False)
         except Exception as exc:
