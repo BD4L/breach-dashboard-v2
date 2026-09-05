@@ -1,6 +1,6 @@
 # GitHub Free constraints
 
-Checked against official GitHub documentation on September 5, 2026. This pilot remains local and does not enable a scraper schedule or Pages deployment.
+Checked against official GitHub documentation on September 5, 2026. The source is in the public `BD4L/breach-dashboard-v2` repository; scraper scheduling and Pages deployment are not yet enabled.
 
 ## Hosting
 
@@ -20,11 +20,11 @@ Schedules run from the default branch, may be delayed or dropped under load, and
 
 GitHub-hosted jobs are ephemeral. The local SQLite file cannot simply be left on a runner between jobs. Before enabling a collector, choose durable storage for the **public** normalized records and revision history, define retention, and serialize writes. Public data commits are a possible free approach; Actions cache alone is not the source of truth. Do not put private data in a public state branch or workflow artifacts.
 
-A push using `GITHUB_TOKEN` does not trigger a Pages build. Use an explicit Pages build/deploy workflow when the user authorizes publication. Keep collector write permission separate from read-only validation, and restrict Pages deployment to the intended BD4L repository/environment. [Creating a Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)
+A branch-based Pages build is not triggered by a push using `GITHUB_TOKEN`. Use an explicit Pages build/deploy workflow when the user authorizes publication. Keep collector write permission separate from read-only validation, and restrict Pages deployment to the intended BD4L repository/environment. [Creating a Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)
 
 ## Remaining publication gates
 
-1. Create the intended new repository under BD4L with appropriate access; verify its actual name/base path.
+1. Repository selected: `BD4L/breach-dashboard-v2`; the project-site base path is `/breach-dashboard-v2/`. Source publication and CI are separate from Pages hosting.
 2. Decide durable public collection-state storage and history retention; add serialized collection and deployment workflows.
 3. Resolve Massachusetts report access and validate current real PDF layouts. Decide whether to expand California beyond the current bounded window and HHS beyond its current dataset.
 4. Review the exact public export, hosting terms, source request policy, and CI execution in the new repository.

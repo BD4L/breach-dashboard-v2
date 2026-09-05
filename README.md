@@ -1,10 +1,10 @@
-# Breach Watch — local pilot
+# Breach Watch
 
 A static public-source review dashboard for a law firm's breach research. This isolated repository replaces the original dashboard's large summary cards with a searchable report table, evidence details, changed-field history, source health, and device-local bookmarks. A Python collector retains source records and revisions in local SQLite, then exports a public JSON snapshot for Astro/React.
 
-**Local first.** No Git remote, production connection, deployment, email, or AI service is configured. The eventual GitHub owner is **BD4L**. The original application and its uncommitted work are preserved; see [baseline](docs/BASELINE.md).
+**Repository:** [BD4L/breach-dashboard-v2](https://github.com/BD4L/breach-dashboard-v2). This is the isolated successor repository. The original application is preserved; see [baseline](docs/BASELINE.md). GitHub Actions validates changes. Pages hosting and scheduled source collection are separate, pending setup steps.
 
-This prepared checkout also has a built preview of the 1,033-report live smoke snapshot: run `cd frontend && npm run preview -- --port 4326` and open `http://127.0.0.1:4326`. The source default remains the synthetic demo; another build replaces the prepared preview with the currently selected export.
+New clones start with 12 synthetic demo reports. Public-source collection is available through the CLI below; collected state and locally built previews are ignored by Git.
 
 ## Run locally
 
@@ -70,9 +70,15 @@ BASE_PATH=/breach-dashboard-v2/ npm run build
 npm run preview
 ```
 
-The static output is `frontend/dist/`. Use the same `BASE_PATH` when previewing a build that requires it. A local root build needs no `BASE_PATH`. The included GitHub workflow only validates code and the public boundary; it neither collects data nor publishes a site.
+The static output is `frontend/dist/`. Use the same `BASE_PATH` when previewing a build that requires it. A local root build needs no `BASE_PATH`. The included GitHub workflow validates code and the public boundary. It does not collect data or publish a site.
 
-The UI uses the locally bundled [Open Props token pack](docs/design-tokens.md). Color, typography, spacing, and interaction decisions live in `frontend/src/styles/tokens.css`; component styles consume semantic roles from that file.
+The UI uses the locally bundled [Open Props token pack](docs/design-tokens.md) with an Anthropic-inspired brand palette. Color roles, typography, spacing, and interaction decisions live in `frontend/src/styles/tokens.css`; the three brand primitives live in `frontend/src/lib/theme.ts`.
+
+## Today counter and refresh
+
+The top-bar counter means source reports published today in **UTC**, using the reported-to-source date only when publication date is absent. It does not count historical reports merely imported today, establish when an actual breach occurred, or deduplicate incidents across sources. Select the counter to review its reports.
+
+While visible, the browser checks the same-origin JSON snapshot every five minutes, checks again when you return to the tab, and supports manual refresh. This refreshes a published snapshot; it does not run the collector. The snapshot timestamp and source-health state remain visible, and a failed refresh retains the last valid data. Scheduled collection and Pages publication are not enabled by this repository creation.
 
 ## Data meaning and current coverage
 

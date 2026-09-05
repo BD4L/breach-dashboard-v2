@@ -1,4 +1,6 @@
-# Local verification — September 5, 2026
+# Verification evidence — September 5, 2026
+
+The first sections record the original local milestone. Later UI and GitHub milestones are recorded below; references to local-only state in the original milestone are historical.
 
 ## Collection evidence
 
@@ -22,7 +24,7 @@ The separate 12-report synthetic demo exercises a corrected count (8,200 → 12,
 - `npm run check`: zero errors, warnings, or hints. Root-path and `/breach-dashboard-v2/` static builds passed. Astro's React integration emits upstream Vite deprecation notices during builds; these are distinct from project diagnostics.
 - `npm audit --audit-level=moderate`: zero known vulnerabilities at verification time. This does not establish absence of all vulnerabilities.
 - Public-boundary check passed for public source, demo/live exports, and built assets. The live export was 1,281,565 bytes; the root static site was 1,678,558 bytes.
-- Original tracked changes have the same SHA-256 as their preservation patch, and original working-tree status matches the saved baseline. New repository has no remote.
+- Original tracked changes have the same SHA-256 as their preservation patch, and original working-tree status matches the saved baseline. At that local milestone, the new repository had no remote.
 
 ## Browser inspection
 
@@ -47,7 +49,7 @@ Final review hardened the collector against ambient `.netrc` authentication and 
 
 ## Scope
 
-The original application is preserved. There is no remote repository, push, publication, migration, authenticated firm workspace, email service, or AI integration in this milestone. GitHub Actions workflow syntax/configuration has only local review until the workflow runs in a future repository.
+The original application was preserved. The initial local milestone included no remote repository, push, publication, migration, authenticated firm workspace, email service, or AI integration. GitHub Actions configuration had only local review at that stage.
 
 ## UI token pass
 
@@ -56,3 +58,22 @@ Replaced the ad hoc palette and accumulated CSS overrides with Open Props 1.7.23
 Typechecking passed with zero project diagnostics. Root and `/breach-dashboard-v2/` static builds passed, as did the public-boundary check and whitespace checks. npm reported zero known vulnerabilities after installation. Existing upstream Vite deprecation notices remain.
 
 Browser checks confirmed the rendered type/color values and no page-wide horizontal overflow at desktop width 1167 px or mobile widths 390 px and 320 px. All four view tabs fit at 390 px; narrower navigation remains horizontally scrollable. At 320 px, the save target and its column both measure 44 px and the target is contained. Source-status colors, mobile evidence navigation, and Escape-to-return were visually checked. The exact 1,033-report live preview snapshot was retained, and the checked-in demo export was restored byte-for-byte after building.
+
+## Anthropic-inspired UI
+
+Applied the three-color brand palette and Open Props scales described in `design-tokens.md`, removed decorative dots, added accessible icon controls, and set 12 px controls and 16 px panels. Browser checks passed at 1167 px desktop and 390 / 320 px mobile, including 44 px bookmark controls and the Saved view. The current narrow navigation fits without page overflow. DM Sans 700 is bundled and verified loaded. Commit `7a598a2` records this completed pass.
+
+## Today counter and GitHub repository
+
+Created the separate public repository [BD4L/breach-dashboard-v2](https://github.com/BD4L/breach-dashboard-v2) with the user's authorization. The source-controlled dataset remains the 12-report synthetic demo; local live state, build output, and preservation archives are excluded. A bounded review of the original three commits and 58 unique blobs found no credential or private-firm-data publication blockers. The existing application remains separate.
+
+Added the UTC notification-date Today counter and a corresponding view. Historical records imported today are excluded unless their source publication date (reported-date fallback) is today. Related source reports count separately. Snapshot revalidation runs every five minutes while visible, on visibility return, and by manual refresh. Failed checks retain the last valid dataset and collection timestamp.
+
+- **21 frontend tests passed**, covering notification-date semantics, UTC rollover, historical imports, source-report identity, loader coalescing, timeouts, malformed data, disposal, and recovery.
+- **46 offline Python tests passed**.
+- Astro type checking reported zero project diagnostics. Root and `/breach-dashboard-v2/` static builds passed; existing upstream Vite deprecation notices remain.
+- Browser verification confirmed the actual local live snapshot has 1,033 reports and zero notification dates matching September 5, 2026 UTC. The Today view shows an explicit empty state and source-coverage limitations.
+- A simulated 404 during manual refresh retained all 1,033 reports and displayed the failed-check state. Restoring the JSON and refreshing cleared the error and recovered without reloading the page.
+- The header and report view fit desktop width 1167 px and mobile widths 390 / 320 px; the mobile manual-refresh target measures 44 px.
+
+Remote checks are available in [GitHub Actions](https://github.com/BD4L/breach-dashboard-v2/actions). This step publishes repository source and validation only. Pages hosting and unattended source collection remain pending; browser snapshot checks alone do not collect new source data.

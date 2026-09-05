@@ -4,6 +4,7 @@ import {
   ArrowDown,
   ArrowUpRight,
   Bookmark,
+  CalendarDays,
   Check,
   ChevronDown,
   ChevronLeft,
@@ -18,6 +19,7 @@ import {
   Pause,
   Plus,
   RotateCcw,
+  RefreshCw,
   Search,
   SlidersHorizontal,
   X,
@@ -26,14 +28,15 @@ import {
   affectedCount,
   affectedScope,
   changeValue,
+  countTodayReports,
   DAY,
   fieldLabel,
   filterReports,
   formatDate,
   INITIAL_FILTERS,
   isRecent,
+  isLocalHostname,
   qualityMessage,
-  readDataset,
   readSavedIds,
   recentHistory,
   reportDateLabel,
@@ -42,12 +45,14 @@ import {
   SAVED_KEY,
   sourceHealth,
   timestamp,
+  utcDay,
   type Dataset,
   type Filters,
   type Report,
   type Source,
   type View,
 } from "../lib/dashboard";
+import { useSnapshot } from "../hooks/useSnapshot";
 
 const PAGE_SIZE = 10;
 const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
@@ -473,10 +478,9 @@ function SourcesView({ data, now }: { data: Dataset; now: number }) {
 }
 
 export default function Dashboard() {
-  const [data, setData] = useState<Dataset | null>(null);
-  const [error, setError] = useState("");
-  const [reload, setReload] = useState(0);
+  const { data, error, refreshing, lastCheckedAt, refresh } = useSnapshot(`${BASE}data/dashboard.json`);
   const [now, setNow] = useState(() => Date.now());
+  const [localPreview, setLocalPreview] = useState(false);
   const [view, setView] = useState<View>("recent");
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
   const [page, setPage] = useState(0);
@@ -491,43 +495,15 @@ export default function Dashboard() {
   const storageKey = `${SAVED_KEY}:${BASE}:${data?.mode || "demo"}`;
 
   useEffect(() => {
-    const controller = new AbortController();
-    let active = true;
-    const timer = setTimeout(() => controller.abort(), 15_000);
-    setError("");
-    fetch(`${BASE}data/dashboard.json`, {
-      signal: controller.signal,
-      cache: "no-cache",
-    })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error(
-            `The dashboard export could not be loaded (${response.status}).`,
-          );
-        return response.json();
-      })
-      .then((value) => {
-        if (active) setData(readDataset(value));
-      })
-      .catch((reason) => {
-        if (active)
-          setError(
-            reason instanceof Error && reason.name !== "AbortError"
-              ? reason.message
-              : "The dashboard export took too long to load. Try again.",
-          );
-      })
-      .finally(() => clearTimeout(timer));
+    const tick = () => setNow(Date.now());
+    const onVisibility = () => { if (document.visibilityState === "visible") tick(); };
+    setLocalPreview(isLocalHostname(window.location.hostname));
+    const timer = setInterval(tick, 60_000);
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
-      active = false;
-      clearTimeout(timer);
-      controller.abort();
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [reload]);
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 60_000);
-    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -585,6 +561,7 @@ export default function Dashboard() {
   );
   const recentCount =
     data?.reports.filter((report) => isRecent(report, now)).length || 0;
+  const todayCount = useMemo(() => countTodayReports(data?.reports || [], now), [data, now]);
   const savedCount =
     data?.reports.filter((report) => saved.has(report.id)).length || 0;
   const unhealthy =
@@ -598,6 +575,12 @@ export default function Dashboard() {
   const snapshotStale = !!data && now - timestamp(data.generatedAt) > 2 * DAY;
   const snapshotFuture =
     !!data && timestamp(data.generatedAt) > now + 5 * 60_000;
+  const todayCoverage = data?.mode === "demo" ? "Demo data" : snapshotFuture ? "Timestamp needs review" : snapshotStale ? "Stale snapshot" : unhealthy ? `${unhealthy} ${unhealthy === 1 ? "source needs" : "sources need"} attention` : "Published snapshot";
+  const checkStatus = refreshing
+    ? error ? "Retrying snapshot check…" : "Checking published snapshot…"
+    : error
+      ? data ? `Update check failed. Showing snapshot from ${formatDate(data.generatedAt, { hour: "numeric", minute: "2-digit" })} UTC.` : "Snapshot check failed."
+      : lastCheckedAt ? `Last checked ${relativeTime(new Date(lastCheckedAt).toISOString(), now).toLowerCase()}.` : "Loading published snapshot…";
 
   function updateFilter(key: keyof Filters, value: string) {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -658,10 +641,33 @@ export default function Dashboard() {
           <span>Breach Watch</span>
         </a>
         <div className="header-context">
-          <span className="environment-label">Local preview</span>
+          {localPreview && <span className="environment-label">Local preview</span>}
+          <div className="header-feed">
+            <button
+              className={`today-counter ${view === "today" ? "active" : ""}`}
+              disabled={!data}
+              aria-pressed={view === "today"}
+              aria-label={data ? `${data.mode === "demo" ? "Demo " : ""}Breaches today: ${todayCount} source reports. View notifications dated ${utcDay(now)} UTC.` : "Breaches today: waiting for the published snapshot"}
+              aria-describedby="today-explanation"
+              title={`Source reports published today UTC, with reported date as fallback. Reports may describe the same breach; these are not occurrence dates. ${todayCoverage}.`}
+              onClick={() => { setFilters(INITIAL_FILTERS); changeView("today"); }}
+            >
+              <CalendarDays size={17} aria-hidden="true" />
+              <span className="today-labels"><span>Breaches today</span><span className="today-coverage">{data ? todayCoverage : "Awaiting snapshot"}</span></span>
+              <strong className="today-count">{data ? todayCount.toLocaleString("en-US") : "—"}</strong>
+            </button>
+            <button className={`icon-button snapshot-refresh ${refreshing ? "is-refreshing" : ""}`} onClick={() => void refresh()} disabled={refreshing} aria-label="Refresh snapshot" title={refreshing ? "Checking for a published snapshot" : "Refresh the published snapshot"} aria-busy={refreshing}>
+              <RefreshCw size={18} aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </header>
       <main id="main-content" className="main-content">
+        <p className="sr-only" id="today-explanation">Counts source reports with a publication date of today UTC, using the reported date only when publication date is unavailable. Related reports count separately. This is not a count of distinct incidents or breaches occurring today. A zero may reflect incomplete or delayed collection. Updates follow published collection snapshots, checked every five minutes while this page is visible.</p>
+        <div className={`snapshot-update-bar ${error ? "update-error" : ""}`}>
+          <span>Auto-refresh every 5 min (UTC)</span>
+          <span id="snapshot-check-status" role="status" aria-live="polite" title={error || (lastCheckedAt ? new Date(lastCheckedAt).toISOString() : undefined)}>{checkStatus}</span>
+        </div>
         {!data ? (
           <div className="load-state" role={error ? "alert" : "status"}>
             <div className="loading-mark">
@@ -677,9 +683,10 @@ export default function Dashboard() {
             {error && (
               <button
                 className="primary-button"
-                onClick={() => setReload((n) => n + 1)}
+                onClick={() => void refresh()}
+                disabled={refreshing}
               >
-                Try again
+                {refreshing ? "Retrying…" : "Try again"}
               </button>
             )}
           </div>
@@ -775,6 +782,9 @@ export default function Dashboard() {
                   <span className="freshness-context">
                     Showing the last 7 days
                   </span>
+                )}
+                {view === "today" && (
+                  <span className="freshness-context">Notifications dated {formatDate(utcDay(now))} UTC</span>
                 )}
                 {view === "saved" && (
                   <span className="freshness-context">
@@ -904,6 +914,9 @@ export default function Dashboard() {
                 </div>
                 {view === "recent" && (
                   <p className="queue-note"><Info size={13} />New means newly collected here. A first collection can include older reports.</p>
+                )}
+                {view === "today" && (
+                  <p className="queue-note"><CalendarDays size={13} />Today’s notifications ({formatDate(utcDay(now))}, UTC), using publication date or reported-date fallback. These are source reports, not distinct breaches or occurrence dates. Collection may be incomplete.</p>
                 )}
                 {view === "saved" && (
                   <div className="saved-note">
@@ -1110,6 +1123,8 @@ export default function Dashboard() {
                             ? "No reports match these filters"
                             : view === "saved"
                               ? "Keep a report within reach"
+                              : view === "today"
+                                ? "No reports dated today in this snapshot"
                               : view === "recent"
                                 ? "No new or changed reports"
                                 : "No reports collected yet"}
@@ -1119,6 +1134,8 @@ export default function Dashboard() {
                             ? "Try a broader search or reset your filters. Unknown counts are included when “Any affected count” is selected."
                             : view === "saved"
                               ? "Use the bookmark beside any report to return to it here. Your saved list stays on this device."
+                              : view === "today"
+                                ? "This snapshot contains no source notifications published or reported today UTC. Collection can lag or be incomplete; this does not establish that no breaches occurred today. Check source health for coverage."
                               : view === "recent"
                                 ? "Nothing was first collected or revised in the last seven days. Check source health to confirm collection is current."
                                 : "Reports will appear after the next successful collection. Check Sources for the current collection status."}

@@ -1,4 +1,4 @@
-export type View = "recent" | "all" | "saved" | "sources";
+export type View = "recent" | "today" | "all" | "saved" | "sources";
 export interface Source {
   id: string;
   label: string;
@@ -246,6 +246,26 @@ export function isRecent(report: Report, now: number): boolean {
   );
   return time >= now - 7 * DAY && time <= now + 5 * 60_000;
 }
+
+export function utcDay(now: number): string {
+  return new Date(now).toISOString().slice(0, 10);
+}
+
+export function isReportFromToday(report: Report, now: number): boolean {
+  // Source notification dates only. An initial import is not a new occurrence.
+  const date = report.publishedDate ?? report.reportedDate;
+  return date === utcDay(now);
+}
+
+export function countTodayReports(reports: Report[], now: number): number {
+  // The validated export has unique report IDs; related source reports remain separate.
+  return reports.filter(report => isReportFromToday(report, now)).length;
+}
+
+export function isLocalHostname(hostname: string): boolean {
+  return hostname === "localhost" || hostname.endsWith(".localhost") ||
+    hostname === "[::1]" || hostname === "::1" || /^127(?:\.\d{1,3}){3}$/.test(hostname);
+}
 export function sourceHealth(
   source: Source,
   now: number,
@@ -343,6 +363,7 @@ export function filterReports(
   return reports
     .filter((r) => {
       if (view === "recent" && !isRecent(r, now)) return false;
+      if (view === "today" && !isReportFromToday(r, now)) return false;
       if (view === "saved" && !saved.has(r.id)) return false;
       if (filters.source !== "all" && r.sourceId !== filters.source)
         return false;

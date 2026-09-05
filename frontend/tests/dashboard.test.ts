@@ -2,9 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   affectedCount,
+  countTodayReports,
   filterReports,
   INITIAL_FILTERS,
   isRecent,
+  isLocalHostname,
+  isReportFromToday,
   qualityMessage,
   readDataset,
   readSavedIds,
@@ -12,6 +15,7 @@ import {
   reportDateLabel,
   safeUrl,
   sourceHealth,
+  utcDay,
   type Dataset,
   type Report,
   type Source,
@@ -84,6 +88,48 @@ test("unknown counts and publication dates stay in the default review queue", ()
     filterReports([report()], "all", INITIAL_FILTERS, new Set(), now).length,
     1,
   );
+});
+
+test("today counts source notification dates and excludes historical imports", () => {
+  const rows = [
+    report({ id: "published", publishedDate: "2026-09-05" }),
+    report({ id: "reported", reportedDate: "2026-09-05" }),
+    report({ id: "historical", publishedDate: "2020-01-01", firstSeen: "2026-09-05T17:00:00Z", lastChanged: "2026-09-05T17:00:00Z" }),
+    report({ id: "occurred", breachStart: "2026-09-05", discoveryDate: "2026-09-05" }),
+  ];
+  assert.equal(countTodayReports(rows, now), 2);
+  assert.deepEqual(filterReports(rows, "today", INITIAL_FILTERS, new Set(), now).map(r => r.id), ["published", "reported"]);
+  assert.equal(filterReports(rows, "today", { ...INITIAL_FILTERS, query: "not present" }, new Set(), now).length, 0);
+  assert.equal(countTodayReports(rows, now), 2, "the header total is independent of table filters");
+});
+
+test("today uses published date precedence and reported date only as fallback", () => {
+  assert.equal(isReportFromToday(report({ publishedDate: "2026-09-04", reportedDate: "2026-09-05" }), now), false);
+  assert.equal(isReportFromToday(report({ publishedDate: null, reportedDate: "2026-09-05" }), now), true);
+  assert.equal(isReportFromToday(report({ publishedDate: "2029-01-01", reportedDate: "2026-09-05" }), now), false);
+  assert.equal(isReportFromToday(report(), now), false);
+});
+
+test("today rolls over at UTC midnight including year boundaries", () => {
+  const before = Date.parse("2026-12-31T23:59:59Z");
+  const after = Date.parse("2026-12-31T18:00:00-06:00");
+  assert.equal(utcDay(after), "2027-01-01");
+  const old = report({ publishedDate: "2026-12-31" });
+  assert.equal(countTodayReports([old], before), 1);
+  assert.equal(countTodayReports([old], after), 0);
+  assert.equal(countTodayReports([report({ reportedDate: "2027-01-01" })], after), 1);
+});
+
+test("today counts separate source reports even when organizations describe one incident", () => {
+  const sameOrganization = [report({ id: "source-one", publishedDate: "2026-09-05" }), report({ id: "source-two", sourceId: "another", publishedDate: "2026-09-05" })];
+  assert.equal(countTodayReports(sameOrganization, now), 2);
+  const duplicate = report({ publishedDate: "2026-09-05" });
+  assert.throws(() => readDataset(dataset([duplicate, duplicate])), "duplicate report IDs cannot enter a validated export");
+});
+
+test("local preview label is reserved for actual loopback hostnames", () => {
+  for (const host of ["localhost", "127.0.0.1", "[::1]", "preview.localhost"]) assert.equal(isLocalHostname(host), true);
+  for (const host of ["bd4l.github.io", "localhost.example.com", "example.com"]) assert.equal(isLocalHostname(host), false);
 });
 
 test("minimum counts require a qualifying exact count or lower bound", () => {
