@@ -1,0 +1,116 @@
+[
+  {
+    "A": [
+      "Completed Date",
+      false
+    ],
+    "B": [
+      "Entity Name",
+      false
+    ],
+    "O": [
+      "Total number of persons affected (including Maine residents)",
+      false
+    ],
+    "P": [
+      "Total number of Maine residents affected",
+      false
+    ],
+    "R": [
+      "Date(s) Breach Occurred",
+      false
+    ],
+    "S": [
+      "Date Breach Discovered",
+      false
+    ],
+    "T": [
+      "Social Security Number",
+      false
+    ],
+    "U": [
+      "Driver's license number or non-driver identification card number",
+      false
+    ],
+    "V": [
+      "Financial account number or credit or debit card number, in combination with the security code, access code, password, or PIN for the account",
+      false
+    ]
+  },
+  {
+    "A": [
+      "9/11/2020 7:59:16 PM",
+      false
+    ],
+    "B": [
+      "Community Food Co-Op",
+      false
+    ],
+    "O": [
+      "60",
+      false
+    ],
+    "P": [
+      "1",
+      false
+    ],
+    "R": [
+      "03/16/2020",
+      false
+    ],
+    "S": [
+      "06/30/2020",
+      false
+    ],
+    "T": [
+      "true",
+      false
+    ],
+    "U": [
+      "false",
+      false
+    ],
+    "V": [
+      "false",
+      false
+    ]
+  },
+  {
+    "A": [
+      "9/10/2020 5:57:42 PM",
+      false
+    ],
+    "B": [
+      "Bok Tower Gardens, Inc.",
+      false
+    ],
+    "O": [
+      "565",
+      false
+    ],
+    "P": [
+      "6",
+      false
+    ],
+    "R": [
+      "5/20/2020",
+      false
+    ],
+    "S": [
+      "7/16/2020",
+      false
+    ],
+    "T": [
+      "false",
+      false
+    ],
+    "U": [
+      "false",
+      false
+    ],
+    "V": [
+      "true",
+      false
+    ]
+  }
+]

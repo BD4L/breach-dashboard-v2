@@ -8,7 +8,7 @@ GitHub Pages serves static files. It cannot run Python collectors, store a priva
 
 Pages has restrictions on using it to run an online business or commercial SaaS. Firm use alone does not prove a violation, but the intended public research site and any future commercial/private product must be assessed against the actual terms before publication. Keep confidential firm workflows out of public hosting. [Pages usage limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)
 
-Expanded coverage uses compact JSON with a 30 MB snapshot budget and a 50 MB built-site budget, below hosting ceilings. A size violation fails the build; it never silently drops records. It renders a collection timestamp and source failures because static snapshots are not real-time monitoring.
+Expanded coverage uses compact JSON with a 40 MB snapshot budget and a 50 MB built-site budget, below hosting ceilings. A size violation fails the build; it never silently drops records. It renders a collection timestamp and source failures because static snapshots are not real-time monitoring.
 
 ## Actions
 

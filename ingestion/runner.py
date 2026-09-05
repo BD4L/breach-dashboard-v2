@@ -1,7 +1,7 @@
 """Independent source workers with a hard deadline and portable result artifacts.
 
-Workers never open a database. The supervisor kills the entire worker process
-group on expiry, including a stuck parser, and still emits a failure artifact.
+Workers never open a database. The supervisor kills the worker and detached
+descendant process groups on expiry and still emits a failure artifact.
 """
 from __future__ import annotations
 
@@ -12,12 +12,12 @@ from importlib import import_module
 import json
 import os
 from pathlib import Path
-import signal
 import subprocess
 import sys
 import tempfile
 
 from .models import Collection, Report, SOURCES, SourceError
+from .process_tree import terminate_tree
 from .validation import timestamp
 
 MAX_RESULT_BYTES = 40_000_000
@@ -26,10 +26,15 @@ DEFAULT_TIMEOUT = 600
 
 def dispatch(source_id: str, *, max_pages: int | None = None) -> Collection:
     groups = {
-        'adapters': {'massachusetts', 'california', 'hhs'},
-        'state_portals': {'indiana', 'iowa', 'maine', 'north_dakota', 'oklahoma', 'maryland'},
-        'other_portals': {'new_jersey', 'wisconsin', 'montana', 'washington', 'south_carolina', 'delaware', 'new_hampshire'},
-        'special_portals': {'texas', 'sec'},
+        'rediscovered_nj': {'new_jersey'},
+        'rediscovered_northeast': {'massachusetts', 'new_hampshire'},
+        'rediscovered_sec': {'sec'},
+        'rediscovered_states': {'iowa', 'maine'},
+        'rediscovered_midatlantic': {'maryland', 'wisconsin'},
+        'adapters': {'california', 'hhs'},
+        'state_portals': {'indiana', 'north_dakota', 'oklahoma'},
+        'other_portals': {'montana', 'washington', 'south_carolina', 'delaware'},
+        'special_portals': {'texas'},
     }
     for name, sources in groups.items():
         if source_id in sources:
@@ -63,6 +68,8 @@ def decode_collection(value: object, source_id: str) -> Collection:
         raise SourceError('Malformed source collection')
     if type(value.get('empty_is_valid', False)) is not bool:
         raise SourceError('Malformed empty-result contract')
+    if type(value.get('new_records_only', False)) is not bool:
+        raise SourceError('Malformed sparse-result contract')
     for key in ('parsed', 'rejected'):
         if type(value.get(key)) is not int or value[key] < 0:
             raise SourceError('Malformed source counts')
@@ -93,10 +100,7 @@ def supervise(command: list[str], *, timeout: float) -> int:
     try:
         return process.wait(timeout=timeout)
     except subprocess.TimeoutExpired as error:
-        try:
-            os.killpg(process.pid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
+        terminate_tree(process.pid)
         process.wait()
         raise SourceError(f'Source exceeded its {timeout:g}-second hard deadline; worker stopped') from error
 

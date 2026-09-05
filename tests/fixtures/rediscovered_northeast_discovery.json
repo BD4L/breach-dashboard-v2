@@ -1,0 +1,156 @@
+{
+  "capturedAt": "2026-09-05",
+  "archive": {
+    "url": "https://www.mass.gov/archive/data-breach-notification-letters",
+    "status": 200,
+    "bytes": 223353,
+    "sha256": "1152fc748241d506101da138ffd9ad22a52b5946f3401473611d7ba87abe6732",
+    "currentAndPriorYearLinks": [
+      {
+        "label": "Data Breach Notification Letters January 2026",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-january-2026"
+      },
+      {
+        "label": "Data Breach Notification Letters February 2026",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-february-2026"
+      },
+      {
+        "label": "Data Breach Notification Letters March 2026",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-march-2026"
+      },
+      {
+        "label": "Data Breach Notification Letters April 2026",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-april-2026"
+      },
+      {
+        "label": "Data Breach Notification Letters May 2026",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-may-2026"
+      },
+      {
+        "label": "Data Breach Notification Letters June 2026",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-june-2026"
+      },
+      {
+        "label": "Data Breach Notification Letters July 2026",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-july-2026"
+      },
+      {
+        "label": "Data Breach Notification Letters August 2026",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-august-2026"
+      },
+      {
+        "label": "Data Breach Notification Letters September 2026",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-september-2026"
+      },
+      {
+        "label": "Data Breach Notification Letters January 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-january-2025"
+      },
+      {
+        "label": "Data Breach Notification Letters February 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-february-2025"
+      },
+      {
+        "label": "Data Breach Notification Letters March 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-march-2025"
+      },
+      {
+        "label": "Data Breach Notification Letters April 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-april-2025"
+      },
+      {
+        "label": "Data Breach Notification Letters May 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-may-2025"
+      },
+      {
+        "label": "Data Breach Notification Letters June 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-june-2025"
+      },
+      {
+        "label": "Data Breach Notification Letters July 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-july-2025"
+      },
+      {
+        "label": "Data Breach Notification Letters August 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-august-2025"
+      },
+      {
+        "label": "Data Breach Notification Letters September 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-september-2025"
+      },
+      {
+        "label": "Data Breach Notification Letters October 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-october-2025"
+      },
+      {
+        "label": "Data Breach Notification Letters November 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-november-2025"
+      },
+      {
+        "label": "Data Breach Notification Letters December 2025",
+        "url": "https://www.mass.gov/lists/data-breach-notification-letters-december-2025"
+      }
+    ],
+    "coverageNotice": "If an assigned breach number is not listed, the consumer was contacted without a letter."
+  },
+  "annualPublication": {
+    "url": "https://www.mass.gov/doc/data-breach-report-2026/download",
+    "status": 200,
+    "format": "application/pdf",
+    "bytes": 1143752,
+    "sha256": "950fcf90df76f2a160d8927cb85ea91e693ef14fc1354d3461661643ea4f99fa",
+    "pageCount": 150,
+    "validatedReports": 1507,
+    "rejected": 0,
+    "repairedBottomBorderPages": [
+      67
+    ],
+    "wrappedNativeIdsValidated": true
+  },
+  "accessLimitations": {
+    "massachusetts": "Annual index/PDF and letter archive/monthly page successfully loaded with the declared project identity; earlier denials were superseded by these ordinary public responses.",
+    "newHampshire": "Public document API observed HTTP200 in normal local Chrome. Ordinary HTTP remained HTTP403 locally and on GitHub-hosted operating systems; Linux headless Chrome also denied access in the parent integration probe. This is an unattended transport limitation, not evidence that the publication was removed."
+  },
+  "annualCollection": {
+    "index": "https://www.mass.gov/lists/data-breach-notification-reports",
+    "years": [
+      2026,
+      2025
+    ],
+    "requests": 3,
+    "bytes": 2727529,
+    "reports": 3705,
+    "rejected": 0,
+    "coverage": "All pages in linked current and prior annual PDFs validated against source ID columns; no independent source total establishes complete historical coverage."
+  },
+  "septemberLetters": {
+    "url": "https://www.mass.gov/lists/data-breach-notification-letters-september-2026",
+    "format": "text/html",
+    "status": 200,
+    "identifiedLetters": 35,
+    "coverage": "Letter-only listing; no dates or affected counts inferred from month membership."
+  },
+  "newHampshirePublicDocuments": {
+    "listing": "https://www.doj.nh.gov/citizens/consumer-protection-antitrust-bureau/security-breach-notifications",
+    "endpoint": "https://www.doj.nh.gov/content/api/documents",
+    "query": {
+      "iterate_nodes": "true",
+      "q": "@field_document_category|=|2146",
+      "textsearch": "",
+      "sort": "field_date_posted|desc|ALLOW_NULLS",
+      "filter_mode": "inclusive",
+      "type": "document",
+      "page": 1,
+      "size": 15
+    },
+    "format": "application/json",
+    "normalChromeStatus": 200,
+    "total": 9937,
+    "lastPage": 663,
+    "capturedRows": 15,
+    "nativeIdField": "id and fields.nid",
+    "publicationDateField": "fields.field_date_posted",
+    "documentUriField": "fields.field_document_file.uri",
+    "documentHost": "mm.nh.gov"
+  }
+}

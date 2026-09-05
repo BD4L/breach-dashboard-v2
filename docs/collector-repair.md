@@ -44,4 +44,4 @@ An unavailable source cannot be made healthy through an error-code change. Sourc
 - Source workers have a 600-second hard deadline, jobs a 12-minute cap, and at most three source jobs run concurrently. Manual and four-hour scheduled runs cannot overlap their durable writes.
 - Routine collection and optional enrichment are separate. The workflow has no AI, subscriber email, global database summary, or pre-collection database snapshot dependency.
 
-Snapshot data is compact JSON, with a 30 MB public snapshot and 50 MB site budget. Full state has explicit per-file and aggregate size guards. Reaching a guard requires a reviewed archival change; records are never silently discarded.
+Snapshot data is compact JSON, with a 40 MB public snapshot and 50 MB site budget. Full state has explicit per-file and aggregate size guards. Reaching a guard requires a reviewed archival change; records are never silently discarded.

@@ -18,6 +18,7 @@ OFFICIAL_HOSTS = {
     'consumer.sc.gov', 'attorneygeneral.delaware.gov', 'www.doj.nh.gov',
     'oag.my.site.com', 'www.sec.gov', 'efts.sec.gov',
 }
+PROJECT_USER_AGENT = 'BreachDashboard/2.0 (+https://github.com/BD4L/breach-dashboard-v2)'
 
 @dataclass
 class Response:
@@ -42,7 +43,7 @@ class PublicClient:
                  deadline_seconds: int = 240, session=None):
         self.session = session or requests.Session()
         self.session.auth = PublicOnlyAuth()
-        self.session.headers.update({'User-Agent': 'BreachDashboardPilot/0.1 (public breach report collector)',
+        self.session.headers.update({'User-Agent': PROJECT_USER_AGENT,
                                      'Accept': 'text/html,application/pdf,text/csv,application/xml;q=0.9,*/*;q=0.5'})
         self.max_requests = max_requests
         self.max_bytes = max_bytes

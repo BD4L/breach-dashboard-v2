@@ -183,6 +183,8 @@ class Store(AbstractContextManager):
         source_id = collection.source_id
         if source_id not in SOURCES:
             raise ValueError(f"Unknown source: {source_id}")
+        if type(collection.new_records_only) is not bool:
+            raise ValueError('Malformed sparse-result contract')
         if (not isinstance(collection.parsed, int) or collection.parsed < 0
                 or not isinstance(collection.rejected, int) or collection.rejected < 0
                 or collection.parsed != len(collection.reports) + collection.rejected):
@@ -232,6 +234,10 @@ class Store(AbstractContextManager):
                 existing = self.connection.execute("SELECT * FROM reports WHERE source_id=? AND native_id=?", (source_id, native_id)).fetchone()
                 if existing and observed_at < existing["last_seen"]:
                     raise ValueError("Collection observation precedes stored data; historical replay is not allowed.")
+                if existing and collection.new_records_only:
+                    # This listing cannot revalidate the richer record's fields,
+                    # so preserve both its values and retrieval provenance.
+                    continue
                 if existing is None:
                     revision = 1
                     fields = ["created"]

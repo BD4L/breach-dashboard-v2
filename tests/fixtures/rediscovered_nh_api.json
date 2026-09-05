@@ -1,0 +1,397 @@
+{
+  "item_count": 15,
+  "total": 9937,
+  "last_page": 663,
+  "data": [
+    {
+      "title": "Monmouth University",
+      "id": "71956",
+      "fields": {
+        "nid": [
+          "71956"
+        ],
+        "title": [
+          "Monmouth University"
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-20"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/monmouth-university-20260820.pdf"
+        }
+      }
+    },
+    {
+      "title": "HUT American Group LLC ",
+      "id": "71961",
+      "fields": {
+        "nid": [
+          "71961"
+        ],
+        "title": [
+          "HUT American Group LLC "
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-20"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/hut-american-group-20260820.pdf"
+        }
+      }
+    },
+    {
+      "title": "CareCloud, Inc.",
+      "id": "71951",
+      "fields": {
+        "nid": [
+          "71951"
+        ],
+        "title": [
+          "CareCloud, Inc."
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-20"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/carecloud-20260820.pdf"
+        }
+      }
+    },
+    {
+      "title": "Valley Perinatal Services, LLC",
+      "id": "71966",
+      "fields": {
+        "nid": [
+          "71966"
+        ],
+        "title": [
+          "Valley Perinatal Services, LLC"
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-20"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/valley-perinatal-services-20260820.pdf"
+        }
+      }
+    },
+    {
+      "title": "Williams Brothers Construction Co., Inc.",
+      "id": "71931",
+      "fields": {
+        "nid": [
+          "71931"
+        ],
+        "title": [
+          "Williams Brothers Construction Co., Inc."
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-19"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/williams-brothers-construction-20260819.pdf"
+        }
+      }
+    },
+    {
+      "title": "Wilmer Cutler Pickering Hale and Dorr LLP",
+      "id": "71946",
+      "fields": {
+        "nid": [
+          "71946"
+        ],
+        "title": [
+          "Wilmer Cutler Pickering Hale and Dorr LLP"
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-19"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/wilmer-cutler-pickering-hale-dorr-20260819.pdf"
+        }
+      }
+    },
+    {
+      "title": "Aerospace Alloys Inc.",
+      "id": "71936",
+      "fields": {
+        "nid": [
+          "71936"
+        ],
+        "title": [
+          "Aerospace Alloys Inc."
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-19"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/aerospace-alloys-20260819.pdf"
+        }
+      }
+    },
+    {
+      "title": "Nebraska Orthopaedic",
+      "id": "71926",
+      "fields": {
+        "nid": [
+          "71926"
+        ],
+        "title": [
+          "Nebraska Orthopaedic"
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-19"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/nebraska-orthopaedic-20260819.pdf"
+        }
+      }
+    },
+    {
+      "title": "Forrestall CPAs LLC",
+      "id": "71941",
+      "fields": {
+        "nid": [
+          "71941"
+        ],
+        "title": [
+          "Forrestall CPAs LLC"
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-19"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/forrestall-cpa-20260819.pdf"
+        }
+      }
+    },
+    {
+      "title": "Apple American Group LLC",
+      "id": "71916",
+      "fields": {
+        "nid": [
+          "71916"
+        ],
+        "title": [
+          "Apple American Group LLC"
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-18"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/apple-american-group-20260818.pdf"
+        }
+      }
+    },
+    {
+      "title": "Turner Construction Company",
+      "id": "71921",
+      "fields": {
+        "nid": [
+          "71921"
+        ],
+        "title": [
+          "Turner Construction Company"
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-18"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/turner-construction-20260818.pdf"
+        }
+      }
+    },
+    {
+      "title": "Colonial Presbyterian Church",
+      "id": "71896",
+      "fields": {
+        "nid": [
+          "71896"
+        ],
+        "title": [
+          "Colonial Presbyterian Church"
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-18"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/colonial-presbyterian-church-20260818.pdf"
+        }
+      }
+    },
+    {
+      "title": "Amgen Inc.",
+      "id": "71911",
+      "fields": {
+        "nid": [
+          "71911"
+        ],
+        "title": [
+          "Amgen Inc."
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-18"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/amgen-20260818.pdf"
+        }
+      }
+    },
+    {
+      "title": "International Code Council, Inc.",
+      "id": "71901",
+      "fields": {
+        "nid": [
+          "71901"
+        ],
+        "title": [
+          "International Code Council, Inc."
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-18"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/international-code-council-20260818.pdf"
+        }
+      }
+    },
+    {
+      "title": "Bahrie Law, PLLC",
+      "id": "71891",
+      "fields": {
+        "nid": [
+          "71891"
+        ],
+        "title": [
+          "Bahrie Law, PLLC"
+        ],
+        "moderation_state": [
+          "published"
+        ],
+        "field_date_posted": [
+          "2026-08-17"
+        ],
+        "field_document_category": [
+          {
+            "id": "2146"
+          }
+        ],
+        "field_document_file": {
+          "uri": "https://mm.nh.gov/files/uploads/doj/remote-docs/bahrie-law-20260817.pdf"
+        }
+      }
+    }
+  ]
+}

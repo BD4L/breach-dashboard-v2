@@ -118,3 +118,5 @@ For an isolated source artifact without touching a database:
 ```
 
 Listing collection is separate from optional document enrichment: routine runs do not download every notice PDF, invoke AI, or fetch SEC XBRL. Indiana and Massachusetts use their annual source reports because those documents are the listings themselves.
+
+Current recovery evidence and source limitations: [September 5 source rediscovery](docs/collector-rediscovery.md).

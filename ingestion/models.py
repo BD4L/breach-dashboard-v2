@@ -4,7 +4,7 @@ from typing import Any
 from .source_catalog import EXTRA_SOURCES
 
 SOURCES = {
-    "massachusetts": {"id": "massachusetts", "label": "Massachusetts", "jurisdiction": "MA", "method": "Annual report", "homepage": "https://www.mass.gov/lists/data-breach-notification-reports"},
+    "massachusetts": {"id": "massachusetts", "label": "Massachusetts", "jurisdiction": "MA", "method": "Annual report / official letter archive", "homepage": "https://www.mass.gov/lists/data-breach-notification-reports"},
     "hhs": {"id": "hhs", "label": "HHS Office for Civil Rights", "jurisdiction": "US", "method": "Federal portal", "homepage": "https://ocrportal.hhs.gov/ocr/breach/breach_frontpage.jsf"},
     "california": {"id": "california", "label": "California", "jurisdiction": "CA", "method": "Public notices", "homepage": "https://oag.ca.gov/privacy/databreach/list"},
 }
@@ -46,3 +46,5 @@ class Collection:
     evidence: dict[str, Any] = field(default_factory=dict)
     # Only set after positively validating an empty, filtered source response.
     empty_is_valid: bool = False
+    # Sparse secondary indexes may add identities without downgrading richer records.
+    new_records_only: bool = False

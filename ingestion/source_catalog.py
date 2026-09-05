@@ -75,3 +75,9 @@ EXTRA_SOURCES = {'indiana': {'id': 'indiana',
          'jurisdiction': 'US',
          'method': '8-K Item 1.05 filings',
          'homepage': 'https://www.sec.gov/edgar/search/'}}
+
+# Active adapters follow the currently published source surfaces.
+EXTRA_SOURCES['maryland']['method'] = 'Official public JSON'
+EXTRA_SOURCES['new_jersey']['method'] = 'Official public HTML notices'
+EXTRA_SOURCES['new_hampshire']['method'] = 'Official public document API'
+EXTRA_SOURCES['sec']['method'] = 'Official Item 1.05 search metadata'

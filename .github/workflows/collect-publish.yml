@@ -47,7 +47,9 @@ jobs:
 
   collect:
     needs: plan
-    runs-on: ubuntu-latest
+    # Wisconsin times out on Ubuntu but its official current/archive pages
+    # were verified on standard macOS runners in the discovery probe.
+    runs-on: ${{ matrix.source == 'wisconsin' && 'macos-latest' || 'ubuntu-latest' }}
     timeout-minutes: 12
     strategy:
       fail-fast: false

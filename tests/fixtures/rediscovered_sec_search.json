@@ -1,0 +1,77 @@
+{
+  "timed_out": false,
+  "_shards": {
+    "total": 50,
+    "successful": 50,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 3,
+      "relation": "eq"
+    },
+    "max_score": 15.147876,
+    "hits": [
+      {
+        "_index": "edgar_file",
+        "_id": "0001104659-26-104300:park-20260828x8k.htm",
+        "_score": 15.147876,
+        "_source": {
+          "ciks": [
+            "0002069604"
+          ],
+          "display_names": [
+            "Park Dental Partners, Inc.  (PARK)  (CIK 0002069604)"
+          ],
+          "file_date": "2026-09-01",
+          "form": "8-K",
+          "adsh": "0001104659-26-104300",
+          "file_type": "8-K",
+          "items": [
+            "1.05",
+            "9.01"
+          ]
+        }
+      },
+      {
+        "_index": "edgar_file",
+        "_id": "0001628280-26-059602:nutx-20260831.htm",
+        "_score": 14.32422,
+        "_source": {
+          "ciks": [
+            "0001479681"
+          ],
+          "display_names": [
+            "Nutex Health Inc.  (NUTX)  (CIK 0001479681)"
+          ],
+          "file_date": "2026-08-31",
+          "form": "8-K",
+          "adsh": "0001628280-26-059602",
+          "file_type": "8-K",
+          "items": [
+            "1.05"
+          ]
+        }
+      },
+      {
+        "_index": "edgar_file",
+        "_id": "0001437749-26-029621:ex_978719.htm",
+        "_score": 10.200147,
+        "_source": {
+          "ciks": [
+            "0000763532"
+          ],
+          "display_names": [
+            "LSI INDUSTRIES INC  (LYTS)  (CIK 0000763532)"
+          ],
+          "file_date": "2026-09-03",
+          "form": "10-K",
+          "adsh": "0001437749-26-029621",
+          "file_type": "EX-14",
+          "items": []
+        }
+      }
+    ]
+  }
+}

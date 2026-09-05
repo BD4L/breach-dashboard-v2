@@ -30,10 +30,25 @@ class RunnerTests(unittest.TestCase):
             importer.return_value.collect.assert_called_once_with('montana', max_pages=7)
 
     def test_catalog_matches_adapter_contracts_without_loading_them_for_planning(self):
-        from ingestion import state_portals, other_portals, special_portals
-        for module in (state_portals, other_portals, special_portals):
-            for source, metadata in module.SOURCES.items():
-                self.assertEqual(SOURCES[source], metadata)
+        from ingestion import (state_portals, other_portals, special_portals,
+                               rediscovered_states, rediscovered_midatlantic,
+                               rediscovered_northeast, rediscovered_sec, rediscovered_nj)
+        active = {}
+        for module in (state_portals, other_portals, special_portals, rediscovered_states,
+                       rediscovered_midatlantic, rediscovered_northeast, rediscovered_sec, rediscovered_nj):
+            active.update(module.SOURCES)
+        for source, metadata in active.items():
+            self.assertEqual(SOURCES[source], metadata)
+
+    def test_rediscovered_sources_dispatch_to_the_active_publication_parser(self):
+        for source, module in [('massachusetts', 'rediscovered_northeast'),
+                               ('new_hampshire', 'rediscovered_northeast'),
+                               ('iowa', 'rediscovered_states'), ('maine', 'rediscovered_states'),
+                               ('maryland', 'rediscovered_midatlantic'), ('wisconsin', 'rediscovered_midatlantic'),
+                               ('new_jersey', 'rediscovered_nj'), ('sec', 'rediscovered_sec')]:
+            with self.subTest(source=source), patch('ingestion.runner.import_module') as importer:
+                dispatch(source)
+                importer.assert_called_once_with('ingestion.' + module)
 
     def test_hung_worker_is_killed_within_deadline(self):
         started = time.monotonic()
@@ -109,6 +124,22 @@ class DurablePipelineTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             restore(archive, restored)
         self.assertFalse(restored.exists())
+
+    def test_sparse_fallback_adds_new_identities_without_downgrading_existing_evidence(self):
+        with Store(self.db, 'live') as store:
+            store.apply_collection(collection(25), NOW - timedelta(days=1))
+            before = store.dashboard(NOW)['reports'][0]
+            sparse = Collection('california', [
+                Report('california', '12', 'Public Example', 'https://oag.ca.gov/privacy/databreach/list'),
+                Report('california', '13', 'New Example', 'https://oag.ca.gov/privacy/databreach/list'),
+            ], 2, complete=False, new_records_only=True)
+            result = store.apply_collection(sparse, NOW)
+            records = {r['nativeId']: r for r in store.dashboard(NOW)['reports']}
+            self.assertEqual(records['12'], before)
+            self.assertEqual(result['counts']['new'], 1)
+            self.assertEqual(result['counts']['changed'], 0)
+            self.assertEqual(result['status'], 'partial')
+            self.assertEqual(records['13']['revision'], 1)
 
     def test_missing_source_artifact_does_not_block_other_results_or_delete_history(self):
         with Store(self.db, 'live') as store:

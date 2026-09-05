@@ -1,0 +1,74 @@
+[
+  {
+    "A": [
+      "DATA BREACH NOTICES",
+      false
+    ]
+  },
+  {
+    "A": [
+      "Company Whose Data Was Breached",
+      false
+    ],
+    "B": [
+      "Date of Breach",
+      false
+    ],
+    "C": [
+      "Date of Notification",
+      false
+    ],
+    "D": [
+      "Type of Information",
+      false
+    ],
+    "E": [
+      "Number of Maine Residents Affected",
+      false
+    ]
+  },
+  {
+    "A": [
+      "Example Corporation, 123 Example Road, Example City, ME 00000",
+      false
+    ],
+    "B": [
+      "8/3/2018 (discovered 10/2/18)",
+      false
+    ],
+    "C": [
+      "43404",
+      true
+    ],
+    "D": [
+      "Name or other personal identifier in combination with financial account or credit or debit card number, in combination with the security code, access code, password, or PIN for the account",
+      false
+    ],
+    "E": [
+      "3",
+      true
+    ]
+  },
+  {
+    "A": [
+      "Another Example Corporation",
+      false
+    ],
+    "B": [
+      "43361",
+      true
+    ],
+    "C": [
+      "43402",
+      true
+    ],
+    "D": [
+      "Name or other personal identifier in combination with financial account or credit or debit card number, in combination with the security code, access code, password, or PIN for the account",
+      false
+    ],
+    "E": [
+      "1",
+      true
+    ]
+  }
+]
