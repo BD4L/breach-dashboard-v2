@@ -6,7 +6,7 @@ on:
       mode:
         description: 'Fixed endpoint diagnostic mode'
         type: choice
-        options: [standard, normal-browser]
+        options: [standard, normal-browser, delaware]
         default: standard
 
 permissions:
@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   probe:
-    if: github.repository == 'BD4L/breach-dashboard-v2' && github.ref == 'refs/heads/main' && inputs.mode != 'normal-browser'
+    if: github.repository == 'BD4L/breach-dashboard-v2' && github.ref == 'refs/heads/main' && inputs.mode == 'standard'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 26
     strategy:
@@ -87,4 +87,32 @@ jobs:
         with:
           name: normal-browser-${{ matrix.os }}
           path: artifacts/normal-browser.json
+          retention-days: 1
+
+  delaware:
+    if: github.repository == 'BD4L/breach-dashboard-v2' && github.ref == 'refs/heads/main' && inputs.mode == 'delaware'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -r requirements.lock
+      - name: Compare the bounded official Delaware collector
+        run: python -m ingestion.runner fetch --source delaware --output artifacts/delaware.json --timeout 120
+      - name: Keep the public source result for one day
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: delaware-${{ matrix.os }}
+          path: artifacts/delaware.json
           retention-days: 1
