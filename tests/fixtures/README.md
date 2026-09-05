@@ -1,0 +1,13 @@
+# Source fixture provenance
+
+Captured September 5, 2026 by ordinary, bounded HTTPS public reads. No source access controls were bypassed. These are parser excerpts, **not complete snapshots**.
+
+- `ca-list.html`: first three report rows and the next-page link from https://oag.ca.gov/privacy/databreach/list. Real source values and IDs retained; unrelated markup and later rows removed. Original response SHA-256 `341aebc43fb9e35f7f2ede09226c73990ea4187c98c8a7ae58d9939fc08d9ce4`.
+- `hhs-navigation.html`: public “View HIPAA Breach Reports” command link from https://ocrportal.hhs.gov/ocr/breach/breach_frontpage.jsf. Reduced form wrapper; view state replaced by `fixture-only` and session suffix removed. The link itself is captured markup.
+- `hhs-reports.html`: report table container from the resulting https://ocrportal.hhs.gov/ocr/breach/breach_report_hip.jsf response, first three real report rows retained. Pagination display changed from `1 - 100` to `1 - 3` to match fixture size; source total of 733 retained. Original response SHA-256 `60cca42151531e432cdf0ccdaeef6bd9262ddb4190a9b71a715dac3668ede123`.
+- `hhs-page2.xml`: first two real rows (source offsets 100 and 101) returned by normal PrimeFaces public pagination. Non-table updates removed; view state replaced by `fixture-state`. Original response SHA-256 `f49b2da4f0d7bfa78c4698bd9d16748bfe14dec8b9b725300ec2f62df62762bd`.
+- `ma-tables-synthetic.json`: explicitly synthetic pdfplumber-style rows based on the documented legacy Massachusetts column contract, with reordered headers, a continuation page, and year rollover. The official Massachusetts index returned HTTP 403; no annual report PDF was fetched. These tests validate row normalization and discovery logic only; they do **not** establish current live PDF extraction fidelity.
+
+Synthetic mutations made inside tests cover errors, malformed values, and response boundaries. No tests perform network calls. Public CA full CSV endpoint timed out during a 30-second read; the pilot therefore uses at most six linked HTML listing pages with stable native `sb24` IDs and labels that source partial while additional pages exist. HHS captures only the **HIPAA Under Investigation** view, excluding Archive and Part 2.
+
+MA PDF coverage regressions additionally use mocked pdfplumber pages with synthetic text/table omissions. A page without extracted tables, a disagreement in native IDs, or unheaded multi-column rows fails collection. Agreement between extracted text and tables is only an omission check: the current live collector remains partial because an independent annual source-count feed has not been validated. No new live PDF claim is established by these tests.

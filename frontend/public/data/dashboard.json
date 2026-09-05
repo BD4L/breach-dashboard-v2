@@ -1,0 +1,606 @@
+{
+  "schemaVersion": 1,
+  "mode": "demo",
+  "generatedAt": "2026-09-05T19:10:58Z",
+  "sources": [
+    {
+      "id": "massachusetts",
+      "label": "Massachusetts",
+      "jurisdiction": "MA",
+      "method": "Annual report",
+      "homepage": "https://www.mass.gov/lists/data-breach-notification-reports",
+      "status": "healthy",
+      "lastAttempt": "2026-09-05T17:21:37Z",
+      "lastSuccess": "2026-09-05T17:21:37Z",
+      "message": "Synthetic preview records; collection was not performed.",
+      "counts": {
+        "parsed": 4,
+        "accepted": 4,
+        "rejected": 0,
+        "new": 1,
+        "changed": 1
+      }
+    },
+    {
+      "id": "hhs",
+      "label": "HHS Office for Civil Rights",
+      "jurisdiction": "US",
+      "method": "Federal portal",
+      "homepage": "https://ocrportal.hhs.gov/ocr/breach/breach_frontpage.jsf",
+      "status": "failed",
+      "lastAttempt": "2026-09-05T17:31:37Z",
+      "lastSuccess": "2026-09-01T18:51:37Z",
+      "message": "Example failure: source structure changed. Last valid reports are retained.",
+      "counts": {
+        "parsed": 0,
+        "accepted": 0,
+        "rejected": 0,
+        "new": 0,
+        "changed": 0
+      }
+    },
+    {
+      "id": "california",
+      "label": "California",
+      "jurisdiction": "CA",
+      "method": "Public notices",
+      "homepage": "https://oag.ca.gov/privacy/databreach/list",
+      "status": "healthy",
+      "lastAttempt": "2026-09-05T17:21:37Z",
+      "lastSuccess": "2026-09-05T17:21:37Z",
+      "message": "Synthetic preview records; collection was not performed.",
+      "counts": {
+        "parsed": 5,
+        "accepted": 5,
+        "rejected": 0,
+        "new": 1,
+        "changed": 0
+      }
+    }
+  ],
+  "reports": [
+    {
+      "affected": {
+        "count": 820,
+        "jurisdiction": "CA",
+        "qualifier": "exact",
+        "scope": "state"
+      },
+      "breachEnd": "2026-07-27",
+      "breachStart": "2026-07-24",
+      "dataTypes": [
+        "Financial information",
+        "Social Security numbers"
+      ],
+      "discoveryDate": "2026-08-15",
+      "nativeId": "demo-notice-004",
+      "noticeUrl": null,
+      "organization": "Example Employee Services",
+      "publishedDate": "2026-09-04",
+      "qualityFlags": [],
+      "reportedDate": null,
+      "sourceId": "california",
+      "sourceUrl": "https://oag.ca.gov/privacy/databreach/list",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "california:b02b39f3b9e76ed52f0c4012",
+      "firstSeen": "2026-09-05T17:21:37Z",
+      "lastSeen": "2026-09-05T17:21:37Z",
+      "lastChanged": "2026-09-05T17:21:37Z",
+      "revision": 1,
+      "evidence": {
+        "retrievedAt": "2026-09-05T17:21:37Z",
+        "contentHash": "89fc636e4331848e7e48d5f02f6e9a049e590f5586d37fc4dac1ff9ead9282aa",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-05T17:21:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    },
+    {
+      "affected": {
+        "count": 12480,
+        "jurisdiction": "MA",
+        "qualifier": "exact",
+        "scope": "state"
+      },
+      "breachEnd": "2026-07-23",
+      "breachStart": "2026-07-20",
+      "dataTypes": [
+        "Medical information",
+        "Social Security numbers"
+      ],
+      "discoveryDate": "2026-08-11",
+      "nativeId": "2026-DEMO-001",
+      "noticeUrl": null,
+      "organization": "Example Community Health",
+      "publishedDate": "2026-08-31",
+      "qualityFlags": [],
+      "reportedDate": null,
+      "sourceId": "massachusetts",
+      "sourceUrl": "https://www.mass.gov/lists/data-breach-notification-reports",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "massachusetts:2d4d196b276e3309498db025",
+      "firstSeen": "2026-09-01T18:51:37Z",
+      "lastSeen": "2026-09-05T17:21:37Z",
+      "lastChanged": "2026-09-05T17:21:37Z",
+      "revision": 2,
+      "evidence": {
+        "retrievedAt": "2026-09-05T17:21:37Z",
+        "contentHash": "8a8e97c1070d6c284f9dbc696386ac5fd4859a0ca2b8d5da292db398aed1ff51",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-05T17:21:37Z",
+          "changedFields": [
+            "affected.count"
+          ],
+          "changes": [
+            {
+              "field": "affected.count",
+              "before": 8200,
+              "after": 12480
+            }
+          ]
+        },
+        {
+          "observedAt": "2026-09-01T18:51:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    },
+    {
+      "affected": {
+        "count": 315,
+        "jurisdiction": "MA",
+        "qualifier": "exact",
+        "scope": "state"
+      },
+      "breachEnd": "2026-07-27",
+      "breachStart": "2026-07-24",
+      "dataTypes": [
+        "Dates of birth",
+        "Names"
+      ],
+      "discoveryDate": "2026-08-15",
+      "nativeId": "2026-DEMO-005",
+      "noticeUrl": null,
+      "organization": "Example Learning Foundation",
+      "publishedDate": "2026-09-04",
+      "qualityFlags": [],
+      "reportedDate": null,
+      "sourceId": "massachusetts",
+      "sourceUrl": "https://www.mass.gov/lists/data-breach-notification-reports",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "massachusetts:e8df8aabfdc286409a732684",
+      "firstSeen": "2026-09-05T17:21:37Z",
+      "lastSeen": "2026-09-05T17:21:37Z",
+      "lastChanged": "2026-09-05T17:21:37Z",
+      "revision": 1,
+      "evidence": {
+        "retrievedAt": "2026-09-05T17:21:37Z",
+        "contentHash": "42cdcfacba6213b33283ec8fe62254f63af4bb1a6ab142fcde191c895fb32757",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-05T17:21:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    },
+    {
+      "affected": {
+        "count": null,
+        "jurisdiction": "CA",
+        "qualifier": "unknown",
+        "scope": "state"
+      },
+      "breachEnd": null,
+      "breachStart": null,
+      "dataTypes": [
+        "Payment information"
+      ],
+      "discoveryDate": null,
+      "nativeId": "demo-notice-007",
+      "noticeUrl": null,
+      "organization": "Example Retail Group",
+      "publishedDate": "2026-09-01",
+      "qualityFlags": [
+        {
+          "code": "count_unknown",
+          "message": "The source has not provided an affected-person count."
+        }
+      ],
+      "reportedDate": null,
+      "sourceId": "california",
+      "sourceUrl": "https://oag.ca.gov/privacy/databreach/list",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "california:41bd8ea1a9b6c2e8bb4c6cd5",
+      "firstSeen": "2026-09-01T18:51:37Z",
+      "lastSeen": "2026-09-05T17:21:37Z",
+      "lastChanged": "2026-09-01T18:51:37Z",
+      "revision": 1,
+      "evidence": {
+        "retrievedAt": "2026-09-05T17:21:37Z",
+        "contentHash": "7b84fa70c48c6f37d42c183685fcda0910f241d15a81180064e7447f8a733b0a",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-01T18:51:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    },
+    {
+      "affected": {
+        "count": null,
+        "jurisdiction": "CA",
+        "qualifier": "unknown",
+        "scope": "state"
+      },
+      "breachEnd": null,
+      "breachStart": null,
+      "dataTypes": [
+        "Contact details",
+        "Names"
+      ],
+      "discoveryDate": null,
+      "nativeId": "demo-notice-002",
+      "noticeUrl": null,
+      "organization": "Example Benefits Cooperative",
+      "publishedDate": "2026-09-01",
+      "qualityFlags": [
+        {
+          "code": "count_unknown",
+          "message": "The source has not provided an affected-person count."
+        }
+      ],
+      "reportedDate": null,
+      "sourceId": "california",
+      "sourceUrl": "https://oag.ca.gov/privacy/databreach/list",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "california:5de6676cc0efe55b9fbc9987",
+      "firstSeen": "2026-09-01T18:51:37Z",
+      "lastSeen": "2026-09-05T17:21:37Z",
+      "lastChanged": "2026-09-01T18:51:37Z",
+      "revision": 1,
+      "evidence": {
+        "retrievedAt": "2026-09-05T17:21:37Z",
+        "contentHash": "ceed3d69afdf0153d4493bd49890d448cb8f86be4b0beb708d1b02c0c4d116dc",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-01T18:51:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    },
+    {
+      "affected": {
+        "count": null,
+        "jurisdiction": "CA",
+        "qualifier": "unknown",
+        "scope": "state"
+      },
+      "breachEnd": null,
+      "breachStart": null,
+      "dataTypes": [
+        "Account credentials"
+      ],
+      "discoveryDate": null,
+      "nativeId": "demo-notice-012",
+      "noticeUrl": null,
+      "organization": "Example Technology Cooperative",
+      "publishedDate": null,
+      "qualityFlags": [
+        {
+          "code": "count_unknown",
+          "message": "The source has not provided an affected-person count."
+        },
+        {
+          "code": "future_date",
+          "message": "publishedDate is in the future: 2027-01-03."
+        }
+      ],
+      "reportedDate": null,
+      "sourceId": "california",
+      "sourceUrl": "https://oag.ca.gov/privacy/databreach/list",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "california:ce45f8596e30c4ea0a7e7874",
+      "firstSeen": "2026-09-01T18:51:37Z",
+      "lastSeen": "2026-09-05T17:21:37Z",
+      "lastChanged": "2026-09-01T18:51:37Z",
+      "revision": 1,
+      "evidence": {
+        "retrievedAt": "2026-09-05T17:21:37Z",
+        "contentHash": "f9c2a99d71d28c9509512b196038ed7c6135663ba93a480ff6f96b7912fef7e1",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-01T18:51:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    },
+    {
+      "affected": {
+        "count": 2450,
+        "jurisdiction": "CA",
+        "qualifier": "exact",
+        "scope": "state"
+      },
+      "breachEnd": "2026-07-22",
+      "breachStart": "2026-07-19",
+      "dataTypes": [
+        "Names",
+        "Social Security numbers"
+      ],
+      "discoveryDate": "2026-08-10",
+      "nativeId": "demo-notice-009",
+      "noticeUrl": null,
+      "organization": "Example Housing Association",
+      "publishedDate": "2026-08-30",
+      "qualityFlags": [],
+      "reportedDate": null,
+      "sourceId": "california",
+      "sourceUrl": "https://oag.ca.gov/privacy/databreach/list",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "california:fc782e89e36d55608ca56657",
+      "firstSeen": "2026-09-01T18:51:37Z",
+      "lastSeen": "2026-09-05T17:21:37Z",
+      "lastChanged": "2026-09-01T18:51:37Z",
+      "revision": 1,
+      "evidence": {
+        "retrievedAt": "2026-09-05T17:21:37Z",
+        "contentHash": "d8d6618a9db0ed30e845952b9ac61d60f942fd5ad9068c58e0cf44aa5b53b65b",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-01T18:51:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    },
+    {
+      "affected": {
+        "count": 540,
+        "jurisdiction": null,
+        "qualifier": "exact",
+        "scope": "reported"
+      },
+      "breachEnd": "2026-07-18",
+      "breachStart": "2026-07-15",
+      "dataTypes": [
+        "Insurance information",
+        "Medical information"
+      ],
+      "discoveryDate": "2026-08-06",
+      "nativeId": "demo-ocr-010",
+      "noticeUrl": null,
+      "organization": "Example Diagnostic Services",
+      "publishedDate": null,
+      "qualityFlags": [],
+      "reportedDate": "2026-08-26",
+      "sourceId": "hhs",
+      "sourceUrl": "https://ocrportal.hhs.gov/ocr/breach/breach_frontpage.jsf",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "hhs:559e72d8305997b05b5a3f37",
+      "firstSeen": "2026-09-01T18:51:37Z",
+      "lastSeen": "2026-09-01T18:51:37Z",
+      "lastChanged": "2026-09-01T18:51:37Z",
+      "revision": 1,
+      "evidence": {
+        "retrievedAt": "2026-09-01T18:51:37Z",
+        "contentHash": "705a5e8811b049dd204461da1d6993c987510b8cd8c2a1863a245de911332a54",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-01T18:51:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    },
+    {
+      "affected": {
+        "count": 42800,
+        "jurisdiction": null,
+        "qualifier": "exact",
+        "scope": "reported"
+      },
+      "breachEnd": "2026-07-22",
+      "breachStart": "2026-07-19",
+      "dataTypes": [
+        "Dates of birth",
+        "Medical information"
+      ],
+      "discoveryDate": "2026-08-10",
+      "nativeId": "demo-ocr-003",
+      "noticeUrl": null,
+      "organization": "Example Regional Medical Center",
+      "publishedDate": null,
+      "qualityFlags": [],
+      "reportedDate": "2026-08-30",
+      "sourceId": "hhs",
+      "sourceUrl": "https://ocrportal.hhs.gov/ocr/breach/breach_frontpage.jsf",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "hhs:8967f15879bfc89adf7d503e",
+      "firstSeen": "2026-09-01T18:51:37Z",
+      "lastSeen": "2026-09-01T18:51:37Z",
+      "lastChanged": "2026-09-01T18:51:37Z",
+      "revision": 1,
+      "evidence": {
+        "retrievedAt": "2026-09-01T18:51:37Z",
+        "contentHash": "8100f3c04d35499dfef7f45831112eb650c2ab29cf8e4f7a3b38def7948e5b63",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-01T18:51:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    },
+    {
+      "affected": {
+        "count": 6100,
+        "jurisdiction": null,
+        "qualifier": "exact",
+        "scope": "reported"
+      },
+      "breachEnd": "2026-07-21",
+      "breachStart": "2026-07-18",
+      "dataTypes": [
+        "Medical information"
+      ],
+      "discoveryDate": "2026-08-09",
+      "nativeId": "demo-ocr-006",
+      "noticeUrl": null,
+      "organization": "Example Outpatient Network",
+      "publishedDate": null,
+      "qualityFlags": [],
+      "reportedDate": "2026-08-29",
+      "sourceId": "hhs",
+      "sourceUrl": "https://ocrportal.hhs.gov/ocr/breach/breach_frontpage.jsf",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "hhs:bbbedb5cee7cba8f554961a1",
+      "firstSeen": "2026-09-01T18:51:37Z",
+      "lastSeen": "2026-09-01T18:51:37Z",
+      "lastChanged": "2026-09-01T18:51:37Z",
+      "revision": 1,
+      "evidence": {
+        "retrievedAt": "2026-09-01T18:51:37Z",
+        "contentHash": "3983d881b954b507b7d251349c7122c664f6ebc45b7e973c7d311d18f757c627",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-01T18:51:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    },
+    {
+      "affected": {
+        "count": 980,
+        "jurisdiction": "MA",
+        "qualifier": "exact",
+        "scope": "state"
+      },
+      "breachEnd": "2026-07-20",
+      "breachStart": "2026-07-17",
+      "dataTypes": [
+        "Contact details"
+      ],
+      "discoveryDate": "2026-08-08",
+      "nativeId": "2026-DEMO-008",
+      "noticeUrl": null,
+      "organization": "Example Community Health",
+      "publishedDate": "2026-08-28",
+      "qualityFlags": [],
+      "reportedDate": null,
+      "sourceId": "massachusetts",
+      "sourceUrl": "https://www.mass.gov/lists/data-breach-notification-reports",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "massachusetts:5fb3ce1484f6fa559be3290d",
+      "firstSeen": "2026-09-01T18:51:37Z",
+      "lastSeen": "2026-09-05T17:21:37Z",
+      "lastChanged": "2026-09-01T18:51:37Z",
+      "revision": 1,
+      "evidence": {
+        "retrievedAt": "2026-09-05T17:21:37Z",
+        "contentHash": "1af9d41dd642041ca5095a9afb64719c3f68dff49d99c935989ccc68c026acfd",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-01T18:51:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    },
+    {
+      "affected": {
+        "count": 75,
+        "jurisdiction": "MA",
+        "qualifier": "exact",
+        "scope": "state"
+      },
+      "breachEnd": "2026-07-16",
+      "breachStart": "2026-07-13",
+      "dataTypes": [
+        "Financial information"
+      ],
+      "discoveryDate": "2026-08-04",
+      "nativeId": "2026-DEMO-011",
+      "noticeUrl": null,
+      "organization": "Example Professional Services",
+      "publishedDate": "2026-08-24",
+      "qualityFlags": [],
+      "reportedDate": null,
+      "sourceId": "massachusetts",
+      "sourceUrl": "https://www.mass.gov/lists/data-breach-notification-reports",
+      "summary": "Synthetic example for reviewing the interface. No real breach or organization is represented. The linked page is the official source index, not evidence of this example.",
+      "id": "massachusetts:ba38f6be2386f5b9b8e784ee",
+      "firstSeen": "2026-09-01T18:51:37Z",
+      "lastSeen": "2026-09-05T17:21:37Z",
+      "lastChanged": "2026-09-01T18:51:37Z",
+      "revision": 1,
+      "evidence": {
+        "retrievedAt": "2026-09-05T17:21:37Z",
+        "contentHash": "d58e2683db3862eca45c65dfbded2629fe47f6cf22a69b04276072a3c31a3b60",
+        "parserVersion": "demo-1"
+      },
+      "history": [
+        {
+          "observedAt": "2026-09-01T18:51:37Z",
+          "changedFields": [
+            "created"
+          ],
+          "changes": []
+        }
+      ]
+    }
+  ]
+}

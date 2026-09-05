@@ -1,0 +1,26 @@
+---
+import Dashboard from '../components/Dashboard';
+import '@fontsource/dm-sans/latin-400.css';
+import '@fontsource/dm-sans/latin-500.css';
+import '@fontsource/dm-sans/latin-600.css';
+import '@fontsource/dm-sans/latin-700.css';
+import '@fontsource/newsreader/latin-400.css';
+import '../styles/dashboard.css';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A source-backed workspace for reviewing public breach notifications, report revisions, and collection health." />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#f6f7f3" />
+    <title>Breach Watch — public notification review</title>
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to reports</a>
+    <Dashboard client:load />
+    <noscript><p class="noscript">JavaScript is needed to search this static dashboard and inspect source evidence.</p></noscript>
+  </body>
+</html>

@@ -1,0 +1,60 @@
+{
+  "provenance": "SYNTHETIC schema fixture based on prior MA adapter header contract; live MA index returned HTTP403 on 2026-09-05. Not a captured annual report.",
+  "tables": [
+    [
+      [
+        "Annual report, header noise"
+      ],
+      [
+        "MA Residents\nAffected",
+        "Date Reported To OCA",
+        "Breach\nNumber",
+        "Reporting Organization Name",
+        "SSN Breached",
+        "Medical Records Breached"
+      ],
+      [
+        "1,204",
+        "01/03/2027",
+        "2027-0001",
+        "Example Hospital",
+        "Yes",
+        "No"
+      ]
+    ],
+    [
+      [
+        "18",
+        "12/31/2026",
+        "2026-9000",
+        "Example Office",
+        "No",
+        "Yes"
+      ],
+      [
+        "MA Residents\nAffected",
+        "Date Reported To OCA",
+        "Breach\nNumber",
+        "Reporting Organization Name",
+        "SSN Breached",
+        "Medical Records Breached"
+      ],
+      [
+        "unknown",
+        "01/05/2027",
+        "2027-0002",
+        "Example Clinic",
+        "No",
+        "Yes"
+      ],
+      [
+        "N/A",
+        "bad-date",
+        "2027-0003",
+        "Example Supplier",
+        "No",
+        "No"
+      ]
+    ]
+  ]
+}
