@@ -1,0 +1,29 @@
+{
+  "d": {
+    "results": [
+      {
+        "__metadata": {
+          "uri": "https://oag.maryland.gov/resources-info/_api/Web/Lists(guid'4824df7b-828f-4fc6-b1fe-b416eb90a832')/Items(33)"
+        },
+        "Title": "Eric Buchanan & Associates, PLLC",
+        "Date_x0020_Received": "3/7/25",
+        "No_x0020_of_x0020_Maryland_x0020": "4",
+        "Information_x0020_Breached": "Names, contact information, dates of birth, Social Security numbers, financial account information, health insurance information, and medical information",
+        "How_x0020_Breach_x0020_Occurred": "Unauthorized access to and acquisition of files from the company network",
+        "Case_x0020_No_x002e_": "ITU-376516.pdf"
+      },
+      {
+        "__metadata": {
+          "uri": "https://oag.maryland.gov/resources-info/_api/Web/Lists(guid'4824df7b-828f-4fc6-b1fe-b416eb90a832')/Items(34)"
+        },
+        "Title": "Boart Longyear Group, Ltd.",
+        "Date_x0020_Received": "3/7/25",
+        "No_x0020_of_x0020_Maryland_x0020": "1",
+        "Information_x0020_Breached": "Name, National Identification number, Social Security number, driver's license number or other government identification card number, passport number, and/or financial account information",
+        "How_x0020_Breach_x0020_Occurred": "Unauthorized access to and acquisition of files from the company network",
+        "Case_x0020_No_x002e_": "ITU-376517.pdf"
+      }
+    ],
+    "__next": "https://oag.maryland.gov/resources-info/_api/web/lists/getbytitle('Security-Breach-Notices-2025')/items?%24skiptoken=Paged%3dTRUE%26p_Date_x0020_Received%3d2%252f19%252f25%26p_ID%3d190&%24top=200&%24select=Title%2cDate_x0020_Received%2cCase_x0020_No_x002e_%2cNo_x0020_of_x0020_Maryland_x0020%2cInformation_x0020_Breached%2cHow_x0020_Breach_x0020_Occurred&%24orderby=Date_x0020_Received+desc"
+  }
+}

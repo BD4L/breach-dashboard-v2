@@ -42,5 +42,4 @@ jobs:
         working-directory: frontend
       - run: python scripts/check_public_boundary.py
 
-# Deliberately no schedules, deployment permissions, ingestion, artifact upload,
-# environment secrets, or calls to the existing application in this pilot.
+# Validation remains read-only. Collection and publishing have separate permissions.

@@ -48,9 +48,9 @@ class CliTests(unittest.TestCase):
         with patch("ingestion.cli.collect", side_effect=fetch) as fetch_mock:
             result, _, _ = self.run_cli("collect", "--source", "all")
         self.assertEqual(result, 1)
-        self.assertEqual(fetch_mock.call_count, 3)
+        self.assertEqual(fetch_mock.call_count, len(SOURCES))
         data = json.loads(self.export.read_text())
-        self.assertEqual(len(data["reports"]), 3)
+        self.assertEqual(len(data["reports"]), len(SOURCES))
         hhs = next(source for source in data["sources"] if source["id"] == "hhs")
         self.assertEqual(hhs["status"], "failed")
         self.assertEqual(hhs["lastSuccess"], "2026-09-04T18:00:00Z")

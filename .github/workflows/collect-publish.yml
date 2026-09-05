@@ -1,0 +1,174 @@
+name: Collect public sources and publish
+
+on:
+  schedule:
+    - cron: '17 */4 * * *'
+  workflow_dispatch:
+    inputs:
+      source:
+        description: 'One source ID, or all (see README)'
+        default: all
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# One durable writer and one Pages deployment at a time, across manual/scheduled runs.
+concurrency:
+  group: collection-and-pages
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    if: github.repository == 'BD4L/breach-dashboard-v2' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      sources: ${{ steps.sources.outputs.sources }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: sources
+        env:
+          REQUESTED_SOURCE: ${{ inputs.source || 'all' }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from ingestion.models import SOURCES
+          requested = os.environ['REQUESTED_SOURCE']
+          if requested != 'all' and requested not in SOURCES:
+              raise SystemExit('Unknown source ID')
+          sources = list(SOURCES) if requested == 'all' else [requested]
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('sources=' + json.dumps(sources) + '\n')
+          PY
+
+  collect:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        source: ${{ fromJSON(needs.plan.outputs.sources) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -r requirements.lock
+      - name: Collect one source with a hard deadline
+        env:
+          SOURCE_ID: ${{ matrix.source }}
+        run: python -m ingestion.runner fetch --source "$SOURCE_ID" --output "results/$SOURCE_ID.json" --timeout 600
+      - name: Retain source result even when collection is incomplete
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: source-${{ matrix.source }}
+          path: results/${{ matrix.source }}.json
+          if-no-files-found: warn
+          retention-days: 1
+          overwrite: true
+
+  merge:
+    needs: [plan, collect]
+    if: always() && !cancelled() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    outputs:
+      incomplete: ${{ steps.merge.outputs.incomplete }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+      - name: Download independent results
+        continue-on-error: true
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          pattern: source-*
+          path: state/results
+          merge-multiple: true
+      - name: Restore durable history (never silently start empty)
+        run: |
+          git fetch --depth=1 origin collection-state
+          git worktree add --detach state/branch FETCH_HEAD
+          python -m ingestion.archive restore --directory state/branch --db state/collection.sqlite
+      - name: Merge valid results and record missing source failures
+        id: merge
+        env:
+          SOURCE_IDS: ${{ needs.plan.outputs.sources }}
+          BATCH_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from ingestion.merge import merge
+          code = merge(Path('state/collection.sqlite'), Path('state/results'),
+                       Path('frontend/public/data/dashboard.json'), json.loads(os.environ['SOURCE_IDS']),
+                       batch=os.environ['BATCH_ID'], summary=Path(os.environ['GITHUB_STEP_SUMMARY']))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'incomplete={code}\n')
+          PY
+      - name: Persist records and full revision history before building
+        run: |
+          python -m ingestion.archive save --db state/collection.sqlite --directory state/branch
+          git -C state/branch config user.name 'github-actions[bot]'
+          git -C state/branch config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C state/branch add manifest.json metadata.jsonl reports.jsonl revisions.jsonl source_runs.jsonl source_run_evidence.jsonl
+          if ! git -C state/branch diff --cached --quiet; then
+            git -C state/branch commit -m "Update public collection history"
+            git -C state/branch push origin HEAD:collection-state
+          fi
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+        env:
+          BASE_PATH: /breach-dashboard-v2/
+      - run: python scripts/check_public_boundary.py
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: frontend/dist
+          retention-days: 1
+
+  deploy:
+    needs: merge
+    if: always() && !cancelled() && needs.merge.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish validated snapshot
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+
+  health:
+    needs: merge
+    if: always() && !cancelled() && needs.merge.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Keep incomplete collection visible in the workflow result
+        env:
+          INCOMPLETE: ${{ needs.merge.outputs.incomplete }}
+        run: test "$INCOMPLETE" = 0

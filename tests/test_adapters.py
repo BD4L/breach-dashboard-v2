@@ -57,13 +57,14 @@ class AdapterTests(unittest.TestCase):
             def request(self, url, **kwargs):
                 self.requests += 1
                 text = fixture('ca-list.html').replace('sb24-629', f'sb24-{self.requests}629')
-                text = text.replace('page=1', f'page={self.requests}')
+                text = text.replace('page=1\"', f'page={self.requests}\"')
+                text = text.replace('<li class="active"><span>1</span></li>', f'<li class="active"><span>{self.requests}</span></li>')
                 return Response(url, text.encode(), 'text/html')
             def close(self): pass
         with patch('ingestion.adapters.PublicClient', FakeClient):
-            result = collect('california')
+            result = collect('california', max_pages=2)
         self.assertFalse(result.complete)
-        self.assertEqual(len(result.reports), 18)
+        self.assertEqual(len(result.reports), 6)
         self.assertEqual(result.rejected, 0)
         self.assertIn('older pages excluded', result.message)
 
@@ -71,8 +72,65 @@ class AdapterTests(unittest.TestCase):
         client = Mock()
         client.request.return_value = Response('https://oag.ca.gov/privacy/databreach/list', fixture('ca-list.html').encode(), 'text/html')
         with patch('ingestion.adapters.PublicClient', return_value=client):
-            with self.assertRaisesRegex(SourceError, 'repeated a page'):
+            with self.assertRaisesRegex(SourceError, 'page'):
                 collect('california')
+
+    def test_ca_actual_final_pager_declares_complete_and_missing_pager_does_not(self):
+        result, next_url = parse_ca_listing(fixture('ca-last.html'), 'https://oag.ca.gov/privacy/databreach/list?page=105', today=TODAY)
+        self.assertTrue(result.complete)
+        self.assertIsNone(next_url)
+        self.assertEqual(result.evidence['totalPages'], 106)
+        html = fixture('ca-list.html').split('<ul class="pagination">')[0]
+        result, next_url = parse_ca_listing(html, today=TODAY)
+        self.assertFalse(result.complete)
+        self.assertIsNone(next_url)
+
+    def test_ca_actual_blank_organization_is_withheld_with_native_evidence(self):
+        result, _ = parse_ca_listing(fixture('ca-missing-organization.html'),
+                                     'https://oag.ca.gov/privacy/databreach/list?page=64', today=TODAY)
+        self.assertEqual((result.parsed, result.rejected, len(result.reports)), (2, 1, 1))
+        self.assertIn('sb24-194945', result.message)
+        self.assertIn('organization name missing', result.message)
+
+    def test_ca_missing_next_link_cannot_claim_complete_while_later_pages_exist(self):
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(fixture('ca-list.html'), 'html.parser')
+        soup.select_one('li.next').decompose()
+        with self.assertRaisesRegex(SourceError, 'next-page control missing'):
+            parse_ca_listing(str(soup), today=TODAY)
+
+    def test_invalid_page_limits_fail_before_network(self):
+        with patch('ingestion.adapters.PublicClient') as client:
+            for value in (0, -1, True, 1.5, 201):
+                with self.assertRaisesRegex(SourceError, 'max_pages'):
+                    collect('california', max_pages=value)
+            client.assert_not_called()
+
+    def test_hhs_configurable_page_limit_reports_truncation_and_selected_scope(self):
+        front = Response('https://ocrportal.hhs.gov/ocr/breach/breach_frontpage.jsf', fixture('hhs-navigation.html').encode(), 'text/html')
+        initial = ('<form id="ocrForm"><input type="hidden" name="javax.faces.ViewState" value="fixture">'
+                   '<ul class="ui-tabs-nav"><li aria-selected="true">Under Investigation</li></ul>'
+                   + fixture('hhs-reports.html') + '</form>')
+        client = Mock(requests=2, bytes=1000)
+        client.request.side_effect = [front, Response('https://ocrportal.hhs.gov/ocr/breach/breach_report_hip.jsf', initial.encode(), 'text/html')]
+        with patch('ingestion.adapters.PublicClient', return_value=client):
+            result = collect('hhs', max_pages=1)
+        self.assertFalse(result.complete)
+        self.assertEqual(result.parsed, 3)
+        self.assertIn('3 of 733', result.message)
+        self.assertIn('Page cap reached', result.message)
+        self.assertEqual(client.request.call_count, 2)
+        client.request.side_effect = [front, Response('https://ocrportal.hhs.gov/ocr/breach/breach_report_hip.jsf', initial.replace('Under Investigation', 'Archive').encode(), 'text/html')]
+        with patch('ingestion.adapters.PublicClient', return_value=client):
+            with self.assertRaisesRegex(SourceError, 'Under Investigation view is not selected'):
+                collect('hhs', max_pages=1)
+
+    def test_ma_current_official_indexed_date_format(self):
+        # Actual date spelling seen in the official 2026 PDF search-index excerpt;
+        # downloaded PDF bytes remain unavailable due HTTP403.
+        flags = []
+        self.assertEqual(parse_date('15-Jul-26', flags, 'Date reported to OCA', today=TODAY), '2026-07-15')
+        self.assertEqual(flags, [])
 
     def test_ma_discovers_current_and_previous_year_no_hardcoded_year(self):
         html = '''<a href="/doc/data-breach-report-2025/download">2025</a>

@@ -10,6 +10,14 @@ from requests.auth import AuthBase
 
 from ingestion.models import SourceError
 
+OFFICIAL_HOSTS = {
+    'www.mass.gov', 'mass.gov', 'ocrportal.hhs.gov', 'oag.ca.gov',
+    'www.in.gov', 'www.iowaattorneygeneral.gov', 'www.maine.gov', 'www1.maine.gov',
+    'attorneygeneral.nd.gov', 'oag.maryland.gov', 'oklahoma.gov',
+    'www.cyber.nj.gov', 'datcp.wi.gov', 'dojmt.gov', 'www.atg.wa.gov',
+    'consumer.sc.gov', 'attorneygeneral.delaware.gov', 'www.doj.nh.gov',
+    'oag.my.site.com', 'www.sec.gov', 'efts.sec.gov',
+}
 
 @dataclass
 class Response:
@@ -54,20 +62,23 @@ class PublicClient:
             if parts.scheme != 'https' or parts.username or parts.password or parts.port not in (None, 443):
                 raise SourceError('Source supplied an unsafe/non-HTTPS URL')
             host = parts.hostname or ''
-            if not (host in {'www.mass.gov', 'mass.gov', 'ocrportal.hhs.gov', 'oag.ca.gov'}
-                    or (host.endswith('.amazonaws.com') and method == 'GET')):
+            if host not in OFFICIAL_HOSTS:
                 raise SourceError('Source redirected outside the permitted official document hosts')
             for attempt in range(2):
                 if self.requests >= self.max_requests or time.monotonic() >= self.deadline:
                     raise SourceError('Public source request/time budget exhausted')
                 if self.last_request_at is not None:
                     time.sleep(max(0, 0.4 - (time.monotonic() - self.last_request_at)))
+                remaining = self.deadline - time.monotonic()
+                if remaining <= 0:
+                    raise SourceError('Public source request/time budget exhausted')
                 self.last_request_at = time.monotonic()
                 self.requests += 1
                 try:
                     # Requests honors REQUESTS_CA_BUNDLE; never disable certificate verification.
                     response = self.session.request(method, url, data=data, headers=headers,
-                                                    timeout=(10, 30), allow_redirects=False, stream=True)
+                                                    timeout=(min(10, remaining), min(30, remaining)),
+                                                    allow_redirects=False, stream=True)
                     with response:
                         if response.status_code in (401, 403, 429):
                             raise SourceError(f'HTTP {response.status_code} from {host}; collection stopped without bypass or retry')

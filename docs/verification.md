@@ -79,3 +79,28 @@ Added the UTC notification-date Today counter and a corresponding view. Historic
 Remote checks are available in [GitHub Actions](https://github.com/BD4L/breach-dashboard-v2/actions). This step publishes repository source and validation only. Pages hosting and unattended source collection remain pending; browser snapshot checks alone do not collect new source data.
 
 The first GitHub validation run exposed an npm 10 clean-install mismatch in the inherited lock: React's Vite required its own compatible esbuild peer entry. Added the missing esbuild 0.28.2 subtree and platform entries, preserving every existing dependency version and libc selector. A clean temporary install passed with the same Node 22.23.2 / npm 10.9.8 versions used by GitHub. This repair changes the lockfile only; the dependency manifest and CI runtime remain unchanged.
+
+## Independent collector repair and durable workflow
+
+The September 5 repair adds 18 independent source adapters and a separate merge/publish workflow. All 114 Python tests passed, including hard worker timeout, portable result contracts, missing-artifact isolation, exact/conflicting duplicate accounting, archive checksum rejection, fresh-runner history restoration, and repeat-merge idempotency. All 21 frontend tests and Astro typechecking passed. Actionlint 1.7.12 validated both workflow files.
+
+The bounded local source smoke merged **17,420 public reports** into a separate database copied from the existing 1,033-report live pilot, preserving those records' first-seen timestamps. It did not query or copy the original application's database. The initial compact export was 17.9 MB and full textual state 34.3 MB, below the configured budgets. The frontend contract validated all records and all 18 source entries.
+
+| Source | Accepted | Local result |
+|---|---:|---|
+| California | 5,293 | 106 pages; two nameless source rows withheld |
+| HHS | 733 | Complete current HIPAA Under Investigation table |
+| Indiana | 784 | 25 annual PDF pages; two duplicates rejected; annual scope partial |
+| Oklahoma | 9 | Complete within the state-government incident feed |
+| Maryland | 257 | Latest declared 2025 list; no 2026 list exposed by the page |
+| Wisconsin | 21 | Current page; historical archive excluded |
+| Montana | 6,650 | Full embedded listing in one request |
+| Washington | 1,849 | All 38 pages; eight exact overlaps at page boundaries; partial |
+| South Carolina | 877 | Two conflicting source rows withheld |
+| Delaware | 322 | Complete listing; blank formatting row ignored |
+| Texas | 625 | All current-view public rows in two requests |
+| MA / IA / ME / ND / NJ / NH / SEC | 0 | Access denied, withdrawn database, missing directory, or challenge; explicit failures |
+
+CA's two rejected rows are `sb24-194945` and `sb24-183108`: both listing and detail pages omit an organization name. Washington's eight repeats occur across page boundaries, so health remains partial even though every numbered page was requested. South Carolina's two rows share organization, date, and notice URL but disagree on count; no count was arbitrarily selected. These are data-quality limits, not silently swallowed failures.
+
+The original application remains unchanged. See [repair scope and per-source limits](collector-repair.md). Wisconsin public-notification dates are retained as report context and excluded from publication/receipt fields and the Today counter. Root and project-path builds passed with the full live dataset; the tracked 12-report demo was restored byte-for-byte. The public-boundary regression distinguishes official South Carolina notice URLs containing a Breaches directory from actual original-application coupling. Browser verification rendered all 17,420 reports and 18 source entries. Remote deployment evidence is recorded after the first actual Actions execution.

@@ -10,10 +10,10 @@ from .store import Store
 from .validation import timestamp, utc_now
 
 
-def collect(source_id: str) -> Collection:
+def collect(source_id: str, **options) -> Collection:
     # Delay optional parser/network dependencies until live collection is requested.
-    from .adapters import collect as collect_source
-    return collect_source(source_id)
+    from .runner import collect_bounded as collect_source
+    return collect_source(source_id, **options)
 
 
 def demo_events(now: datetime):
@@ -32,7 +32,7 @@ def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
     commands = result.add_subparsers(dest="command", required=True)
     for command, description in (("demo", "Seed a separate database with synthetic examples."),
-                                 ("collect", "Collect public sources sequentially into a local database."),
+                                 ("collect", "Run isolated, deadline-bounded public collectors into a local database."),
                                  ("export", "Export the current local database without collecting.")):
         subparser = commands.add_parser(command, help=description)
         subparser.add_argument("--db", required=True, type=Path, help="Explicit path to local durable SQLite state.")
@@ -40,6 +40,8 @@ def parser() -> argparse.ArgumentParser:
         subparser.add_argument("--now", type=parse_now, help="UTC observation timestamp override for reproducible fixtures.")
         if command == "collect":
             subparser.add_argument("--source", required=True, choices=["all", *SOURCES])
+            subparser.add_argument("--max-pages", type=int, help="Override the adapter's page limit where supported.")
+            subparser.add_argument("--timeout", type=float, help="Hard per-source deadline in seconds (maximum 900).")
     return result
 
 
@@ -87,7 +89,12 @@ def main(argv: list[str] | None = None) -> int:
                 source_ids = list(SOURCES) if args.source == "all" else [args.source]
                 for source_id in source_ids:
                     try:
-                        collection = collect(source_id)
+                        options = {}
+                        if args.max_pages is not None:
+                            options['max_pages'] = args.max_pages
+                        if args.timeout is not None:
+                            options['timeout'] = args.timeout
+                        collection = collect(source_id, **options)
                         if collection.source_id != source_id:
                             raise SourceError("Adapter returned a different source; no records were saved.")
                         result = store.apply_collection(collection, now)

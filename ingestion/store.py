@@ -218,7 +218,8 @@ class Store(AbstractContextManager):
         message_parts = [collection.message] if collection.message else []
         if reasons:
             message_parts.extend(dict.fromkeys(reasons))
-        if not normalized:
+        valid_empty = collection.empty_is_valid is True and collection.parsed == 0 and rejected == 0
+        if not normalized and not valid_empty:
             message_parts.append("No valid reports were returned; retained the last valid data.")
             return self.record_failure(source_id, " ".join(message_parts), now,
                                        parsed=collection.parsed, rejected=rejected, evidence=collection.evidence)
@@ -312,7 +313,8 @@ class Store(AbstractContextManager):
         if destination.resolve() == self.path.resolve():
             raise ValueError("Export must not overwrite its SQLite database.")
         data = self.dashboard(now)
-        payload = json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+        # Compact public snapshots keep expanded source coverage inexpensive to load.
+        payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"), allow_nan=False) + "\n"
         destination.parent.mkdir(parents=True, exist_ok=True)
         temporary = None
         try:

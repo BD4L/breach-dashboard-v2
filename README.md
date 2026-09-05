@@ -2,7 +2,7 @@
 
 A static public-source review dashboard for a law firm's breach research. This isolated repository replaces the original dashboard's large summary cards with a searchable report table, evidence details, changed-field history, source health, and device-local bookmarks. A Python collector retains source records and revisions in local SQLite, then exports a public JSON snapshot for Astro/React.
 
-**Repository:** [BD4L/breach-dashboard-v2](https://github.com/BD4L/breach-dashboard-v2). This is the isolated successor repository. The original application is preserved; see [baseline](docs/BASELINE.md). GitHub Actions validates changes. Pages hosting and scheduled source collection are separate, pending setup steps.
+**Repository:** [BD4L/breach-dashboard-v2](https://github.com/BD4L/breach-dashboard-v2). This is the isolated successor repository. The original application is preserved; see [baseline](docs/BASELINE.md). GitHub Actions validates changes and runs independent public collectors every four hours, with manual dispatch. The collection workflow persists history to `collection-state` and explicitly deploys snapshots to GitHub Pages.
 
 New clones start with 12 synthetic demo reports. Public-source collection is available through the CLI below; collected state and locally built previews are ignored by Git.
 
@@ -32,7 +32,7 @@ Collect public sources into a separate durable local database:
 .venv/bin/python -m ingestion.cli collect --source all --db state/live-pilot.sqlite --export frontend/public/data/dashboard.json
 ```
 
-Select `massachusetts`, `hhs`, or `california` instead of `all` to refresh one source. Collection is sequential, bounded, and stops on access denial or rate limits. On this Mac, the successful live smoke run used the trusted system CA bundle:
+Select a source ID instead of `all` to refresh one source. The local CLI supervises one isolated process at a time; Actions runs up to three independent source jobs concurrently. Each worker has a hard 600-second deadline covering fetching and parsing, plus request, response-size, and page limits. Access denial and rate limits stop a source immediately. `--timeout` and `--max-pages` explicitly override supported limits. On this Mac, the successful live smoke run used the trusted system CA bundle:
 
 ```sh
 REQUESTS_CA_BUNDLE=/etc/ssl/cert.pem .venv/bin/python -m ingestion.cli collect --source hhs --db state/live-pilot.sqlite --export frontend/public/data/dashboard.json
@@ -62,7 +62,7 @@ cd ..
 .venv/bin/python scripts/check_public_boundary.py
 ```
 
-For a future GitHub project site, build with its actual base path:
+For the GitHub project site, build with its base path:
 
 ```sh
 cd frontend
@@ -70,7 +70,7 @@ BASE_PATH=/breach-dashboard-v2/ npm run build
 npm run preview
 ```
 
-The static output is `frontend/dist/`. Use the same `BASE_PATH` when previewing a build that requires it. A local root build needs no `BASE_PATH`. The included GitHub workflow validates code and the public boundary. It does not collect data or publish a site.
+The static output is `frontend/dist/`. Use the same `BASE_PATH` when previewing a build that requires it. A local root build needs no `BASE_PATH`. The read-only validation workflow checks code and the public boundary. The separate collection workflow merges public data and deploys the static build.
 
 The UI uses the locally bundled [Open Props token pack](docs/design-tokens.md) with an Anthropic-inspired brand palette. Color roles, typography, spacing, and interaction decisions live in `frontend/src/styles/tokens.css`; the three brand primitives live in `frontend/src/lib/theme.ts`.
 
@@ -78,7 +78,7 @@ The UI uses the locally bundled [Open Props token pack](docs/design-tokens.md) w
 
 The top-bar counter means source reports published today in **UTC**, using the reported-to-source date only when publication date is absent. It does not count historical reports merely imported today, establish when an actual breach occurred, or deduplicate incidents across sources. Select the counter to review its reports.
 
-While visible, the browser checks the same-origin JSON snapshot every five minutes, checks again when you return to the tab, and supports manual refresh. This refreshes a published snapshot; it does not run the collector. The snapshot timestamp and source-health state remain visible, and a failed refresh retains the last valid data. Scheduled collection and Pages publication are not enabled by this repository creation.
+While visible, the browser checks the same-origin JSON snapshot every five minutes, checks again when you return to the tab, and supports manual refresh. This refreshes a published snapshot; it does not run the collector. The snapshot timestamp and source-health state remain visible, and a failed refresh retains the last valid data. For a new source collection, run **Collect public sources and publish** in GitHub Actions, selecting `all` or one source ID. The public browser never receives an administrative token.
 
 ## Data meaning and current coverage
 
@@ -86,7 +86,7 @@ While visible, the browser checks the same-origin JSON snapshot every five minut
 - Counts retain their source scope and qualifiers. Massachusetts counts are state residents; a federal portal count is labeled “reported” unless a stronger scope is supported. Missing counts remain unknown and stay in the default view.
 - Source corrections create a new revision while preserving first-seen time. The detail pane shows changed fields and before/after values. The fingerprint describes normalized fields, not an archived document.
 - HHS covers **HIPAA Under Investigation**, including pagination. Archived cases and Part 2 reports are outside this adapter.
-- California currently takes six listing pages, up to 300 reports. Older reports are outside that bounded window, so coverage is explicitly partial. Counts and notice enrichment absent from the listing remain unknown.
+- California follows the listing through its verified last page, with a configurable 120-page default budget. A September 5 run fetched 106 pages / 5,295 rows in about a minute; malformed or conflicting rows are reported separately. Counts and notice enrichment absent from the listing remain unknown.
 - Massachusetts discovers current/prior-year annual reports. Its parser is fixture-tested, but the live index returned HTTP 403 during this pilot. Real PDF fidelity remains unverified until an accessible current report can be tested. Even a parsed PDF remains partial until an independent annual report count is validated; table/text agreement alone does not prove completeness. There is no access-control workaround.
 
 These are public research records. Source links support review; the dashboard does not establish legal deadlines or automatically merge organizations. It does not remove reports merely because they disappear from a source's current listing.
@@ -97,4 +97,22 @@ Everything in a Pages deployment and a public repository is public. This pilot p
 
 Local state, build output, dependencies, and environment files are ignored by Git. The boundary check catches selected production references, private field names, unsafe report links, and size-budget violations; it is not a general secret scanner or an authorization system.
 
-See [GitHub Free constraints and next-stage design](docs/github-free.md) and [verification evidence](docs/verification.md) before enabling unattended collection or publishing.
+See [collector coverage and repair evidence](docs/collector-repair.md), [GitHub Free constraints](docs/github-free.md), and [verification evidence](docs/verification.md).
+
+## Independent collection and durable history
+
+Source IDs: `massachusetts`, `hhs`, `california`, `indiana`, `iowa`, `maine`, `north_dakota`, `oklahoma`, `maryland`, `new_jersey`, `wisconsin`, `montana`, `washington`, `south_carolina`, `delaware`, `new_hampshire`, `texas`, `sec`. Coverage and known external failures are documented per source; having an adapter does not mean a source is currently accessible.
+
+The schedule is `:17` every four hours in UTC. GitHub can delay or drop scheduled runs. Manual and scheduled collection share one concurrency group, so durable writes cannot overlap. Each source job has a 12-minute Actions cap and a 10-minute worker deadline; one source's failure does not cancel another. Collector jobs have no database credentials or write permission.
+
+A separate merge job downloads source results, restores public state from the `collection-state` branch, and applies valid records transactionally. Missing, malformed, empty, or failed results retain previous records and record a failure. Only an explicitly validated empty filtered feed may report no matches. A failed source or partial coverage keeps the workflow red, while the deploy job can still publish retained data and current source health. A summary service, email service, or pre-run database snapshot is never a prerequisite for collection.
+
+The state branch contains JSON Lines tables with full revisions and observation history, plus a checksum manifest. Restore rejects missing/corrupt history instead of silently resetting the database. Actions artifacts expire after one day and are only transport; caches hold dependencies. State is committed before the Pages build so a deployment failure cannot lose successful collection. Per-file/state size guards stop publication instead of deleting old history. All persisted state is public normalized source data.
+
+For an isolated source artifact without touching a database:
+
+```sh
+.venv/bin/python -m ingestion.runner fetch --source california --output state/results/california.json --timeout 600
+```
+
+Listing collection is separate from optional document enrichment: routine runs do not download every notice PDF, invoke AI, or fetch SEC XBRL. Indiana and Massachusetts use their annual source reports because those documents are the listings themselves.

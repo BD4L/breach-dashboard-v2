@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from io import BytesIO
 import re
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import parse_qs, urljoin, urlsplit
 import xml.etree.ElementTree as ET
 
 from bs4 import BeautifulSoup
@@ -14,9 +14,10 @@ import pdfplumber
 from ingestion.models import Collection, Report, SOURCES, SourceError
 from ingestion.network import PublicClient
 
-PARSER_VERSION = 'pilot-1'
-CA_MAX_PAGES = 6
+PARSER_VERSION = 'pilot-2'
+CA_MAX_PAGES = 120
 HHS_MAX_PAGES = 12
+MAX_CONFIGURABLE_PAGES = 200
 UNKNOWN = {'', 'n/a', 'na', 'unknown', 'pending', 'not provided', 'none', 'various'}
 
 
@@ -37,7 +38,7 @@ def parse_date(value, flags, field, *, today=None):
     if raw.lower() in UNKNOWN:
         return None
     parsed = None
-    for fmt in ('%m/%d/%Y', '%Y-%m-%d', '%B %d, %Y', '%b %d, %Y'):
+    for fmt in ('%m/%d/%Y', '%Y-%m-%d', '%B %d, %Y', '%b %d, %Y', '%d-%b-%y'):
         try:
             parsed = datetime.strptime(raw, fmt).date()
             break
@@ -209,6 +210,7 @@ def parse_ca_listing(html: str, url=None, *, today=None):
     soup = BeautifulSoup(html, 'html.parser')
     table, headers = _find_table(soup, {'organizationname', 'datesofbreach', 'reporteddate'})
     reports, parsed, rejected = [], 0, 0
+    rejected_notes = []
     for row in table.find_all('tr'):
         cells = row.find_all('td', recursive=False)
         if not cells:
@@ -219,13 +221,19 @@ def parse_ca_listing(html: str, url=None, *, today=None):
             continue
         org_cell = cells[headers['organizationname']]
         link = org_cell.find('a', href=True)
-        if not link or not clean(org_cell.get_text(' ')):
+        if not link:
             rejected += 1
+            rejected_notes.append('Missing original-source link')
             continue
         source_url = official_url(url, link['href'], 'oag.ca.gov')
         native = re.search(r'/reports/(sb24-\d+)(?:/|$)', urlsplit(source_url).path)
         if not native:
             rejected += 1
+            rejected_notes.append('Missing native report identifier')
+            continue
+        if not clean(org_cell.get_text(' ')):
+            rejected += 1
+            rejected_notes.append(f'{native[1]}: organization name missing from official listing')
             continue
         flags = []
         reported = parse_date(cells[headers['reporteddate']].get_text(' '), flags, 'Reported date', today=today)
@@ -240,10 +248,51 @@ def parse_ca_listing(html: str, url=None, *, today=None):
                               reported_date=reported, breach_start=breach,
                               summary='California sample-notice listing. Affected count and data types require notice review.',
                               quality_flags=flags, parser_version=PARSER_VERSION))
-    next_link = soup.select_one('li.next a[href], li.pager-next a[href], a[rel="next"][href]')
-    next_url = official_url(url, next_link['href'], 'oag.ca.gov') if next_link else None
     result = _checked('california', reports, parsed, rejected)
+    next_url, terminal, page_number, total_pages = ca_pagination(soup, url)
+    result.complete = terminal
+    result.message = '; '.join(rejected_notes)
+    result.evidence = {'pageNumber': page_number, 'totalPages': total_pages}
+    if not terminal and not next_url:
+        result.message += ' Listing pagination could not establish coverage.'
     return result, next_url
+
+
+def ca_pagination(soup, url):
+    """Validate the source's active/next/last controls before claiming completion."""
+    def page_of(link):
+        query = parse_qs(urlsplit(link).query)
+        value = query.get('page', ['0'])
+        if len(value) != 1 or not re.fullmatch(r'\d+', value[0]):
+            raise SourceError('California: invalid listing page offset')
+        return int(value[0])
+    current = page_of(url)
+    pager = soup.select_one('ul.pagination, ul.pager')
+    if pager is None:
+        return None, False, current + 1, None
+    active = pager.select_one('li.active, li.pager-current')
+    if active is None or clean(active.get_text(' ')) != str(current + 1):
+        raise SourceError('California: displayed page does not match requested page')
+    next_link = pager.select_one('li.next a[href], li.pager-next a[href], a[rel="next"][href], a[title="Go to next page"][href]')
+    last_link = pager.select_one('li.pager-last a[href], a[title="Go to last page"][href]')
+    total = page_of(official_url(url, last_link['href'], 'oag.ca.gov')) + 1 if last_link else None
+    if next_link:
+        next_url = official_url(url, next_link['href'], 'oag.ca.gov')
+        if page_of(next_url) != current + 1:
+            raise SourceError('California: next link skips or repeats a listing page')
+        if total is not None and total <= current + 1:
+            raise SourceError('California: next and last page controls disagree')
+        return next_url, False, current + 1, total
+    later_links = [a for a in pager.find_all('a', href=True)
+                   if page_of(official_url(url, a['href'], 'oag.ca.gov')) > current]
+    if later_links:
+        raise SourceError('California: next-page control missing while later listing pages remain')
+    previous = pager.select_one('li.prev a[href], li.pager-previous a[href], a[title="Go to previous page"][href]')
+    # The actual final source page exposes its active number and previous control.
+    # A removed/unknown pager is not evidence that the entire listing is complete.
+    terminal = previous is not None and page_of(official_url(url, previous['href'], 'oag.ca.gov')) == current - 1
+    return None, terminal, current + 1, current + 1 if terminal else total
+
 
 
 @dataclass
@@ -379,10 +428,16 @@ def hhs_page_html(fragment, template, table_id, expected_first, total):
     return str(original)
 
 
-def collect(source_id: str) -> Collection:
-    if source_id not in SOURCES:
+def collect(source_id: str, *, max_pages: int | None = None) -> Collection:
+    if source_id not in {'massachusetts', 'california', 'hhs'}:
         raise SourceError(f'Unknown source: {source_id}')
-    client = PublicClient(max_requests=30)
+    if max_pages is not None and (isinstance(max_pages, bool) or not isinstance(max_pages, int)
+                                  or not 1 <= max_pages <= MAX_CONFIGURABLE_PAGES):
+        raise SourceError(f'max_pages must be an integer from 1 to {MAX_CONFIGURABLE_PAGES}')
+    page_limit = max_pages if max_pages is not None else CA_MAX_PAGES if source_id == 'california' else HHS_MAX_PAGES
+    client = PublicClient(max_requests=page_limit * 2 + 8 if source_id != 'massachusetts' else 12,
+                          max_bytes=40_000_000 if source_id == 'california' else 15_000_000,
+                          deadline_seconds=540 if source_id == 'california' else 240)
     try:
         if source_id == 'massachusetts':
             landing = client.request(SOURCES[source_id]['homepage'])
@@ -400,7 +455,7 @@ def collect(source_id: str) -> Collection:
                 result.message += ' Current-year report not linked yet.'
         elif source_id == 'california':
             url, seen, batches = SOURCES[source_id]['homepage'], set(), []
-            for _ in range(CA_MAX_PAGES):
+            for _ in range(page_limit):
                 if url in seen:
                     raise SourceError('California: pagination repeated a page')
                 seen.add(url)
@@ -411,21 +466,30 @@ def collect(source_id: str) -> Collection:
                     break
             result = _checked(source_id, [r for b in batches for r in b.reports],
                               sum(b.parsed for b in batches), sum(b.rejected for b in batches))
-            result.complete = url is None
-            result.message = f'Collected {len(batches)} listing pages ({result.parsed} source reports). '
-            result.message += 'Complete listing.' if result.complete else 'Bounded latest-page window; older pages excluded, prior saved reports retained.'
+            result.complete = url is None and batches[-1].complete
+            total_pages = batches[0].evidence.get('totalPages') or batches[-1].evidence.get('totalPages')
+            covered = f'{len(batches)} of {total_pages}' if total_pages else str(len(batches))
+            result.message = f'Collected {covered} listing pages ({result.parsed} source reports). '
+            result.message += ('Complete listing; original notice links retained without PDF enrichment.' if result.complete else
+                               f'Page limit {page_limit} reached or pagination unverified; older pages excluded, prior saved reports retained.')
+            rejection_messages = [batch.message for batch in batches if batch.rejected and batch.message]
+            if rejection_messages:
+                result.message += ' Withheld rows: ' + '; '.join(rejection_messages)
         else:
             front = client.request(SOURCES[source_id]['homepage'])
             action, data = hhs_navigation(front.text, front.url)
             response = client.request(action, data=data)
             _, action, data = hhs_form(response.text, response.url)
             template = response.text
+            selected_tab = BeautifulSoup(template, 'html.parser').select_one('.ui-tabs-nav [aria-selected="true"]')
+            if selected_tab is None or clean(selected_tab.get_text(' ')) != 'Under Investigation':
+                raise SourceError('HHS: expected HIPAA Under Investigation view is not selected')
             page = parse_hhs_table(template)
             batches, total, table_id = [page.collection], page.total, page.table_id
             if page.first != 1:
                 raise SourceError('HHS: initial report page did not begin at row 1')
             page_size = page.last
-            for _ in range(HHS_MAX_PAGES - 1):
+            for _ in range(page_limit - 1):
                 if page.last >= total:
                     break
                 first = page.last
@@ -444,7 +508,8 @@ def collect(source_id: str) -> Collection:
             result.message = f'HIPAA Under Investigation: {result.parsed} of {total} reports. Archive and Part 2 excluded.'
             if not result.complete:
                 result.message += ' Page cap reached; incomplete current dataset.'
-        result.evidence = {'requests': client.requests, 'bytes': client.bytes}
+        result.evidence = {'requests': client.requests, 'bytes': client.bytes,
+                           'pageCount': len(batches)}
         return result
     finally:
         client.close()

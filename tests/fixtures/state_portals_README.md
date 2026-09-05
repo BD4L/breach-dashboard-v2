@@ -1,0 +1,15 @@
+# State portal fixture provenance
+
+Captured by bounded, anonymous, TLS-verified official HTTPS reads on September 5, 2026. No private database or source reporting forms were accessed. Fixtures omit unrelated markup, contact details, session fields, and full document contents.
+
+- `state_portals_indiana_index.html`: actual 2025/2026 links from the Indiana [Security Breaches hub](https://www.in.gov/attorneygeneral/consumer-protection-division/id-theft-prevention/security-breaches/).
+- `state_portals_indiana_tables.json`: header and first three real rows extracted using pdfplumber from the linked [2026 annual PDF](https://www.in.gov/attorneygeneral/consumer-protection-division/id-theft-prevention/files/DB-Year-to-Date-Report-7_2026.pdf). The original has 25 pages. Rows are alphabetical; their displayed row numbers are not durable incident IDs. Notification sent is a consumer-notification date, not an AG receipt/publication date. PDF extraction has additionally been checked against the complete downloaded file outside Git.
+- `state_portals_maryland_index.html`: reduced annual-list declarations from the [current Maryland page](https://oag.maryland.gov/resources-info/Pages/security-breach-notices.aspx). The actual page advertises 2020–2025, not 2026; the fixture retains its two latest lists.
+- `state_portals_maryland.json`: first two rows and actual continuation URL from the page's anonymous SharePoint GET endpoint for its 2025 list. Metadata is reduced to the stable item URI. Only source report fields used by the dashboard are retained. This is not a complete annual list.
+- `state_portals_oklahoma_index.html`: actual `data-newsfeedapiurl` from the [government-incident directory](https://oklahoma.gov/omes/divisions/information-services/cyber-command/notices/cybersecurity-breaches.html).
+- `state_portals_oklahoma.json`: three of the nine records returned by that JSON feed, including a partial incident date. `lastModified` is not treated as publication or breach date.
+- `state_portals_oklahoma_detail.html`: explicit creation-date element and agency/type-of-data table from the linked Oklahoma Tax Commission notice. No other notice paragraphs are retained.
+- `state_portals_maine_offline.html`: reduced official notice from [Maine's replacement page](https://www.maine.gov/ag/consumer-protection/data-security-breaches). It explicitly says the public-facing database will remain offline during a review of reporting abuse. This is an external availability condition, not a successfully repaired parser.
+- `state_portals_iowa_synthetic.html` and `state_portals_nd_synthetic.html`: clearly synthetic future-compatible parser cases, not captured current schemas. Iowa's official hub returned HTTP 403 during the read; North Dakota's old directory returned HTTP 404 and no current replacement directory was verified. Their live collection remains unavailable, rather than claiming an empty successful result.
+
+Offline mutations test unsafe links, missing headers, count/date uncertainty, incomplete PDF extraction, duplicate identity, and bounded collection. No tests perform network reads.

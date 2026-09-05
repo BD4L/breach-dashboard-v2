@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- SYNTHETIC: SEC live HTTP access denied. Fixture models documented Atom feed conventions, not a captured current feed. -->
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Latest Filings</title>
+  <entry><title>8-K - Example Company (0000123456) (Filer)</title>
+    <id>urn:tag:sec.gov,2008:accession-number=0000123456-26-000001</id>
+    <link href="https://www.sec.gov/Archives/edgar/data/123456/000012345626000001/0000123456-26-000001-index.htm" rel="alternate"/>
+    <updated>2026-09-04T18:30:00-04:00</updated><summary type="html">&lt;b&gt;Filed:&lt;/b&gt; 2026-09-04 &lt;br&gt;Size: 20 KB</summary>
+  </entry>
+</feed>

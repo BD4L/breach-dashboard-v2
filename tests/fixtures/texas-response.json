@@ -1,0 +1,39 @@
+[
+  {
+    "type": "rpc",
+    "statusCode": 200,
+    "method": "getDatareports",
+    "result": [
+      {
+        "Id": "a49cs000000GR2fAAG",
+        "Name": "BR-0004114",
+        "Business_Name__c": "CDS in Texas",
+        "Method_of_Noticee__c": "Notice by publication in print media;U.S. Mail",
+        "Published_at_AG_website_Date__c": 1743465600000,
+        "Types_of_Personal_Information_Involved__c": "Name of individual;Health Insurance Information",
+        "Notice_of_Breach_provided_to_consumers__c": "Yes",
+        "Number_of_Texans_affected_by_the_breach__c": 566
+      },
+      {
+        "Id": "a49cs000000NBUDAA4",
+        "Name": "BR-0004227",
+        "Business_Name__c": "Dallas County MHMR dba Metrocare Services",
+        "Method_of_Noticee__c": "Notice by publication in print media;Posted at company website or special website;U.S. Mail",
+        "Published_at_AG_website_Date__c": 1744329600000,
+        "Types_of_Personal_Information_Involved__c": "Name of individual;Government-issued ID number (e.g. passport, state ID card);Medical Information;Health Insurance Information",
+        "Notice_of_Breach_provided_to_consumers__c": "Yes",
+        "Number_of_Texans_affected_by_the_breach__c": 542
+      },
+      {
+        "Id": "a49cs000000sWR7AAM",
+        "Name": "BR-0004390",
+        "Business_Name__c": "Texas Centers for Infectious Disease Associates",
+        "Method_of_Noticee__c": "U.S. Mail",
+        "Published_at_AG_website_Date__c": 1751328000000,
+        "Types_of_Personal_Information_Involved__c": "Name of individual;Social Security Number Information;Driver\u2019s License number;Government-issued ID number (e.g. passport, state ID card);Medical Information;Health Insurance Information;Other",
+        "Notice_of_Breach_provided_to_consumers__c": "Yes",
+        "Number_of_Texans_affected_by_the_breach__c": 19213
+      }
+    ]
+  }
+]

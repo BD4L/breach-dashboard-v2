@@ -14,7 +14,7 @@ PATTERNS = {
     "GitHub API in public app": re.compile(r"api\.github\.com", re.I),
     "public administrative token": re.compile(r"PUBLIC_GITHUB_TOKEN|SUPABASE_SERVICE|SERVICE_ROLE_KEY"),
     "credential literal": re.compile(r"(?:ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{30,}|sk-[A-Za-z0-9]{20,})"),
-    "original app reference": re.compile(r"HackerManMarlin|BD4L/Breaches|/Breaches/", re.I),
+    "original app reference": re.compile(r"HackerManMarlin|BD4L/Breaches\b|bd4l\.github\.io/Breaches\b|[\"']/Breaches/", re.I),
 }
 PRIVATE_KEYS = {"notes", "assigned_to", "assignedto", "user_id", "userid", "email", "subscribers", "access_token", "refresh_token"}
 
@@ -53,13 +53,13 @@ def main():
                     parsed = urlsplit(value)
                     if parsed.scheme != "https" or not parsed.netloc or parsed.username or parsed.password:
                         errors.append(f"Unsafe {field} in public export")
-        if data_path.stat().st_size > 5_000_000:
-            errors.append("Public pilot export exceeds its 5 MB budget")
+        if data_path.stat().st_size > 30_000_000:
+            errors.append("Public export exceeds its 30 MB budget")
     built = ROOT / "frontend/dist"
     if built.exists():
         total = sum(path.stat().st_size for path in built.rglob("*") if path.is_file())
-        if total > 25_000_000:
-            errors.append("Static pilot exceeds its 25 MB budget")
+        if total > 50_000_000:
+            errors.append("Static site exceeds its 50 MB budget")
     if errors:
         print("Public boundary check failed:")
         print("\n".join(sorted(set(errors))))
