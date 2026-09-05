@@ -125,4 +125,6 @@ The follow-up [current-coverage investigation](docs/current-coverage.md) disting
 
 Optional [local Chrome collection](docs/local-browser-collection.md) produces independent NH, NJ and SEC result envelopes without changing GitHub or scheduling a background job.
 
+[Source access diagnosis](docs/source-access-diagnosis.md) distinguishes publisher denials from runner timeouts and compares the same bounded browser client on local and standard GitHub runners. The manual diagnostic's `matched-browser` mode collects first-page metadata only and does not publish or change history.
+
 The dashboard initially loads up to 200 complete reports from a small snapshot index. Counts describe the whole published snapshot; the report list explicitly identifies its loaded subset. All reports, search, filters, saved records and full download fetch and validate the complete archive on demand. The original full JSON URL remains compatible. See [snapshot loading and compatibility](frontend/SNAPSHOTS.md).
