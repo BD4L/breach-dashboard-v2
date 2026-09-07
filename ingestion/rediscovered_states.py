@@ -11,13 +11,13 @@ from hashlib import sha256
 from io import BytesIO
 import json
 import re
-from urllib.parse import unquote, urlsplit
+from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET
 from zipfile import ZipFile, BadZipFile, ZIP_STORED, ZIP_DEFLATED
 
 from bs4 import BeautifulSoup
 
-from .models import Collection, Report, SourceError
+from .models import Report, SourceError
 from .network import PublicClient
 from .state_portals import clean, key, official_url, parse_count, parse_date, checked, SOURCES as ORIGINAL
 

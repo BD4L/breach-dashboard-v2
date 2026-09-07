@@ -1,36 +1,31 @@
-# Pilot contract (v1)
+# Data contract
 
-All agents use this contract. Local-only pilot; no production URLs, credentials, database writers, email, or paid AI integrations. Retain Astro/React and Python. Root owns integration/docs/config and final verification.
+The executable contracts are [`Report` and `Collection`](../ingestion/models.py), [record validation](../ingestion/validation.py), [SQLite storage and export](../ingestion/store.py), and [frontend types](../frontend/src/lib/dashboard.ts).
 
-## Python source adapter interface
+## Collection
 
-`ingestion.adapters.collect(source_id: str) -> Collection` for `massachusetts`, `hhs`, `california`. `Collection` and `Report` dataclasses defined in `ingestion/models.py` (root owned). Source failures raise `SourceError` and never return an empty successful collection. No direct database calls in adapters. Unit parser functions accept captured source text/bytes. Adapters may fetch bounded public official source pages only, respect 403/429 and never bypass controls. Normalize dates to YYYY-MM-DD or None, preserve dubious raw values in quality_flags. SourceReport native_id must not be the common annual document URL. Do not infer breach date from reported date, or national victims from state counts.
+Adapters return a `Collection` containing normalized `Report` records, parsed/rejected counts, coverage information, and bounded retrieval evidence. They do not write the database. The source registry is `SOURCES` in `ingestion/models.py`, extended by `ingestion/source_catalog.py`.
 
-## Database and exported JSON
+Source errors must not become empty successful results. An empty filtered feed is accepted only when explicitly validated with `empty_is_valid`. Partial collections retain valid records and report their limits. Sparse secondary listings can set `new_records_only` to add identities without overwriting richer stored evidence.
 
-Pipeline owns `ingestion/store.py`, `ingestion/cli.py`, tests/test_store.py, and tests/test_cli.py. SQLite local state persists reports/revisions and source runs; saves should be transactional. Idempotent content hash ignores retrieval metadata. Failure preserves last known good reports. Distinguish changed from new, firstSeen never changes, revision history retained. Exports use camelCase JSON in frontend/public/data/dashboard.json. JSON schema version 1:
+Dates use `YYYY-MM-DD` or null. Native IDs identify individual source reports, not a shared annual document. Counts retain scope (`state`, `national`, `reported`, `unknown`) and qualifier (`exact`, `at_least`, `less_than`, `unknown`). Missing values stay unknown; reported dates do not imply breach dates, and state counts do not imply national totals.
 
-```
-{schemaVersion:1, mode:"demo"|"live", generatedAt:ISO,
- sources:[{id,label,jurisdiction,method,homepage,status:"healthy"|"unchanged"|"partial"|"failed"|"disabled",
- lastAttempt:ISO|null,lastSuccess:ISO|null,message:string,
- counts:{parsed,accepted,rejected,new,changed}}],
- reports:[{id,sourceId,nativeId,organization,
- publishedDate:string|null,reportedDate:string|null,breachStart:string|null,breachEnd:string|null,discoveryDate:string|null,
- firstSeen:ISO,lastSeen:ISO,lastChanged:ISO,revision:number,
- affected:{count:number|null,scope:"state"|"national"|"reported"|"unknown",jurisdiction:string|null,qualifier:"exact"|"at_least"|"less_than"|"unknown"},
- dataTypes:string[],sourceUrl:string,noticeUrl:string|null,summary:string,
- qualityFlags:[{code,message}],
- evidence:{retrievedAt:ISO,contentHash:string,parserVersion:string},
- history:[{observedAt:ISO,changedFields:string[],changes:[{field:string,before:unknown,after:unknown}]}]}]}
-```
+Independent workers write validated result envelopes for the merge job. Request, page, response-size, and worker limits bound collection. Access denials and rate limits remain explicit errors. Source-run diagnostics retain selected retrieval metrics, never response bodies, headers, or credentials.
 
-Sources registry root defines constants `SOURCES` in models.py. UI must calculate staleness from current time, show data mode prominently, render safe source links only, keep unknowns in default views, and not label source reports as deduplicated incidents. No auto-merging solely by organization. Pilot review queue = source reports with evidence; explicit incident-grouping is future unless confidently supported. Device-local bookmarks of report IDs allowed with honest label; no notes or firm metadata in localStorage or public files.
+## State and revisions
 
-History is newest first, with the most recent 20 revisions exported; complete snapshots remain in SQLite. `contentHash` fingerprints normalized report fields, not the original source document. Partial collection retains accepted reports and earlier data but does not advance `lastSuccess`; it must not be presented as full source coverage. Source-run diagnostics are stored separately from public report fields.
+SQLite stores reports, immutable revisions, and source runs transactionally. Report identity derives from the source and native ID. The normalized content hash ignores retrieval metadata; identical content updates observation timestamps without creating another revision. Corrections preserve `firstSeen` and increment `revision`. Missing or failed source results never delete prior reports.
 
-CLI desired commands:
-`python -m ingestion.cli demo --db state/demo.sqlite --export frontend/public/data/dashboard.json`
-`python -m ingestion.cli collect --source all --db state/pilot.sqlite --export frontend/public/data/dashboard.json`
-`python -m ingestion.cli export --db state/pilot.sqlite --export frontend/public/data/dashboard.json`
-Live collection defaults explicit source/all with jobs sequential locally (<=3 later). Exit nonzero when any source fails but still export healthy/last valid data and current health. Demo generated deterministic relative to supplied `--now` or current UTC; independent database cannot mix demo/live silently. Tests must not call network. Root provides demo records.
+Sources expose `healthy`, `unchanged`, `partial`, `failed`, or `disabled`, with `lastAttempt`, `lastSuccess`, a message, and parsed/accepted/rejected/new/changed counts. Only `healthy` and `unchanged` advance `lastSuccess`; partial collection does not imply full coverage. Demo and live modes cannot be mixed in one database.
+
+The `collection-state` branch persists all revisions and source-run history as checksummed JSON Lines. Restore rejects missing or corrupt state instead of starting a new history. Actions artifacts and dependency caches are not durable record storage.
+
+## Public snapshots
+
+The complete `data/dashboard.json` export uses schema 1: `schemaVersion`, `mode`, `generatedAt`, `sources`, and `reports`. JSON field names are camelCase. Each report includes normalized source fields, identity, observation timestamps, revision number, quality flags, evidence, and history.
+
+Public report history contains the latest 20 revisions, newest first, with changed fields and before/after values. Complete revision content remains in durable state. `evidence.contentHash` fingerprints normalized fields, not an archived source document. Report evidence also includes retrieval time and parser version.
+
+The static build adds a schema 2 index with up to 200 complete reports, whole-snapshot counts, and the hash/size/generation of the full schema 1 export. The loader verifies an archive before replacing usable data. See [snapshot loading and compatibility](../frontend/SNAPSHOTS.md) for the wire format and refresh behavior.
+
+The UI must preserve source-report meaning, unknown counts, source health, and visible demo status. It computes staleness from the current time and permits only safe source links. No organization-name-only incident merging or private firm metadata belongs in the public export; device-local bookmarks contain report IDs only.

@@ -28,12 +28,12 @@ EXTRA_SOURCES = {'indiana': {'id': 'indiana',
  'maryland': {'id': 'maryland',
               'label': 'Maryland',
               'jurisdiction': 'MD',
-              'method': 'Public notice lists',
+              'method': 'Official public JSON',
               'homepage': 'https://oag.maryland.gov/resources-info/Pages/security-breach-notices.aspx'},
  'new_jersey': {'id': 'new_jersey',
                 'label': 'New Jersey',
                 'jurisdiction': 'NJ',
-                'method': 'Public notices',
+                'method': 'Official public HTML notices',
                 'homepage': 'https://www.cyber.nj.gov/threat-landscape/public-data-breaches'},
  'wisconsin': {'id': 'wisconsin',
                'label': 'Wisconsin',
@@ -63,7 +63,7 @@ EXTRA_SOURCES = {'indiana': {'id': 'indiana',
  'new_hampshire': {'id': 'new_hampshire',
                    'label': 'New Hampshire',
                    'jurisdiction': 'NH',
-                   'method': 'Public notices',
+                   'method': 'Official public document API',
                    'homepage': 'https://www.doj.nh.gov/citizens/consumer-protection-antitrust-bureau/security-breach-notifications'},
  'texas': {'id': 'texas',
            'label': 'Texas',
@@ -73,11 +73,5 @@ EXTRA_SOURCES = {'indiana': {'id': 'indiana',
  'sec': {'id': 'sec',
          'label': 'SEC EDGAR',
          'jurisdiction': 'US',
-         'method': '8-K Item 1.05 filings',
+         'method': 'Official Item 1.05 search metadata',
          'homepage': 'https://www.sec.gov/edgar/search/'}}
-
-# Active adapters follow the currently published source surfaces.
-EXTRA_SOURCES['maryland']['method'] = 'Official public JSON'
-EXTRA_SOURCES['new_jersey']['method'] = 'Official public HTML notices'
-EXTRA_SOURCES['new_hampshire']['method'] = 'Official public document API'
-EXTRA_SOURCES['sec']['method'] = 'Official Item 1.05 search metadata'

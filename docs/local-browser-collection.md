@@ -1,7 +1,7 @@
 # Browser collection for NH, NJ and SEC
 
 New Hampshire, New Jersey and SEC use ordinary headed Chrome with JavaScript
-disabled in the four-hour collection workflow. A matched diagnostic verified
+disabled in the 30-minute collection workflow. A matched diagnostic verified
 each production first-page URL locally and on standard Ubuntu and macOS GitHub
 runners ([run 33999088632](https://github.com/BD4L/breach-dashboard-v2/actions/runs/33999088632)).
 The full collectors retain their existing page/window limits and report partial

@@ -8,7 +8,7 @@ from pathlib import Path
 from .models import SOURCES, SourceError
 from .runner import decode_collection, read_json
 from .store import Store
-from .validation import timestamp, utc_now
+from .validation import utc_now
 
 
 def merge(db: Path, results: Path, output: Path, source_ids: list[str], *, batch: str,

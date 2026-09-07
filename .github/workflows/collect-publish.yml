@@ -2,7 +2,7 @@ name: Collect public sources and publish
 
 on:
   schedule:
-    - cron: '17 */4 * * *'
+    - cron: '17,47 * * * *'
   workflow_dispatch:
     inputs:
       source:
@@ -40,7 +40,8 @@ jobs:
           requested = os.environ['REQUESTED_SOURCE']
           if requested != 'all' and requested not in SOURCES:
               raise SystemExit('Unknown source ID')
-          sources = list(SOURCES) if requested == 'all' else [requested]
+          priority = ['california', 'sec', 'new_hampshire', 'massachusetts']
+          sources = priority + [source for source in SOURCES if source not in priority] if requested == 'all' else [requested]
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('sources=' + json.dumps(sources) + '\n')
           PY
@@ -53,7 +54,7 @@ jobs:
     timeout-minutes: 12
     strategy:
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 8
       matrix:
         source: ${{ fromJSON(needs.plan.outputs.sources) }}
     steps:
@@ -64,6 +65,7 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
+          cache-dependency-path: ${{ contains(fromJSON('["new_hampshire","new_jersey","sec"]'), matrix.source) && 'requirements*.lock' || 'requirements.lock' }}
       - run: python -m pip install -r requirements.lock
       - name: Install the verified browser transport for NH, NJ and SEC
         if: contains(fromJSON('["new_hampshire","new_jersey","sec"]'), matrix.source)

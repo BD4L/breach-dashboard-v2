@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import asdict
-from datetime import datetime
 from importlib import import_module
 import json
 import os
