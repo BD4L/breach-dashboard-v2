@@ -16,7 +16,7 @@ OFFICIAL_HOSTS = {
     'attorneygeneral.nd.gov', 'oag.maryland.gov', 'oklahoma.gov',
     'www.cyber.nj.gov', 'datcp.wi.gov', 'dojmt.gov', 'www.atg.wa.gov',
     'consumer.sc.gov', 'attorneygeneral.delaware.gov', 'data.delaware.gov', 'www.doj.nh.gov',
-    'oag.my.site.com', 'www.sec.gov', 'efts.sec.gov',
+    'oag.my.site.com', 'www.sec.gov', 'efts.sec.gov', 'www.ransomlook.io',
 }
 PROJECT_USER_AGENT = 'BreachDashboard/2.0 (+https://github.com/BD4L/breach-dashboard-v2)'
 
@@ -40,7 +40,7 @@ class PublicOnlyAuth(AuthBase):
 
 class PublicClient:
     def __init__(self, *, max_requests: int = 24, max_bytes: int = 15_000_000,
-                 deadline_seconds: int = 240, session=None):
+                 deadline_seconds: int = 240, session=None, allowed_urls: set[str] | None = None):
         self.session = session or requests.Session()
         self.session.auth = PublicOnlyAuth()
         self.session.headers.update({'User-Agent': PROJECT_USER_AGENT,
@@ -51,6 +51,7 @@ class PublicClient:
         self.bytes = 0
         self.deadline = time.monotonic() + deadline_seconds
         self.last_request_at = None
+        self.allowed_urls = frozenset(allowed_urls) if allowed_urls is not None else None
 
     def close(self):
         self.session.close()
@@ -59,6 +60,8 @@ class PublicClient:
         """Retry transient failures once. Stop immediately on 401/403/429."""
         method = 'POST' if data is not None else 'GET'
         for redirect in range(5):
+            if self.allowed_urls is not None and url not in self.allowed_urls:
+                raise SourceError('Source URL is outside this collector\'s permitted metadata endpoint')
             parts = urlsplit(url)
             if parts.scheme != 'https' or parts.username or parts.password or parts.port not in (None, 443):
                 raise SourceError('Source supplied an unsafe/non-HTTPS URL')

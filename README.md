@@ -1,6 +1,6 @@
 # Breach Watch
 
-A public-source breach research dashboard with a searchable report table, evidence details, revision history, source health, and device-local bookmarks. Python collects and retains records; Astro/React serves static snapshots.
+A recent breach aggregator for research teams, with public notices, explicitly unverified ransomware claims, evidence links, source health, and device-local bookmarks. Python collects records; Astro/React serves static snapshots. The default Latest view prioritizes source dates over historical imports.
 
 [Live dashboard](https://bd4l.github.io/breach-dashboard-v2/) · [Repository](https://github.com/BD4L/breach-dashboard-v2)
 
@@ -51,7 +51,9 @@ For the GitHub project site, run `BASE_PATH=/breach-dashboard-v2/ npm run build`
 
 ## Collection and refresh
 
-GitHub Actions checks all 18 sources every 30 minutes, at minutes 17 and 47 UTC. Up to eight independent collectors run concurrently, with the slowest sources started first. Each worker has a 600-second deadline inside a 12-minute job budget, plus bounded requests and pages. Failures do not cancel other sources. NH, NJ and SEC use headed Chrome on standard Ubuntu runners; Wisconsin uses standard macOS; the remaining collectors use HTTP.
+GitHub Actions checks all 19 sources every 30 minutes, at minutes 17 and 47 UTC. Up to eight independent collectors run concurrently, with RansomLook and SEC started first. Each worker has a 600-second deadline inside a 12-minute job budget, plus bounded requests and pages. RansomLook has a smaller 60-second metadata budget. Failures do not cancel other sources. NH, NJ and SEC use headed Chrome on standard Ubuntu runners; Wisconsin uses standard macOS; the remaining collectors use HTTP.
+
+SEC discovery checks three UTC calendar days instead of repeatedly scanning a month. The 00:17 UTC scheduled run reconciles 30 days; a manual run can select either window. One bounded retry handles transient SEC server errors. Access denials and rate limits remain visible failures.
 
 Run **Collect public sources and publish** in Actions to collect all sources or one source manually. **Publish preserved public history** rebuilds Pages without scraping. GitHub may delay or drop scheduled runs; this is periodic collection, not guaranteed immediate monitoring. See [GitHub Free limits and storage](docs/github-free.md).
 
@@ -61,10 +63,28 @@ The visible browser checks for a published snapshot every five minutes, when ret
 
 ## Data meaning and public boundary
 
-- Rows are source reports, not deduplicated incidents. “New” means first observed by this collector, including historical notices.
-- The Today counter uses the source publication date in UTC, falling back to the reported-to-source date. It does not establish when a breach occurred.
+- Rows are source reports, not deduplicated incidents. Latest uses the last seven days of source observation/publication/reporting dates; importing an old report does not make it recent. All retains older and undated records.
+- Today uses UTC source dates, including the provider's observation time for ransomware claims. It does not establish when a breach occurred or confirm a claim.
+- RansomLook contributes public claim metadata only. Claims remain explicitly unverified throughout the UI, RSS, JSON, MCP and alerts. Data is attributed to [RansomLook](https://www.ransomlook.io/about) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), with normalization disclosed. No leak dumps, credentials, screenshots or onion content are collected.
 - Counts retain their scope and qualifiers; missing counts remain unknown. Corrections create revisions without changing first-seen time. Disappearing source rows are not deleted from history.
 - Coverage varies by source and collection window. See [coverage findings](docs/current-coverage.md), [source rediscovery](docs/collector-rediscovery.md), and [hosted access evidence](docs/source-access-diagnosis.md).
 - Everything in the repository and Pages deployment is public. Do not add firm notes, assignments, client data, or credentials. Bookmarks store report IDs in this browser only. `noindex` is not access control.
 
 The public-boundary check validates selected private-field, link, and size constraints; it is not a general secret scanner. The [data contract](docs/data-contract.md) defines record and history semantics. [Verification evidence](docs/verification.md) and the [original baseline](docs/BASELINE.md) record completed checks and preservation boundaries.
+
+## Agent access and alerts
+
+Use the public [RSS feed](https://bd4l.github.io/breach-dashboard-v2/data/recent.xml),
+[recent JSON manifest](https://bd4l.github.io/breach-dashboard-v2/data/agent/index.json),
+or the small [local MCP connector](agent/README.md). The JSON/MCP feed covers 30
+source-dated days and includes publication age and source outcomes.
+
+The [private email worker](docs/alerts.md) uses Resend and a durable Supabase outbox
+with verified staff recipients. Preview is offline by default. Production delivery
+requires private schema, sender/recipient configuration, repository secrets and an
+explicit enable flag. Retire the old email path before enabling the successor to
+avoid duplicate notices across the two systems. Recipient details never go to Pages.
+
+Free source feeds can surface claims before official notices, but no earliest-discovery
+guarantee is established. Faster paid feeds or remote MCP hosting require a separate
+service and suitable data redistribution rights; see [monitoring scope](docs/recent-monitoring.md).

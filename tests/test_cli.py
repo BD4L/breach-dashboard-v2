@@ -17,7 +17,10 @@ NOW_TEXT = "2026-09-05T18:00:00Z"
 
 
 def collection(source="massachusetts", *, complete=True):
-    return Collection(source, [Report(source, "sample-1", "Example", SOURCES[source]["homepage"], reported_date="2026-08-01")], 1, complete=complete)
+    item = Report(source, "sample-1", "Example", SOURCES[source]["homepage"], reported_date="2026-08-01",
+                  signal_type="ransomware_claim" if source == "ransomlook" else None,
+                  source_observed_at="2026-08-01T00:00:00Z" if source == "ransomlook" else None)
+    return Collection(source, [item], 1, complete=complete)
 
 
 class CliTests(unittest.TestCase):

@@ -1,5 +1,6 @@
 """Pure boundary tests plus opt-in real Chrome redirect/subresource proof."""
 from collections import Counter
+from contextlib import contextmanager
 from datetime import date,datetime,timedelta,timezone
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 import json
@@ -134,6 +135,106 @@ class BoundaryTests(unittest.TestCase):
             value=json.loads(output.read_text())
             self.assertEqual(value['sourceId'],'sec');self.assertIn('hard deadline',value['error'])
             self.assertNotIn('collection',value)
+
+    def test_sec_reconciliation_window_reaches_worker_and_a_verified_empty_window_succeeds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output=Path(directory)/'sec.json'
+            def worker(command, *, timeout):
+                self.assertEqual(command[-2:],['--window-days','30'])
+                result_path=Path(command[command.index('--output')+1])
+                p.atomic_json(result_path,{'collection':p.asdict(Collection('sec',[],0,complete=True,empty_is_valid=True))})
+                return 0
+            with patch.object(p,'supervise',side_effect=worker):
+                self.assertEqual(p.main(['fetch','--source','sec','--output',str(output),'--window-days','30']),0)
+            self.assertTrue(json.loads(output.read_text())['collection']['complete'])
+
+    def test_window_override_is_sec_only_and_does_not_start_other_sources(self):
+        with patch.object(p,'LocalBrowserClient') as browser,patch.object(p,'supervise') as supervise:
+            for source in ('new_hampshire','new_jersey'):
+                with self.assertRaisesRegex(SourceError,'only supported for SEC'):
+                    p.collect_local(source,window_days=30)
+                with self.assertRaisesRegex(ValueError,'only supported for SEC'):
+                    p.fetch(source,Path('unused.json'),window_days=30)
+            browser.assert_not_called();supervise.assert_not_called()
+
+    def test_sec_collection_forwards_default_or_explicit_window_with_utc_date(self):
+        for window,expected in ((None,3),(30,30)):
+            result=Collection('sec',[],0,complete=True,empty_is_valid=True)
+            client=Mock(requests=1,bytes=100)
+            with patch.object(p,'LocalBrowserClient',return_value=client),patch.object(p,'datetime') as clock, \
+                    patch('ingestion.rediscovered_sec.collect_with_client',return_value=result) as collect:
+                clock.now.return_value=datetime(2026,9,7,0,30,tzinfo=timezone.utc)
+                p.collect_local('sec',window_days=window)
+            collect.assert_called_once_with(client,max_pages=None,today=date(2026,9,7),window_days=expected)
+            client.close.assert_called_once()
+
+
+class SecRetryTests(unittest.TestCase):
+    @contextmanager
+    def browser(self, responses, *, source='sec', **budgets):
+        clock=[0.0];navigations=[];sleeps=[];responses=iter(responses)
+        today=datetime.now(timezone.utc).date()
+        url=search_url(today-timedelta(days=3),today,0) if source=='sec' else nh_api_url(1)
+        def sleep(seconds):
+            sleeps.append(seconds);clock[0]+=seconds
+        with patch.object(p.time,'monotonic',side_effect=lambda:clock[0]),patch.object(p.time,'sleep',side_effect=sleep):
+            client=p.LocalBrowserClient(source,**budgets)
+            def prepare():
+                status,body,elapsed=next(responses)
+                response=Mock(status=status,url=url,headers={'content-type':'application/json'})
+                response.body.return_value=body
+                def navigate(target,**kwargs):
+                    navigations.append(target);clock[0]+=elapsed
+                    return response
+                client._page=Mock();client._page.goto.side_effect=navigate
+            with patch.object(client,'_start'),patch.object(client,'_prepare_page',side_effect=prepare):
+                try:yield client,url,navigations,sleeps
+                finally:client.close()
+
+    def test_selected_server_errors_retry_once_and_recover_the_same_page(self):
+        for status in (500,502,503,504):
+            with self.subTest(status=status),self.browser([(status,b'upstream error',0),(200,b'{}',0)]) as (client,url,calls,sleeps):
+                self.assertEqual(client.request(url).content,b'{}')
+                self.assertEqual(calls,[url,url])
+                self.assertEqual(client.requests,2)
+                self.assertEqual([value for value in sleeps if value],[1])
+
+    def test_persistent_server_error_stops_after_one_retry(self):
+        with self.browser([(500,b'upstream error',0)]*3) as (client,url,calls,sleeps):
+            with self.assertRaisesRegex(SourceError,'retry limit'):client.request(url)
+            self.assertEqual(len(calls),2)
+            with self.assertRaisesRegex(SourceError,'retry limit'):client.request(url)
+            self.assertEqual(len(calls),2)
+
+    def test_denials_other_errors_and_challenges_are_not_retried(self):
+        for status in (401,403,429,400,404,501):
+            with self.subTest(status=status),self.browser([(status,b'error',0)]) as (client,url,calls,sleeps):
+                with self.assertRaisesRegex(SourceError,f'HTTP {status}'):client.request(url)
+                self.assertEqual(len(calls),1);self.assertFalse(sleeps)
+        for status in (200,500):
+            with self.subTest(status=status),self.browser([(status,b'<title>Access Denied</title>',0)]) as (client,url,calls,sleeps):
+                with self.assertRaisesRegex(SourceError,'challenge'):client.request(url)
+                self.assertEqual(len(calls),1);self.assertFalse(sleeps)
+
+    def test_retry_does_not_change_other_sources(self):
+        with self.browser([(500,b'error',0)],source='new_hampshire') as (client,url,calls,sleeps):
+            with self.assertRaisesRegex(SourceError,'without retry'):client.request(url)
+            self.assertEqual(len(calls),1);self.assertFalse(sleeps)
+
+    def test_retry_requires_remaining_request_and_byte_budget(self):
+        for budget,message in (({'max_requests':1},'request budget'),({'max_bytes':5},'byte budget')):
+            with self.subTest(budget=budget),self.browser([(500,b'error',0)],**budget) as (client,url,calls,sleeps):
+                with self.assertRaisesRegex(SourceError,message):client.request(url)
+                self.assertEqual(len(calls),1);self.assertFalse(sleeps)
+
+    def test_retry_backoff_cannot_outlive_global_or_first_navigation_deadline(self):
+        for budget,elapsed in (({'deadline_seconds':1},0),({},29.5)):
+            with self.subTest(budget=budget),self.browser([(500,b'error',elapsed)],**budget) as (client,url,calls,sleeps):
+                with self.assertRaisesRegex(SourceError,'time budget'):client.request(url)
+                self.assertEqual(len(calls),1);self.assertFalse(sleeps)
+        with self.browser([(500,b'error',28),(200,b'{}',2)]) as (client,url,calls,sleeps):
+            with self.assertRaisesRegex(SourceError,'time budget'):client.request(url)
+            self.assertEqual(len(calls),2)
 
 
 @unittest.skipUnless(os.environ.get('BREACH_RUN_BROWSER_TESTS')=='1','Opt-in local Chrome network proof')

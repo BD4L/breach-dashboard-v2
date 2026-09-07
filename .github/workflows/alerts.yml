@@ -1,0 +1,50 @@
+name: Deliver staff breach alerts
+
+on:
+  workflow_run:
+    workflows: [Collect public sources and publish, Publish preserved public history]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staff-breach-alerts
+  cancel-in-progress: false
+
+jobs:
+  alerts:
+    if: >-
+      vars.ALERTS_ENABLED == 'true' &&
+      github.repository == 'BD4L/breach-dashboard-v2' && github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.workflow_run.head_repository.full_name == github.repository &&
+        github.event.workflow_run.head_branch == 'main'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: BD4L/breach-dashboard-v2
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.lock
+      - run: python -m pip install -r requirements.lock
+      # Overall source health may be red after a successful partial publication.
+      # Read only fresh public Pages data, never upstream code or result artifacts.
+      - name: Read the fresh published snapshot
+        run: python -m ingestion.alerts --fetch-published "$RUNNER_TEMP/alerts-snapshot.json"
+      - name: Deliver privately queued staff alerts
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_FROM_EMAIL: ${{ secrets.ALERT_FROM_EMAIL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          ALERT_DELIVERY_LIMIT: ${{ vars.ALERT_DELIVERY_LIMIT || '25' }}
+        run: python -m ingestion.alerts --snapshot "$RUNNER_TEMP/alerts-snapshot.json" --deliver --limit "$ALERT_DELIVERY_LIMIT"

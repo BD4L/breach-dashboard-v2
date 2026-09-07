@@ -25,6 +25,7 @@ DEFAULT_TIMEOUT = 600
 
 def dispatch(source_id: str, *, max_pages: int | None = None) -> Collection:
     groups = {
+        'early_signals': {'ransomlook'},
         'rediscovered_delaware': {'delaware'},
         'rediscovered_nj': {'new_jersey'},
         'rediscovered_northeast': {'massachusetts', 'new_hampshire'},

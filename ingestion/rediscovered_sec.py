@@ -1,13 +1,13 @@
 """Collect official Item 1.05 metadata from EDGAR's current public search API.
 
 The endpoint, pagination and document URLs follow SEC's published search client.
-Search every 8-K document in a bounded 30-day window, then require the actual
+Search every 8-K document in a bounded recent window, then require the actual
 Item 1.05 filing metadata and primary form; generic cybersecurity mentions and
 exhibits cannot create breach reports. No contact identity is invented.
 """
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import re
 from urllib.parse import urlencode
@@ -82,12 +82,14 @@ def parse_search_page(content, *, start, end):
     return reports, hit_ids, total['value'], total['relation']
 
 
-def collect_with_client(client, *, max_pages=None, today=None):
+def collect_with_client(client, *, max_pages=None, today=None, window_days=3):
     limit = 100 if max_pages is None else max_pages
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 100:
         raise SourceError('SEC max_pages must be an integer from 1 to 100')
-    today = today or date.today()
-    start = today - timedelta(days=30)
+    if type(window_days) is not int or window_days not in (3, 30):
+        raise SourceError('SEC window_days must be 3 for recent discovery or 30 for reconciliation')
+    today = today or datetime.now(timezone.utc).date()
+    start = today - timedelta(days=window_days - 1)
     reports, seen_docs, by_accession = [], set(), {}
     expected = None
     exact = False
@@ -127,24 +129,24 @@ def collect_with_client(client, *, max_pages=None, today=None):
             break
     if not reports and not exhausted:
         raise SourceError('SEC: no Item 1.05 reports found before the bounded search stopped; empty coverage is unverified')
-    message = (f'Official 8-K search from {start} through {today}: {len(seen_docs)} of '
+    message = (f'Official 8-K search for {window_days} calendar days, inclusive filing dates {start} through {today}: {len(seen_docs)} of '
                f'{expected if exact else "at least " + str(expected)} document hits inspected across {page_count} pages; '
                f'{len(reports)} distinct primary Item 1.05 filings. '
                'Earlier filings, other disclosure items and document enrichment are outside this rolling window. ')
     message += 'The declared search-window total reconciled.' if exhausted else 'The window is incomplete. ' + (stopped or 'Page budget reached.')
-    return Collection('sec', reports, len(reports), message=message, complete=False,
+    return Collection('sec', reports, len(reports), message=message, complete=exhausted,
                       empty_is_valid=exhausted and not reports,
                       evidence={'requests': client.requests, 'bytes': client.bytes, 'pageCount': page_count,
                                 'searchHitCount': len(seen_docs), 'declaredTotal': expected,
-                                'windowStart': start.isoformat(), 'windowEnd': today.isoformat(),
+                                'windowDays': window_days, 'windowStart': start.isoformat(), 'windowEnd': today.isoformat(),
                                 'windowReconciled': exhausted})
 
 
-def collect(source_id, *, max_pages=None):
+def collect(source_id, *, max_pages=None, window_days=3):
     if source_id != 'sec':
         raise SourceError('Unknown SEC search source')
     client = CLIENT_FACTORY(max_requests=205, max_bytes=35_000_000, deadline_seconds=480)
     try:
-        return collect_with_client(client, max_pages=max_pages)
+        return collect_with_client(client, max_pages=max_pages, window_days=window_days)
     finally:
         client.close()

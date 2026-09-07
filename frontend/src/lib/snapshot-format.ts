@@ -1,4 +1,4 @@
-import { DAY, readDataset, type Dataset, type Filters, type View } from "./dashboard.ts";
+import { DAY, readDataset, utcDay, type Dataset, type Filters, type View } from "./dashboard.ts";
 
 export interface SnapshotIndex {
   id: string;
@@ -6,6 +6,7 @@ export interface SnapshotIndex {
   archive: { url: string; sha256: string; bytes: number };
   sourceDateCounts: Record<string, number>;
   changeTimeCounts: Record<string, number>;
+  signalTimeCounts?: Record<string, number>;
 }
 export interface PublishedSnapshot { data: Dataset; index: SnapshotIndex | null }
 export const MAX_ARCHIVE_BYTES = 50_000_000;
@@ -35,13 +36,34 @@ export function readSnapshot(value: unknown): PublishedSnapshot {
     changed += n;
   }
   if (dated > s.totalReports || changed !== s.totalReports) return invalid();
+  if (s.signalTimeCounts !== undefined) {
+    if (!object(s.signalTimeCounts)) return invalid();
+    const days: Record<string, number> = {};
+    for (const [time, n] of Object.entries(s.signalTimeCounts)) {
+      const at = Date.parse(time);
+      if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(time) ||
+          !Number.isFinite(at) || utcDay(at) !== time.slice(0, 10) || !count(n)) return invalid();
+      days[utcDay(at)] = (days[utcDay(at)] || 0) + n;
+    }
+    for (const day of new Set([...Object.keys(days), ...Object.keys(s.sourceDateCounts)])) {
+      if ((days[day] || 0) !== (s.sourceDateCounts[day] || 0)) return invalid();
+    }
+  }
   return { data, index: s as unknown as SnapshotIndex };
 }
 
 export function snapshotRecentCount(index: SnapshotIndex, now: number): number {
-  return Object.entries(index.changeTimeCounts).reduce((n, [time, count]) => {
+  // Older snapshots contain source dates only; collection times never imply freshness.
+  return Object.entries(index.signalTimeCounts ?? index.sourceDateCounts).reduce((n, [time, count]) => {
     const at = Date.parse(time);
-    return n + (at >= now - 7 * DAY && at <= now + 5 * 60_000 ? count : 0);
+    return n + (at >= now - 7 * DAY && at <= now ? count : 0);
+  }, 0);
+}
+
+export function snapshotTodayCount(index: SnapshotIndex, now: number): number {
+  return Object.entries(index.signalTimeCounts ?? index.sourceDateCounts).reduce((n, [time, count]) => {
+    const at = Date.parse(time);
+    return n + (at <= now && utcDay(at) === utcDay(now) ? count : 0);
   }, 0);
 }
 

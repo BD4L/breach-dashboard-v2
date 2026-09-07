@@ -10,6 +10,13 @@ Source errors must not become empty successful results. An empty filtered feed i
 
 Dates use `YYYY-MM-DD` or null. Native IDs identify individual source reports, not a shared annual document. Counts retain scope (`state`, `national`, `reported`, `unknown`) and qualifier (`exact`, `at_least`, `less_than`, `unknown`). Missing values stay unknown; reported dates do not imply breach dates, and state counts do not imply national totals.
 
+RansomLook records require `signal_type=ransomware_claim` and an aware
+`source_observed_at` timestamp no later than collection time. These export as
+`signalType` and `sourceObservedAt`; absence on existing official reports preserves
+their previous normalized hashes. Claim IDs derive from group, title and full
+provider discovery timestamp because the metadata endpoint supplies no stable ID.
+Source metadata carries attribution, license links and a normalization notice.
+
 Independent workers write validated result envelopes for the merge job. Request, page, response-size, and worker limits bound collection. Access denials and rate limits remain explicit errors. Source-run diagnostics retain selected retrieval metrics, never response bodies, headers, or credentials.
 
 ## State and revisions
@@ -29,3 +36,8 @@ Public report history contains the latest 20 revisions, newest first, with chang
 The static build adds a schema 2 index with up to 200 complete reports, whole-snapshot counts, and the hash/size/generation of the full schema 1 export. The loader verifies an archive before replacing usable data. See [snapshot loading and compatibility](../frontend/SNAPSHOTS.md) for the wire format and refresh behavior.
 
 The UI must preserve source-report meaning, unknown counts, source health, and visible demo status. It computes staleness from the current time and permits only safe source links. No organization-name-only incident merging or private firm metadata belongs in the public export; device-local bookmarks contain report IDs only.
+
+The static build also emits a bounded 30-day [agent feed](../agent/README.md) and
+latest-100 RSS feed. Latest and these feeds use source observation/publication/report
+time, excluding future and undated records. They do not use import time as a breach
+date. Claims must remain unverified and attributed in every consumer.

@@ -33,7 +33,9 @@ These commands create local result envelopes only. They do not merge a database,
 write GitHub, publish Pages, or schedule another run. A partial source produces
 exit status 1 while retaining its valid collected records in the envelope.
 Inspect the message, counts and evidence before a separately authorized merge.
-SEC scans its existing 30-day filing window; NH defaults to 30 pages of 25 rows.
+SEC defaults to three UTC calendar days including today. Use `--window-days 30`
+for reconciliation; the daily 00:17 UTC Actions run selects it automatically.
+NH defaults to 30 pages of 25 rows.
 `--timeout` defaults to 600 seconds and accepts up to 900 seconds. The supervisor
 terminates the worker and its detached Chrome descendants at the hard deadline.
 
@@ -48,7 +50,8 @@ CDP Fetch request-stage interception permits only one approved main-frame GET
 per navigation. Redirect hops, additional frames and subresources are blocked
 before their HTTP request proceeds. Only the three fixed source path/query
 contracts are accepted; the CLI has no arbitrary-URL option. Denials stop without
-retry. HTML/JSON response bytes feed the existing source parsers. Envelopes
+retry. SEC retries one transient HTTP 500/502/503/504 within the original navigation
+deadline and source request budget. HTML/JSON response bytes feed the existing source parsers. Envelopes
 identify local or GitHub Actions execution. `GITHUB_ACTIONS=true` selects only
 the evidence/message label, and the runner OS is limited to fixed known labels;
 neither environment value changes request behavior or browser configuration.

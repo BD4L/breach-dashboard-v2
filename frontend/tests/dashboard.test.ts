@@ -6,6 +6,7 @@ import {
   filterReports,
   INITIAL_FILTERS,
   isRecent,
+  isRecentSignal,
   isLocalHostname,
   isReportFromToday,
   qualityMessage,
@@ -15,6 +16,8 @@ import {
   reportDateLabel,
   safeUrl,
   sourceHealth,
+  sourceKind,
+  signalTime,
   utcDay,
   type Dataset,
   type Report,
@@ -79,15 +82,46 @@ function dataset(reports = [report()]): Dataset {
   };
 }
 
-test("unknown counts and publication dates stay in the default review queue", () => {
+test("undated reports remain in history without looking fresh; recent unknown counts stay visible", () => {
   assert.equal(
     filterReports([report()], "recent", INITIAL_FILTERS, new Set(), now).length,
-    1,
+    0,
   );
   assert.equal(
     filterReports([report()], "all", INITIAL_FILTERS, new Set(), now).length,
     1,
   );
+  assert.equal(filterReports([report({ reportedDate: "2026-09-05" })], "recent", INITIAL_FILTERS, new Set(), now).length, 1);
+});
+
+test("Latest follows source time, never a new import or revision of an old disclosure", () => {
+  const old = report({ publishedDate: "2020-01-01", revision: 2 });
+  assert.equal(isRecent(old, now), true, "collection recency remains separate");
+  assert.equal(isRecentSignal(old, now), false);
+  assert.equal(isRecentSignal(report({ publishedDate: "2026-09-05", firstSeen: "2025-01-01T00:00:00Z", lastChanged: "2025-01-01T00:00:00Z" }), now), true);
+  assert.equal(isRecentSignal(report({ publishedDate: "2029-01-01", reportedDate: "2026-09-05" }), now), false);
+  assert.equal(filterReports([old], "recent", INITIAL_FILTERS, new Set(), now).length, 0);
+});
+
+test("claim freshness uses the source observation timestamp with exact seven-day boundaries", () => {
+  const claim = report({ sourceId: "ransomlook", signalType: "ransomware_claim", sourceObservedAt: "2026-08-29T18:00:00Z", publishedDate: "2026-09-05" });
+  assert.equal(signalTime(claim), Date.parse("2026-08-29T18:00:00Z"));
+  assert.equal(isRecentSignal(claim, now), true);
+  assert.equal(isRecentSignal({ ...claim, sourceObservedAt: "2026-08-29T17:59:59Z" }, now), false);
+  assert.equal(isRecentSignal({ ...claim, sourceObservedAt: "2026-09-05T18:00:01Z" }, now), false);
+  assert.equal(isReportFromToday({ ...claim, sourceObservedAt: "2026-09-04T23:30:00-01:00", publishedDate: "2020-01-01" }, now), true);
+  assert.equal(isReportFromToday({ ...claim, sourceObservedAt: "2026-09-05T18:00:01Z" }, now), false);
+});
+
+test("the claim filter and source labels distinguish allegations from official reports", () => {
+  const claim = report({ id: "claim", sourceId: "ransomlook", signalType: "ransomware_claim", sourceObservedAt: "2026-09-05T17:00:00Z" });
+  const disclosure = report({ id: "disclosure", sourceId: "sec", publishedDate: "2026-09-05" });
+  assert.deepEqual(filterReports([disclosure, claim], "recent", { ...INITIAL_FILTERS, quality: "claims" }, new Set(), now).map(r => r.id), ["claim"]);
+  assert.equal(sourceKind("ransomlook"), "Ransomware claims");
+  assert.equal(sourceKind("sec"), "SEC filings");
+  assert.equal(sourceKind("hhs"), "Federal portal");
+  assert.equal(sourceKind("ma"), "State register");
+  assert.equal(reportDateLabel(claim, now), "Observed Sep 5");
 });
 
 test("today counts source notification dates and excludes historical imports", () => {
@@ -210,7 +244,7 @@ test("revisions use observation time and do not infer recency from publication",
   );
 });
 
-test("tied collection changes use valid source dates before organization order", () => {
+test("latest ordering uses valid source dates ahead of collection changes and breaks ties by organization", () => {
   const rows = [
     report({ id: "reported-older", organization: "A company", reportedDate: "2026-09-02" }),
     report({ id: "published-tie", organization: "Z company", publishedDate: "2026-09-02" }),
@@ -221,7 +255,7 @@ test("tied collection changes use valid source dates before organization order",
   ];
   assert.deepEqual(
     filterReports(rows, "all", INITIAL_FILTERS, new Set(), now).map(row => row.id),
-    ["changed-first", "latest-published", "reported-newer", "reported-older", "published-tie", "future-withheld"],
+    ["latest-published", "reported-newer", "reported-older", "published-tie", "changed-first", "future-withheld"],
   );
 });
 
@@ -230,7 +264,7 @@ test("source date labels preserve reported versus published and show older years
   assert.equal(reportDateLabel(report({ reportedDate: "2026-09-03" }), now), "Reported Sep 3");
   assert.equal(reportDateLabel(report({ reportedDate: "2020-09-03" }), now), "Reported Sep 3, 2020");
   assert.equal(reportDateLabel(report({ publishedDate: "2029-01-01" }), now), "Source date not reported");
-  assert.equal(reportDateLabel(report({ publishedDate: "2029-01-01", reportedDate: "2026-09-03" }), now), "Reported Sep 3");
+  assert.equal(reportDateLabel(report({ publishedDate: "2029-01-01", reportedDate: "2026-09-03" }), now), "Source date not reported");
 });
 
 test("date quality messages use understandable field names", () => {
@@ -281,6 +315,21 @@ test("contract rejects malformed dates, duplicate identities and dangling source
     readDataset({ ...dataset(), sources: [{ ...source, lastSuccess: "bad" }] }),
   );
   assert.throws(() => readDataset({ ...dataset(), schemaVersion: 2 }));
+});
+
+test("claim records require explicit classification and source observation; attribution links stay safe", () => {
+  const claimSource: Source = { ...source, id: "ransomlook", label: "RansomLook", homepage: "https://www.ransomlook.io/", attribution: {
+    name: "RansomLook", url: "https://www.ransomlook.io/", license: "CC BY 4.0", licenseUrl: "https://creativecommons.org/licenses/by/4.0/", changes: "Normalized and filtered for recent claims.",
+  } };
+  const claim = report({ sourceId: "ransomlook", signalType: "ransomware_claim", sourceObservedAt: "2026-09-05T17:00:00Z" });
+  const valid = { ...dataset([claim]), sources: [claimSource] };
+  assert.equal(readDataset(valid).reports[0].signalType, "ransomware_claim");
+  assert.throws(() => readDataset({ ...valid, reports: [{ ...claim, signalType: undefined }] }));
+  assert.throws(() => readDataset({ ...valid, reports: [{ ...claim, sourceObservedAt: undefined }] }));
+  assert.throws(() => readDataset(dataset([report({ signalType: "ransomware_claim" })])));
+  for (const field of ["url", "licenseUrl"]) assert.throws(() => readDataset({ ...valid, sources: [{ ...claimSource, attribution: { ...claimSource.attribution, [field]: "javascript:alert(1)" } }] }));
+  assert.throws(() => readDataset({ ...valid, sources: [{ ...claimSource, homepage: "javascript:alert(1)" }] }));
+  assert.throws(() => readDataset({ ...valid, sources: [{ ...claimSource, attribution: { ...claimSource.attribution, changes: [] } }] }));
 });
 
 test("newest revisions render first without duplicating the initial collection", () => {

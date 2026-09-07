@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile, rename, rm } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readDataset, filterReports, INITIAL_FILTERS } from "../src/lib/dashboard.ts";
+import { readDataset, filterReports, INITIAL_FILTERS, signalTime, utcDay } from "../src/lib/dashboard.ts";
 import { readSnapshot } from "../src/lib/snapshot-format.ts";
 
 export function splitSnapshot(input, { recentLimit = 200, bootstrapBudget = 1_000_000 } = {}) {
@@ -12,17 +12,21 @@ export function splitSnapshot(input, { recentLimit = 200, bootstrapBudget = 1_00
   const archive = Buffer.isBuffer(input) ? input : Buffer.from(input);
   const full = readDataset(JSON.parse(archive.toString("utf8")));
   const id = createHash("sha256").update(archive).digest("hex");
-  const sourceDateCounts = {}, changeTimeCounts = {};
+  const sourceDateCounts = {}, changeTimeCounts = {}, signalTimeCounts = {};
   for (const report of full.reports) {
-    const day = report.publishedDate ?? report.reportedDate;
-    if (day) sourceDateCounts[day] = (sourceDateCounts[day] || 0) + 1;
+    const at = signalTime(report);
+    if (Number.isFinite(at)) {
+      const day = utcDay(at), time = new Date(at).toISOString();
+      sourceDateCounts[day] = (sourceDateCounts[day] || 0) + 1;
+      signalTimeCounts[time] = (signalTimeCounts[time] || 0) + 1;
+    }
     const changed = new Date(Math.max(Date.parse(report.firstSeen), Date.parse(report.lastChanged))).toISOString();
     changeTimeCounts[changed] = (changeTimeCounts[changed] || 0) + 1;
   }
   const ordered = filterReports(full.reports, "all", INITIAL_FILTERS, new Set(), Date.parse(full.generatedAt));
   const bootstrap = { schemaVersion: 2, mode: full.mode, generatedAt: full.generatedAt, sources: full.sources,
     reports: ordered.slice(0, recentLimit), snapshot: { id, totalReports: full.reports.length,
-      archive: { url: "dashboard.json", sha256: id, bytes: archive.byteLength }, sourceDateCounts, changeTimeCounts } };
+      archive: { url: "dashboard.json", sha256: id, bytes: archive.byteLength }, sourceDateCounts, changeTimeCounts, signalTimeCounts } };
   let encoded = Buffer.from(JSON.stringify(bootstrap));
   // Whole records are retained; their evidence/history is never truncated to fit.
   while (encoded.byteLength > bootstrapBudget && bootstrap.reports.length > 1) {

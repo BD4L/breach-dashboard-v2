@@ -19,6 +19,8 @@ import {
   Info,
   Pause,
   Plus,
+  Plug,
+  Rss,
   RotateCcw,
   RefreshCw,
   Search,
@@ -36,6 +38,7 @@ import {
   formatDate,
   INITIAL_FILTERS,
   isRecent,
+  isRecentSignal,
   isLocalHostname,
   qualityMessage,
   readSavedIds,
@@ -45,6 +48,7 @@ import {
   safeUrl,
   SAVED_KEY,
   sourceHealth,
+  sourceKind,
   timestamp,
   utcDay,
   type Dataset,
@@ -54,7 +58,7 @@ import {
   type View,
 } from "../lib/dashboard";
 import { useSnapshot } from "../hooks/useSnapshot";
-import { needsArchive, snapshotRecentCount } from "../lib/snapshot-format";
+import { needsArchive, snapshotRecentCount, snapshotTodayCount } from "../lib/snapshot-format";
 
 const PAGE_SIZE = 10;
 const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
@@ -111,6 +115,8 @@ function HealthLabel({ source, now }: { source: Source; now: number }) {
 }
 
 function ReportBadge({ report, now }: { report: Report; now: number }) {
+  if (report.signalType === "ransomware_claim")
+    return <span className="report-badge claim"><AlertTriangle size={13} aria-hidden="true" />Unverified claim</span>;
   if (report.revision > 1)
     return (
       <span className="report-badge revised" role="img" aria-label={`Updated report, revision ${report.revision}`} title={`Updated report, revision ${report.revision}`}>
@@ -121,6 +127,16 @@ function ReportBadge({ report, now }: { report: Report; now: number }) {
   if (isRecent(report, now))
     return <span className="report-badge new" role="img" aria-label="Newly collected" title="Newly collected"><Plus size={13} aria-hidden="true" /></span>;
   return <span className="report-badge archived">Collected</span>;
+}
+
+function SourceAttribution({ source }: { source?: Source }) {
+  const attribution = source?.attribution;
+  if (!attribution) return null;
+  return <p className="source-attribution">
+    Data from <ExternalLink url={attribution.url}>{attribution.name}</ExternalLink>{" "}
+    under <ExternalLink url={attribution.licenseUrl}>{attribution.license}</ExternalLink>.
+    {" "}{attribution.changes}
+  </p>;
 }
 
 function DetailPane({
@@ -181,6 +197,8 @@ function DetailPane({
         <p className="detail-source">
           {source?.label || "Source not available"}
         </p>
+        {report.signalType === "ransomware_claim" && <p className="detail-hint">A ransomware group’s allegation observed by RansomLook. This claim has not been independently verified.</p>}
+        <SourceAttribution source={source} />
         {source && sourceHealth(source, now).tone !== "good" && (
           <div className="detail-source-health">
             <HealthLabel source={source} now={now} />
@@ -225,6 +243,10 @@ function DetailPane({
         <section className="detail-section">
           <h3>Reported timeline</h3>
           <dl className="timeline-fields">
+            {report.sourceObservedAt && <div>
+              <dt>Observed by source</dt>
+              <dd>{formatDate(report.sourceObservedAt, { hour: "numeric", minute: "2-digit" })} UTC</dd>
+            </div>}
             <div>
               <dt>Published</dt>
               <dd>{formatDate(report.publishedDate)}</dd>
@@ -457,9 +479,10 @@ function SourcesView({ data, now }: { data: Dataset; now: number }) {
                       : "Last valid collection is within 48 hours."}
                 </span>
                 <ExternalLink url={source.homepage}>
-                  Official source
+                  {source.id === "ransomlook" ? "RansomLook" : "Official source"}
                 </ExternalLink>
               </div>
+              <SourceAttribution source={source} />
             </article>
           );
         })}
@@ -467,11 +490,11 @@ function SourcesView({ data, now }: { data: Dataset; now: number }) {
       <div className="source-footnote">
         <Info size={17} />
         <div>
-          <strong>Public source reports, with their original context.</strong>
+          <strong>Public reports and claims, with their original context.</strong>
           <p>
             One breach can appear in more than one source. Reports are not
             automatically merged, and state counts are not added together.
-            Failed collection keeps the last valid data available.
+            Ransomware claims are unverified. Failed collection keeps the last valid data available.
           </p>
         </div>
       </div>
@@ -570,8 +593,8 @@ export default function Dashboard() {
     data?.sources.map((source) => [source.id, source]) || [],
   );
   const recentCount = index && !archiveLoaded ? snapshotRecentCount(index, now)
-    : data?.reports.filter((report) => isRecent(report, now)).length || 0;
-  const todayCount = useMemo(() => index && !archiveLoaded ? index.sourceDateCounts[utcDay(now)] || 0
+    : data?.reports.filter((report) => isRecentSignal(report, now)).length || 0;
+  const todayCount = useMemo(() => index && !archiveLoaded ? snapshotTodayCount(index, now)
     : countTodayReports(data?.reports || [], now), [data, index, archiveLoaded, now]);
   // Before the archive loads this is a device bookmark count, not a matched-report count.
   const savedCount = archiveLoaded ? data?.reports.filter((report) => saved.has(report.id)).length || 0 : saved.size;
@@ -673,13 +696,13 @@ export default function Dashboard() {
               className={`today-counter ${view === "today" ? "active" : ""}`}
               disabled={!data}
               aria-pressed={view === "today"}
-              aria-label={data ? `${data.mode === "demo" ? "Demo " : ""}Breaches today: ${todayCount} source reports. View notifications dated ${utcDay(now)} UTC.` : "Breaches today: waiting for the published snapshot"}
+              aria-label={data ? `${data.mode === "demo" ? "Demo " : ""}Reports and claims today: ${todayCount}. View source signals dated ${utcDay(now)} UTC.` : "Reports and claims today: waiting for the published snapshot"}
               aria-describedby="today-explanation"
-              title={`Source reports published today UTC, with reported date as fallback. Reports may describe the same breach; these are not occurrence dates. ${todayCoverage}.`}
+              title={`Reports published or reported today UTC, and claims observed by their source today. Claims are unverified; related records count separately. ${todayCoverage}.`}
               onClick={() => { setFilters(INITIAL_FILTERS); changeView("today"); }}
             >
               <CalendarDays size={17} aria-hidden="true" />
-              <span className="today-labels"><span>Breaches today</span><span className="today-coverage">{data ? todayCoverage : "Awaiting snapshot"}</span></span>
+              <span className="today-labels"><span>Reports &amp; claims today</span><span className="today-coverage">{data ? todayCoverage : "Awaiting snapshot"}</span></span>
               <strong className="today-count">{data ? todayCount.toLocaleString("en-US") : "—"}</strong>
             </button>
             <button className={`icon-button snapshot-refresh ${refreshing ? "is-refreshing" : ""}`} onClick={() => void refresh()} disabled={refreshing} aria-label="Refresh snapshot" title={refreshing ? "Checking for a published snapshot" : "Refresh the published snapshot"} aria-busy={refreshing}>
@@ -689,7 +712,7 @@ export default function Dashboard() {
         </div>
       </header>
       <main id="main-content" className="main-content">
-        <p className="sr-only" id="today-explanation">Counts source reports with a publication date of today UTC, using the reported date only when publication date is unavailable. Related reports count separately. This is not a count of distinct incidents or breaches occurring today. A zero may reflect incomplete or delayed collection. Updates follow published collection snapshots, checked every five minutes while this page is visible.</p>
+        <p className="sr-only" id="today-explanation">Counts reports published today UTC, with reported date as fallback, and unverified claims observed by their source today. Related records count separately. This is not a count of confirmed breaches or occurrence dates. A zero may reflect incomplete or delayed collection. Published snapshots are checked every five minutes while this page is visible.</p>
         <div className={`snapshot-update-bar ${error ? "update-error" : ""}`}>
           <span>Auto-refresh every 5 min (UTC)</span>
           <span id="snapshot-check-status" role="status" aria-live="polite" title={error || (lastCheckedAt ? new Date(lastCheckedAt).toISOString() : undefined)}>{checkStatus}</span>
@@ -731,14 +754,14 @@ export default function Dashboard() {
             {data.mode === "live" && (
               <div className="live-banner">
                 <Database size={14} aria-hidden="true" />
-                Collected public reports{" "}
+                Public reports and claims{" "}
                 <span>Snapshot only. Verify original sources before use.</span>
               </div>
             )}
             <div className="page-heading">
               <div>
                 <h1>Breach reports</h1>
-                <p>Find what changed. Follow the evidence.</p>
+                <p>Recent disclosures and claims. Follow the evidence.</p>
               </div>
               <div className="snapshot-stamp">
                 <span>Collection snapshot</span>
@@ -761,10 +784,10 @@ export default function Dashboard() {
             <nav className="view-tabs" aria-label="Report views">
               {(
                 [
-                  { id: "recent", label: "New & updated", count: recentCount },
+                  { id: "recent", label: "Latest", count: recentCount },
                   {
                     id: "all",
-                    label: "All reports",
+                    label: "All history",
                     count: totalReports,
                   },
                   { id: "saved", label: "Saved", count: savedCount },
@@ -810,7 +833,7 @@ export default function Dashboard() {
                   </span>
                 )}
                 {view === "today" && (
-                  <span className="freshness-context">Notifications dated {formatDate(utcDay(now))} UTC</span>
+                  <span className="freshness-context">Source signals dated {formatDate(utcDay(now))} UTC</span>
                 )}
                 {view === "saved" && (
                   <span className="freshness-context">
@@ -920,6 +943,7 @@ export default function Dashboard() {
                         }
                       >
                         <option value="all">Any status</option>
+                        <option value="claims">Unverified claims</option>
                         <option value="updated">Updated reports</option>
                         <option value="flagged">Needs verification</option>
                       </select>
@@ -948,7 +972,7 @@ export default function Dashboard() {
                         updateFilter("sort", event.target.value)
                       }
                     >
-                      <option value="latest">Latest collection change</option>
+                      <option value="latest">Latest source date</option>
                       <option value="affected">Largest reported count</option>
                       <option value="organization">Organization A–Z</option>
                     </select>
@@ -956,10 +980,10 @@ export default function Dashboard() {
                   </label>
                 </div>
                 {view === "recent" && (
-                  <p className="queue-note"><Info size={13} />New means newly collected here. A first collection can include older reports.</p>
+                  <p className="queue-note"><Info size={13} />Last 7 days by source observation, publication, or reported date. Older and undated records remain in All history.</p>
                 )}
                 {view === "today" && (
-                  <p className="queue-note"><CalendarDays size={13} />Today’s notifications ({formatDate(utcDay(now))}, UTC), using publication date or reported-date fallback. These are source reports, not distinct breaches or occurrence dates. Collection may be incomplete.</p>
+                  <p className="queue-note"><CalendarDays size={13} />Reports published or reported today and claims observed by their source today ({formatDate(utcDay(now))}, UTC). Claims are unverified and related records count separately.</p>
                 )}
                 {view === "saved" && (
                   <div className="saved-note">
@@ -983,7 +1007,7 @@ export default function Dashboard() {
                     tabIndex={-1}
                     aria-label="Report list"
                   >
-                    {waitingForArchive || (!archiveLoaded && !filtered.length) ? (
+                    {waitingForArchive || (!archiveLoaded && !filtered.length && recentCount > 0) ? (
                       <div className="empty-state" role="status">
                         <FolderSearch size={31} strokeWidth={1.2} />
                         <h2>{archiveStatus === "loading" ? "Loading the full archive" : "Full archive needed"}</h2>
@@ -1015,7 +1039,7 @@ export default function Dashboard() {
                                 </Info>
                               </th>
                               <th scope="col" className="observed-column">
-                                Observed
+                                Collected
                               </th>
                               <th scope="col" className="bookmark-column">
                                 <span className="sr-only">Save report</span>
@@ -1044,7 +1068,7 @@ export default function Dashboard() {
                                   </button>
                                   <div className="report-meta">
                                     <ReportBadge report={report} now={now} />
-                                    <span className="published-text">
+                                    <span className="published-text" title={reportDateLabel(report, now)}>
                                       {reportDateLabel(report, now)}
                                     </span>
                                     {report.qualityFlags.length > 0 && (
@@ -1070,9 +1094,7 @@ export default function Dashboard() {
                                     )}
                                   </span>
                                   <span className="cell-subtext">
-                                    {report.sourceId === "hhs"
-                                      ? "Federal portal"
-                                      : "State register"}
+                                    {sourceKind(report.sourceId)}
                                   </span>
                                 </td>
                                 <td className="count-cell">
@@ -1177,9 +1199,9 @@ export default function Dashboard() {
                             : view === "saved"
                               ? "Keep a report within reach"
                               : view === "today"
-                                ? "No reports dated today in this snapshot"
+                                ? "No reports or claims dated today"
                               : view === "recent"
-                                ? "No new or changed reports"
+                                ? "No recent reports or claims"
                                 : "No reports collected yet"}
                         </h2>
                         <p>
@@ -1188,9 +1210,9 @@ export default function Dashboard() {
                             : view === "saved"
                               ? "Use the bookmark beside any report to return to it here. Your saved list stays on this device."
                               : view === "today"
-                                ? "This snapshot contains no source notifications published or reported today UTC. Collection can lag or be incomplete; this does not establish that no breaches occurred today. Check source health for coverage."
+                                ? "This snapshot has no reports published or reported today UTC, or claims observed today. Collection can lag or be incomplete. Check source health for coverage."
                               : view === "recent"
-                                ? "Nothing was first collected or revised in the last seven days. Check source health to confirm collection is current."
+                                ? "No source observation, publication, or reported dates fall within the last seven days. All history keeps older and undated records. Check Sources for collection status."
                                 : "Reports will appear after the next successful collection. Check Sources for the current collection status."}
                         </p>
                         <button
@@ -1216,8 +1238,7 @@ export default function Dashboard() {
                     )}
                     <p className="table-context">
                       <Info size={13} />
-                      Each row is a source report. Related reports may describe
-                      the same breach.
+                      Each row is a source report or an unverified claim. Related records may describe the same incident.
                     </p>
                   </div>
                   {selected && (
@@ -1239,7 +1260,10 @@ export default function Dashboard() {
               </>
             )}
             <footer className="page-footer">
-              <span>Public notification research</span>
+              <div className="feed-links">
+                <a href={`${BASE}data/recent.xml`} title="Subscribe to recent reports and claims"><Rss size={14} aria-hidden="true" />RSS</a>
+                <a href="https://github.com/BD4L/breach-dashboard-v2/tree/main/agent" target="_blank" rel="noopener noreferrer" title="Connect a local agent with MCP"><Plug size={14} aria-hidden="true" />Connect an agent</a>
+              </div>
               <span>Dates shown in UTC</span>
             </footer>
           </>

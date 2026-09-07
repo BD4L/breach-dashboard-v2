@@ -16,6 +16,7 @@ export interface Source {
     new: number;
     changed: number;
   };
+  attribution?: { name: string; url: string; license: string; licenseUrl: string; changes: string };
 }
 export interface Report {
   id: string;
@@ -41,6 +42,8 @@ export interface Report {
   sourceUrl: string;
   noticeUrl: string | null;
   summary: string;
+  signalType?: "ransomware_claim";
+  sourceObservedAt?: string;
   qualityFlags: { code: string; message: string }[];
   evidence: { retrievedAt: string; contentHash: string; parserVersion: string };
   history: {
@@ -131,6 +134,11 @@ export function readDataset(value: unknown): Dataset {
       )
     )
       return invalid();
+    if (!safeUrl(s.homepage as string)) return invalid();
+    if (s.attribution !== undefined && (!object(s.attribution) ||
+        !["name", "url", "license", "licenseUrl", "changes"].every(
+          key => typeof (s.attribution as Record<string, unknown>)[key] === "string",
+        ) || !safeUrl(s.attribution.url as string) || !safeUrl(s.attribution.licenseUrl as string))) return invalid();
   }
   const sourceIds = new Set(value.sources.map((s) => s.id));
   const reportIds = new Set<string>();
@@ -191,6 +199,10 @@ export function readDataset(value: unknown): Dataset {
     )
       return invalid();
     reportIds.add(r.id as string);
+    if ((r.signalType !== undefined && r.signalType !== "ransomware_claim") ||
+        (r.sourceId === "ransomlook" && (r.signalType !== "ransomware_claim" || !validTimestamp(r.sourceObservedAt))) ||
+        (r.signalType === "ransomware_claim" && r.sourceId !== "ransomlook") ||
+        (r.sourceObservedAt !== undefined && !validTimestamp(r.sourceObservedAt))) return invalid();
     if (
       !["firstSeen", "lastSeen", "lastChanged"].every((k) =>
         validTimestamp(r[k]),
@@ -239,6 +251,14 @@ export function safeUrl(value: string | null | undefined): string | null {
 export function timestamp(value: string | null | undefined): number {
   return value ? Date.parse(value) : NaN;
 }
+export function signalTime(report: Report): number {
+  return timestamp(report.sourceObservedAt ?? report.publishedDate ?? report.reportedDate);
+}
+
+export function isRecentSignal(report: Report, now: number, days = 7): boolean {
+  const at = signalTime(report);
+  return Number.isFinite(at) && at >= now - days * DAY && at <= now;
+}
 export function isRecent(report: Report, now: number): boolean {
   const time = Math.max(
     timestamp(report.firstSeen) || 0,
@@ -252,9 +272,8 @@ export function utcDay(now: number): string {
 }
 
 export function isReportFromToday(report: Report, now: number): boolean {
-  // Source notification dates only. An initial import is not a new occurrence.
-  const date = report.publishedDate ?? report.reportedDate;
-  return date === utcDay(now);
+  const at = signalTime(report);
+  return Number.isFinite(at) && at <= now && utcDay(at) === utcDay(now);
 }
 
 export function countTodayReports(reports: Report[], now: number): number {
@@ -338,11 +357,19 @@ export function affectedCount(affected: Report["affected"]): string {
   return prefix + affected.count.toLocaleString("en-US");
 }
 
-export function reportSourceDate(report: Report, now: number): { label: "Published" | "Reported"; date: string } | null {
-  for (const [label, date] of [["Published", report.publishedDate], ["Reported", report.reportedDate]] as const) {
-    if (date && validDate(date) && timestamp(date) <= now + 5 * 60_000) return { label, date };
-  }
-  return null;
+export function sourceKind(sourceId: string): string {
+  if (sourceId === "ransomlook") return "Ransomware claims";
+  if (sourceId === "sec") return "SEC filings";
+  if (sourceId === "hhs") return "Federal portal";
+  return "State register";
+}
+
+export function reportSourceDate(report: Report, now: number): { label: "Observed" | "Published" | "Reported"; date: string } | null {
+  const at = signalTime(report);
+  if (!Number.isFinite(at) || at > now) return null;
+  if (report.sourceObservedAt) return { label: "Observed", date: report.sourceObservedAt };
+  if (report.publishedDate) return { label: "Published", date: report.publishedDate };
+  return { label: "Reported", date: report.reportedDate! };
 }
 
 export function reportDateLabel(report: Report, now: number): string {
@@ -362,7 +389,7 @@ export function filterReports(
   const query = filters.query.trim().toLocaleLowerCase("en-US");
   return reports
     .filter((r) => {
-      if (view === "recent" && !isRecent(r, now)) return false;
+      if (view === "recent" && !isRecentSignal(r, now)) return false;
       if (view === "today" && !isReportFromToday(r, now)) return false;
       if (view === "saved" && !saved.has(r.id)) return false;
       if (filters.source !== "all" && r.sourceId !== filters.source)
@@ -378,6 +405,7 @@ export function filterReports(
       if (filters.quality === "flagged" && r.qualityFlags.length === 0)
         return false;
       if (filters.quality === "updated" && r.revision < 2) return false;
+      if (filters.quality === "claims" && r.signalType !== "ransomware_claim") return false;
       return (
         !query ||
         [r.organization, r.nativeId, r.summary, ...r.dataTypes]
@@ -392,7 +420,6 @@ export function filterReports(
       if (filters.sort === "affected")
         return (b.affected.count ?? -1) - (a.affected.count ?? -1);
       return (
-        (timestamp(b.lastChanged) || 0) - (timestamp(a.lastChanged) || 0) ||
         (timestamp(reportSourceDate(b, now)?.date) || 0) - (timestamp(reportSourceDate(a, now)?.date) || 0) ||
         a.organization.localeCompare(b.organization)
       );
@@ -420,6 +447,10 @@ export function fieldLabel(value: string): string {
         published_date: "Publication date",
         reportedDate: "Reported date",
         reported_date: "Reported date",
+        sourceObservedAt: "Source observation time",
+        source_observed_at: "Source observation time",
+        signalType: "Report classification",
+        signal_type: "Report classification",
         breachStart: "Breach start date",
         breach_start: "Breach start date",
         breachEnd: "Breach end date",

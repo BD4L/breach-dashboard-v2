@@ -29,6 +29,10 @@ TRANSPORT = 'local_headed_chrome_javascript_disabled'
 _CHALLENGE = re.compile(rb'<title[^>]*>\s*(?:Access Denied|Request Rejected|Just a moment)|Request unsuccessful\. Incapsula|Your Request Originates from an Undeclared Automated Tool', re.I)
 
 
+class _TransientServerError(SourceError):
+    pass
+
+
 def transport_context():
     """Describe execution only; never change browser/network behavior."""
     if os.environ.get('GITHUB_ACTIONS') == 'true':
@@ -175,10 +179,29 @@ class LocalBrowserClient:
         self._cdp.send('Fetch.enable',{'patterns':[{'urlPattern':'*','requestStage':'Request'}], 'handleAuthRequests':True})
 
     def request(self, url, *, data=None, headers=None):
+        retry_deadline = None
+        for attempt in range(2):
+            try:
+                return self._request_once(url, data=data, headers=headers, retry_deadline=retry_deadline)
+            except _TransientServerError as error:
+                if attempt:
+                    self._stop(f'{error}; SEC retry limit reached')
+                    raise SourceError(self._failure) from error
+                if self.requests >= self.max_requests:
+                    raise SourceError('Local browser request budget exhausted before SEC retry') from error
+                if self.bytes >= self.max_bytes:
+                    raise SourceError('Local browser byte budget exhausted before SEC retry') from error
+                if self._remaining() <= 1:
+                    raise SourceError('Local browser time budget exhausted before SEC retry') from error
+                # Backoff and the retry share the first navigation's 30s budget.
+                retry_deadline = self._request_deadline
+                time.sleep(1)
+
+    def _request_once(self, url, *, data=None, headers=None, retry_deadline=None):
         expected = approved_url(self.source,url)
         if data is not None or headers:
             raise SourceError('Local browser permits GET with ordinary browser headers only')
-        self._request_deadline = self.deadline
+        self._request_deadline = retry_deadline if retry_deadline is not None else self.deadline
         self._remaining()
         if self.requests >= self.max_requests: raise SourceError('Local browser request budget exhausted')
         if self._last is not None:
@@ -189,7 +212,7 @@ class LocalBrowserClient:
         self._expected = expected
         self._seen_document = False
         self._request_bytes = 0
-        self._request_deadline = min(self.deadline,time.monotonic()+30)
+        self._request_deadline = min(self._request_deadline,time.monotonic()+30)
         self._last = time.monotonic()
         self.requests += 1
         before = self.bytes
@@ -198,23 +221,26 @@ class LocalBrowserClient:
             response = self._page.goto(url,wait_until='domcontentloaded',timeout=max(1,int(self._remaining()*1000)))
             self._remaining()
             if response is None: raise SourceError('Local browser navigation had no response')
-            if response.status != 200:
+            retryable = self.source == 'sec' and response.status in (500, 502, 503, 504)
+            if response.status != 200 and not retryable:
                 self._stop(f'HTTP {response.status}; local browser stopped without retry')
                 raise SourceError(self._failure)
             if approved_url(self.source,response.url) != expected:
                 raise SourceError('Local browser returned an unexpected publication URL')
             content_type = response.headers.get('content-type','')
-            if not any(kind in content_type.lower() for kind in ('json','html')):
+            if not retryable and not any(kind in content_type.lower() for kind in ('json','html')):
                 raise SourceError('Local browser supports only public JSON/HTML listings; downloads are not collected')
             content = response.body()
             self._remaining()
             self.bytes = max(self.bytes,before+len(content))
-            if not content or len(content) > self.max_response_bytes or self.bytes > self.max_bytes:
+            if (not content and not retryable) or len(content) > self.max_response_bytes or self.bytes > self.max_bytes:
                 self._stop('Local browser returned an empty or oversized response')
                 raise SourceError(self._failure)
             if _CHALLENGE.search(content) or (b'_Incapsula_Resource' in content and len(content)<5000):
                 self._stop('Local browser received an access challenge; no challenge was solved')
                 raise SourceError(self._failure)
+            if retryable:
+                raise _TransientServerError(f'HTTP {response.status}')
             return Response(response.url,content,content_type)
         except SourceError:
             raise
@@ -238,8 +264,10 @@ class LocalBrowserClient:
                 setattr(self,name,None)
 
 
-def collect_local(source, *, max_pages=None):
+def collect_local(source, *, max_pages=None, window_days=None):
     if source not in LOCAL_SOURCES: raise SourceError('Unknown local browser source')
+    if window_days is not None and (source != 'sec' or type(window_days) is not int or window_days not in (3, 30)):
+        raise SourceError('window_days is only supported for SEC: 3 for discovery or 30 for reconciliation')
     if source == 'new_jersey':
         from .rediscovered_nj import collect
         result = collect(source,max_pages=max_pages,client_factory=lambda **kw:LocalBrowserClient(source,**kw),
@@ -252,7 +280,8 @@ def collect_local(source, *, max_pages=None):
                 result = collect_nh_documents(client,max_pages=max_pages,today=datetime.now(timezone.utc).date())
             else:
                 from .rediscovered_sec import collect_with_client
-                result = collect_with_client(client,max_pages=max_pages,today=datetime.now(timezone.utc).date())
+                result = collect_with_client(client,max_pages=max_pages,today=datetime.now(timezone.utc).date(),
+                                             window_days=3 if window_days is None else window_days)
             result.evidence.update({'requests':client.requests,'bytes':client.bytes})
         finally: client.close()
     evidence, message = transport_context()
@@ -261,15 +290,18 @@ def collect_local(source, *, max_pages=None):
     return result
 
 
-def fetch(source, output, *, timeout=600, max_pages=None):
+def fetch(source, output, *, timeout=600, max_pages=None, window_days=None):
     if source not in LOCAL_SOURCES or not math.isfinite(timeout) or not 0 < timeout <= 900:
         raise ValueError('Choose an approved local source and a deadline in (0,900] seconds')
+    if window_days is not None and (source != 'sec' or type(window_days) is not int or window_days not in (3, 30)):
+        raise ValueError('window_days is only supported for SEC: 3 for discovery or 30 for reconciliation')
     envelope={'schemaVersion':1,'sourceId':source,'attemptedAt':timestamp()}
     try:
         with tempfile.TemporaryDirectory(prefix='breach-local-browser-') as directory:
             result_path=Path(directory)/'worker.json'
             command=[sys.executable,'-m','ingestion.local_browser','_worker','--source',source,'--output',str(result_path)]
             if max_pages is not None: command += ['--max-pages',str(max_pages)]
+            if window_days is not None: command += ['--window-days',str(window_days)]
             status=supervise(command,timeout=timeout)
             value=read_json(result_path) if result_path.is_file() else {}
             if status != 0 or value.get('error') or 'collection' not in value:
@@ -291,10 +323,12 @@ def main(argv=None):
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--max-pages',type=int)
     parser.add_argument('--timeout',type=float,default=600)
+    parser.add_argument('--window-days',type=int,choices=(3,30),help='SEC only: 3 calendar days for discovery (default) or 30 for reconciliation, including today')
     args=parser.parse_args(argv)
-    if args.command=='fetch': return fetch(args.source,args.output,timeout=args.timeout,max_pages=args.max_pages)
+    if args.window_days is not None and args.source != 'sec': parser.error('--window-days is only supported for SEC')
+    if args.command=='fetch': return fetch(args.source,args.output,timeout=args.timeout,max_pages=args.max_pages,window_days=args.window_days)
     try:
-        result=collect_local(args.source,max_pages=args.max_pages)
+        result=collect_local(args.source,max_pages=args.max_pages,window_days=args.window_days)
         atomic_json(args.output,{'collection':asdict(result)});return 0
     except Exception as exc:
         atomic_json(args.output,{'error':f'{type(exc).__name__}: {exc}'[:2000]});return 1

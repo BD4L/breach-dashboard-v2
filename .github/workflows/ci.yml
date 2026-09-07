@@ -42,5 +42,9 @@ jobs:
       - run: npm run build
         working-directory: frontend
       - run: python scripts/check_public_boundary.py
+      - run: npm ci --ignore-scripts
+        working-directory: agent
+      - run: npm test
+        working-directory: agent
 
 # Validation remains read-only. Collection and publishing have separate permissions.

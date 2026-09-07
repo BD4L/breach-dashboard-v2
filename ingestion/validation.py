@@ -63,6 +63,25 @@ def normalize_report(report: Report, *, source_id: str, now: datetime) -> dict:
 
     content = {"sourceId": source_id, "nativeId": native_id,
                "organization": organization, "sourceUrl": report.source_url}
+    # Optional signal fields leave existing report fingerprints unchanged.
+    if report.signal_type is not None:
+        if report.signal_type != "ransomware_claim" or source_id != "ransomlook":
+            raise InvalidReport("Unrecognized signal classification for this source.")
+        content["signalType"] = report.signal_type
+    if source_id == "ransomlook" and report.signal_type != "ransomware_claim":
+        raise InvalidReport("Ransomware claims must retain their unverified classification.")
+    if source_id == "ransomlook" and report.source_observed_at is None:
+        raise InvalidReport("Ransomware claims need their provider observation timestamp.")
+    if report.source_observed_at is not None:
+        try:
+            observed = datetime.fromisoformat(report.source_observed_at.replace("Z", "+00:00"))
+            if observed.tzinfo is None:
+                raise ValueError("Missing timezone")
+        except (ValueError, AttributeError, TypeError) as exc:
+            raise InvalidReport("Source observation time must be a timezone-aware timestamp.") from exc
+        if observed > now:
+            raise InvalidReport("Source observation time cannot be in the future.")
+        content["sourceObservedAt"] = timestamp(observed)
     today = utc_now(now).date()
     for attribute, exported in DATE_FIELDS.items():
         raw = getattr(report, attribute)

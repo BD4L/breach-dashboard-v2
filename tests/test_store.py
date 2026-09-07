@@ -8,9 +8,17 @@ from unittest.mock import patch
 
 from ingestion.models import Collection, Report
 from ingestion.store import ModeMismatch, Store
+from ingestion.validation import InvalidReport, normalize_report
 
 
 NOW = datetime(2026, 9, 5, 18, tzinfo=timezone.utc)
+# Persisted by the pre-claim normalizer; optional metadata must not revise this report.
+LEGACY_CONTENT = ('{"affected":{"count":40,"jurisdiction":"MA","qualifier":"exact","scope":"state"},'
+                  '"breachEnd":null,"breachStart":null,"dataTypes":["Medical information","Names"],'
+                  '"discoveryDate":null,"nativeId":"2026-123","noticeUrl":null,"organization":"Example Health",'
+                  '"publishedDate":"2026-09-01","qualityFlags":[],"reportedDate":null,"sourceId":"massachusetts",'
+                  '"sourceUrl":"https://www.mass.gov/example-report.pdf","summary":""}')
+LEGACY_HASH = "c2d58c2e5a928195bc86791fb81b80296f34f79eea55643b5796f54d4085272e"
 
 
 def report(**changes):
@@ -44,8 +52,11 @@ class StoreTests(unittest.TestCase):
     def test_idempotent_retrieval_does_not_create_content_revision(self):
         first = self.store.apply_collection(collection(report()), NOW)
         initial = self.current()["reports"][0]
+        stored = self.store.connection.execute("SELECT content_json, content_hash FROM reports").fetchone()
+        self.assertEqual(tuple(stored), (LEGACY_CONTENT, LEGACY_HASH))
         later = NOW + timedelta(hours=2)
-        second = self.store.apply_collection(collection(report(parser_version="2", data_types=["Medical information", "Names", "Names"])), later)
+        second = self.store.apply_collection(collection(report(parser_version="2", data_types=["Medical information", "Names", "Names"],
+                                                               signal_type=None, source_observed_at=None)), later)
         latest = self.current()["reports"][0]
         self.assertEqual(first["counts"]["new"], 1)
         self.assertEqual(second["status"], "unchanged")
@@ -57,6 +68,56 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(latest["evidence"]["parserVersion"], "2")
         self.assertEqual(latest["revision"], 1)
         self.assertEqual(len(latest["history"]), 1)
+        self.assertEqual(tuple(self.store.connection.execute("SELECT content_json, content_hash FROM reports").fetchone()),
+                         (LEGACY_CONTENT, LEGACY_HASH))
+        self.assertEqual(self.store.connection.execute("SELECT COUNT(*) FROM revisions").fetchone()[0], 1)
+
+    def test_claim_contract_requires_source_classification_and_observation_together(self):
+        valid = report(source_id="ransomlook", signal_type="ransomware_claim", source_observed_at="2026-09-05T17:00:00Z")
+        for changes in ({"signal_type": None}, {"source_observed_at": None},
+                        {"signal_type": "confirmed_breach"}, {"source_id": "massachusetts"}):
+            record = replace(valid, **changes)
+            with self.subTest(changes=changes), self.assertRaises(InvalidReport):
+                normalize_report(record, source_id=record.source_id, now=NOW)
+        with self.assertRaises(InvalidReport):
+            normalize_report(valid, source_id="massachusetts", now=NOW)
+
+    def test_source_observation_rejects_future_naive_and_malformed_times(self):
+        for observed in ("2026-09-05T18:00:01Z", "2026-09-05T18:00:00.001Z",
+                         "2026-09-05T13:00:01-05:00", "2026-09-05T17:00:00", "2026-09-05", "invalid"):
+            record = report(source_id="ransomlook", signal_type="ransomware_claim", source_observed_at=observed)
+            with self.subTest(observed=observed), self.assertRaises(InvalidReport):
+                normalize_report(record, source_id="ransomlook", now=NOW)
+
+    def test_claim_identity_classification_and_attribution_survive_reopen_and_export(self):
+        claim = report(source_id="ransomlook", native_id="group-claim-1", signal_type="ransomware_claim",
+                       source_observed_at="2026-09-05T12:00:00-05:00", published_date=None,
+                       source_url="https://www.ransomlook.io/group/example", summary="Unverified ransomware group claim.")
+        result = self.store.apply_collection(Collection("ransomlook", [claim], 1), NOW)
+        self.assertEqual(result["status"], "healthy")
+        original = self.current()["reports"][0]
+        with Store(self.path) as reopened:
+            same = reopened.apply_collection(Collection("ransomlook", [replace(claim, source_observed_at="2026-09-05T17:00:00Z")], 1),
+                                             NOW + timedelta(hours=1))
+            self.assertEqual(same["status"], "unchanged")
+            path = Path(self.directory.name) / "claims.json"
+            exported = reopened.export(path, NOW + timedelta(hours=1))
+            self.assertEqual(json.loads(path.read_text()), exported)
+            saved = exported["reports"][0]
+            self.assertEqual(saved["id"], original["id"])
+            self.assertEqual(saved["firstSeen"], original["firstSeen"])
+            self.assertEqual(saved["evidence"]["contentHash"], original["evidence"]["contentHash"])
+            self.assertEqual(saved["signalType"], "ransomware_claim")
+            self.assertEqual(saved["sourceObservedAt"], "2026-09-05T17:00:00Z")
+            self.assertEqual(saved["revision"], 1)
+            self.assertEqual(len(saved["history"]), 1)
+            provider = next(s for s in exported["sources"] if s["id"] == "ransomlook")
+            self.assertEqual(provider["attribution"], {
+                "name": "RansomLook", "url": "https://www.ransomlook.io/", "license": "CC BY 4.0",
+                "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+                "changes": "Metadata normalized; claims are not independently verified.",
+            })
+            self.assertEqual(provider["status"], "unchanged")
 
     def test_changed_record_retains_identity_first_seen_and_full_local_revision(self):
         self.store.apply_collection(collection(report()), NOW)

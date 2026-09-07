@@ -74,4 +74,12 @@ EXTRA_SOURCES = {'indiana': {'id': 'indiana',
          'label': 'SEC EDGAR',
          'jurisdiction': 'US',
          'method': 'Official Item 1.05 search metadata',
-         'homepage': 'https://www.sec.gov/edgar/search/'}}
+         'homepage': 'https://www.sec.gov/edgar/search/'},
+ 'ransomlook': {'id': 'ransomlook',
+               'label': 'RansomLook',
+               'jurisdiction': 'Global',
+               'method': 'Unverified ransomware group claims',
+               'homepage': 'https://www.ransomlook.io/',
+               'attribution': {'name': 'RansomLook', 'url': 'https://www.ransomlook.io/',
+                               'license': 'CC BY 4.0', 'licenseUrl': 'https://creativecommons.org/licenses/by/4.0/',
+                               'changes': 'Metadata normalized; claims are not independently verified.'}}}

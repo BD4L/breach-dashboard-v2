@@ -1,5 +1,21 @@
 # Source fixture provenance
 
+## RansomLook early-signal metadata (September 7, 2026)
+
+`ransomlook-posts.json` contains the first three metadata rows from one bounded,
+anonymous HTTPS read of
+https://www.ransomlook.io/api/posts?from=2026-09-05&to=2026-09-07 . The complete
+response was HTTP 200, `application/json`, 7,931 bytes, and 70 rows. The fixture
+retains exact source group names, titles and discovery timestamps; it is a reduced
+excerpt, not complete coverage or an independently confirmed breach list. No
+source HTML, screenshot, onion page, victim website, or leaked document was
+requested. Source: [RansomLook](https://www.ransomlook.io/about), whose website,
+API responses and datasets are licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The fixture is reduced
+and reformatted; test mutations are synthetic.
+
+## Government source fixtures (September 5, 2026)
+
 Captured September 5, 2026 by ordinary, bounded HTTPS public reads. No source access controls were bypassed. These are parser excerpts, **not complete snapshots**.
 
 - `ca-list.html`: first three report rows and complete pagination controls from https://oag.ca.gov/privacy/databreach/list. Real source values and IDs retained; unrelated markup and later rows removed. Original response SHA-256 `341aebc43fb9e35f7f2ede09226c73990ea4187c98c8a7ae58d9939fc08d9ce4`.

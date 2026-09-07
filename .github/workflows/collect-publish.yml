@@ -2,7 +2,9 @@ name: Collect public sources and publish
 
 on:
   schedule:
-    - cron: '17,47 * * * *'
+    - cron: '17 0 * * *'
+    - cron: '17 1-23 * * *'
+    - cron: '47 * * * *'
   workflow_dispatch:
     inputs:
       source:
@@ -10,6 +12,11 @@ on:
         default: all
         required: true
         type: string
+      sec_window_days:
+        description: 'SEC discovery window; 30-day reconciliation also runs daily'
+        default: '3'
+        type: choice
+        options: ['3', '30']
 
 permissions:
   contents: read
@@ -40,7 +47,7 @@ jobs:
           requested = os.environ['REQUESTED_SOURCE']
           if requested != 'all' and requested not in SOURCES:
               raise SystemExit('Unknown source ID')
-          priority = ['california', 'sec', 'new_hampshire', 'massachusetts']
+          priority = ['ransomlook', 'sec', 'california', 'new_hampshire', 'massachusetts']
           sources = priority + [source for source in SOURCES if source not in priority] if requested == 'all' else [requested]
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('sources=' + json.dumps(sources) + '\n')
@@ -82,7 +89,11 @@ jobs:
         if: contains(fromJSON('["new_hampshire","new_jersey","sec"]'), matrix.source)
         env:
           SOURCE_ID: ${{ matrix.source }}
-        run: xvfb-run -a python -m ingestion.local_browser fetch --source "$SOURCE_ID" --output "results/$SOURCE_ID.json" --timeout 600
+          SEC_WINDOW_DAYS: ${{ inputs.sec_window_days || (github.event.schedule == '17 0 * * *' && '30' || '3') }}
+        run: |
+          args=()
+          if [ "$SOURCE_ID" = sec ]; then args+=(--window-days "$SEC_WINDOW_DAYS"); fi
+          xvfb-run -a python -m ingestion.local_browser fetch --source "$SOURCE_ID" --output "results/$SOURCE_ID.json" --timeout 600 "${args[@]}"
       - name: Retain source result even when collection is incomplete
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

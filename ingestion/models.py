@@ -33,6 +33,8 @@ class Report:
     summary: str = ""
     quality_flags: list[dict[str, str]] = field(default_factory=list)
     parser_version: str = "1"
+    source_observed_at: str | None = None
+    signal_type: str | None = None
 
 @dataclass
 class Collection:
