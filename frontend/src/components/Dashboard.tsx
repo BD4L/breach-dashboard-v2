@@ -24,7 +24,6 @@ import {
   RotateCcw,
   RefreshCw,
   Search,
-  SlidersHorizontal,
   X,
 } from "lucide-react";
 import {
@@ -50,6 +49,7 @@ import {
   sourceHealth,
   sourceKind,
   timestamp,
+  todayOfficialFilters,
   utcDay,
   type Dataset,
   type Filters,
@@ -58,12 +58,33 @@ import {
   type View,
 } from "../lib/dashboard";
 import { useSnapshot } from "../hooks/useSnapshot";
+import MultiSelectFilter from "./MultiSelectFilter";
 import { needsArchive, snapshotRecentCount, snapshotTodayCount } from "../lib/snapshot-format";
 
 const PAGE_SIZE = 10;
 const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const shortSource = (source?: Source) =>
   source?.id === "hhs" ? "HHS OCR" : source?.label || "Unknown source";
+const SIZE_OPTIONS = [
+  { value: "1000", label: "1,000+ reported" },
+  { value: "100000", label: "100,000+ reported" },
+  { value: "unknown", label: "Count not reported" },
+];
+const STATUS_OPTIONS = [
+  { value: "updated", label: "Updated reports" },
+  { value: "flagged", label: "Needs verification" },
+];
+const KIND_OPTIONS = [
+  { value: "official", label: "Official notices and filings" },
+  { value: "claims", label: "Unverified ransomware claims" },
+];
+const SEARCH_OPTIONS = [
+  { value: "organization", label: "Organization" },
+  { value: "ids", label: "Report IDs" },
+  { value: "summary", label: "Summary" },
+  { value: "dataTypes", label: "Data involved" },
+  { value: "source", label: "Source name" },
+];
 
 function displayChangeValue(value: unknown, field: string): string {
   const formatted = changeValue(value, field);
@@ -561,7 +582,7 @@ export default function Dashboard() {
         if (view === "sources") setView("all");
         setTimeout(() => searchRef.current?.focus(), 0);
       }
-      if (event.key === "Escape" && mobileDetail) {
+      if (event.key === "Escape" && mobileDetail && !event.defaultPrevented) {
         setMobileDetail(false);
         reportListRef.current?.focus();
       }
@@ -578,7 +599,7 @@ export default function Dashboard() {
     if (archiveRequired && data && !archiveLoaded) void loadArchive();
   }, [archiveRequired, data?.generatedAt, index?.id, loadArchive]);
   const filtered = useMemo(
-    () => waitingForArchive ? [] : filterReports(data?.reports || [], view, filters, saved, now),
+    () => waitingForArchive ? [] : filterReports(data?.reports || [], view, filters, saved, now, data?.sources),
     [data, view, filters, saved, now, waitingForArchive],
   );
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -603,9 +624,14 @@ export default function Dashboard() {
       .length || 0;
   const filtersActive =
     filters.query !== "" ||
-    filters.source !== "all" ||
-    filters.size !== "all" ||
-    filters.quality !== "all";
+    filters.source !== null ||
+    filters.size !== null ||
+    filters.quality !== null ||
+    filters.kind !== null ||
+    filters.searchFields !== null;
+  const officialOnly = filters.kind?.length === 1 && filters.kind[0] === "official";
+  const todayOfficialPreset = view === "today" && officialOnly && !filters.query &&
+    filters.source === null && filters.size === null && filters.quality === null && filters.searchFields === null;
   const snapshotStale = !!data && now - timestamp(data.generatedAt) > 2 * DAY;
   const snapshotFuture =
     !!data && timestamp(data.generatedAt) > now + 5 * 60_000;
@@ -631,7 +657,7 @@ export default function Dashboard() {
       setTimeout(() => URL.revokeObjectURL(href), 1000);
     } finally { setExporting(false); }
   }
-  function updateFilter(key: keyof Filters, value: string) {
+  function updateFilter<K extends keyof Filters>(key: K, value: Filters[K]) {
     setFilters((current) => ({ ...current, [key]: value }));
     setPage(0);
     setSelectedId(null);
@@ -647,6 +673,7 @@ export default function Dashboard() {
     setFilters(INITIAL_FILTERS);
     setPage(0);
     setSelectedId(null);
+    setMobileDetail(false);
   }
   function toggleSave(report: Report) {
     const next = new Set(saved);
@@ -785,6 +812,7 @@ export default function Dashboard() {
               {(
                 [
                   { id: "recent", label: "Latest", count: recentCount },
+                  { id: "today", label: "Today · official only", count: undefined },
                   {
                     id: "all",
                     label: "All history",
@@ -800,20 +828,20 @@ export default function Dashboard() {
               ).map((tab) => (
                 <button
                   key={tab.id}
-                  className={`${view === tab.id ? "active" : ""} ${tab.id === "saved" || tab.id === "sources" ? "icon-tab" : ""}`}
-                  aria-current={view === tab.id ? "page" : undefined}
-                  aria-label={`${tab.label} ${tab.count}`}
+                  className={`${view === tab.id && (tab.id !== "today" || officialOnly) ? "active" : ""} ${tab.id === "saved" || tab.id === "sources" ? "icon-tab" : ""}`}
+                  aria-current={view === tab.id && (tab.id !== "today" || officialOnly) ? "page" : undefined}
+                  aria-label={`${tab.label}${tab.count === undefined ? "" : ` ${tab.count}`}`}
                   title={tab.id === "saved" ? archiveLoaded ? "Saved reports present in this snapshot" : "Bookmarks on this device; load Saved to check the full archive" : tab.label}
-                  onClick={() => changeView(tab.id)}
+                  onClick={() => { if (tab.id === "today") setFilters(todayOfficialFilters()); changeView(tab.id); }}
                 >
                   {tab.id === "saved" && <Bookmark size={16} aria-hidden="true" />}
                   {tab.id === "sources" && <Activity size={16} aria-hidden="true" />}
                   {tab.id !== "saved" && tab.id !== "sources" && tab.label}
-                  <span
+                  {tab.count !== undefined && <span
                     className={`tab-count ${tab.id === "sources" && unhealthy ? "attention-count" : ""}`}
                   >
                     {tab.count}
-                  </span>
+                  </span>}
                 </button>
               ))}
             </nav>
@@ -878,8 +906,8 @@ export default function Dashboard() {
                     <Search size={17} />
                     <input
                       ref={searchRef}
-                      aria-label="Search organizations, report IDs, or data types"
-                      placeholder="Search organizations, report IDs, data…"
+                      aria-label="Search reports in selected fields"
+                      placeholder="Search reports…"
                       value={filters.query}
                       onChange={(event) =>
                         updateFilter("query", event.target.value)
@@ -897,58 +925,18 @@ export default function Dashboard() {
                       <kbd aria-hidden="true">/</kbd>
                     )}
                   </div>
+                  <MultiSelectFilter label="Search in" allLabel="All search fields" options={SEARCH_OPTIONS}
+                    value={filters.searchFields} onChange={value => updateFilter("searchFields", value as Filters["searchFields"])} />
                   <div className="filter-selects">
-                    <label>
-                      <span className="sr-only">Source</span>
-                      <select
-                        aria-label="Filter by source"
-                        value={filters.source}
-                        onChange={(event) =>
-                          updateFilter("source", event.target.value)
-                        }
-                      >
-                        <option value="all">All sources</option>
-                        {data.sources.map((source) => (
-                          <option key={source.id} value={source.id}>
-                            {shortSource(source)}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown size={13} />
-                    </label>
-                    <label>
-                      <span className="sr-only">Affected count</span>
-                      <select
-                        aria-label="Filter by affected count"
-                        value={filters.size}
-                        onChange={(event) =>
-                          updateFilter("size", event.target.value)
-                        }
-                      >
-                        <option value="all">Any affected count</option>
-                        <option value="1000">1,000+ reported</option>
-                        <option value="100000">100,000+ reported</option>
-                        <option value="unknown">Count not reported</option>
-                      </select>
-                      <ChevronDown size={13} />
-                    </label>
-                    <label className="quality-select">
-                      <SlidersHorizontal size={14} />
-                      <span className="sr-only">Report status</span>
-                      <select
-                        aria-label="Filter by report status"
-                        value={filters.quality}
-                        onChange={(event) =>
-                          updateFilter("quality", event.target.value)
-                        }
-                      >
-                        <option value="all">Any status</option>
-                        <option value="claims">Unverified claims</option>
-                        <option value="updated">Updated reports</option>
-                        <option value="flagged">Needs verification</option>
-                      </select>
-                      <ChevronDown size={13} />
-                    </label>
+                    <MultiSelectFilter label="Sources" allLabel="All sources" searchable
+                      options={data.sources.map(source => ({ value: source.id, label: shortSource(source) }))}
+                      value={filters.source} onChange={value => updateFilter("source", value)} />
+                    <MultiSelectFilter label="Report type" allLabel="All report types" options={KIND_OPTIONS}
+                      value={filters.kind} onChange={value => updateFilter("kind", value as Filters["kind"])} />
+                    <MultiSelectFilter label="Affected count" allLabel="Any affected count" options={SIZE_OPTIONS}
+                      value={filters.size} onChange={value => updateFilter("size", value)} />
+                    <MultiSelectFilter label="Status" allLabel="Any status" options={STATUS_OPTIONS}
+                      value={filters.quality} onChange={value => updateFilter("quality", value)} />
                   </div>
                 </div>
                 <div className="result-toolbar">
@@ -983,7 +971,9 @@ export default function Dashboard() {
                   <p className="queue-note"><Info size={13} />Last 7 days by source observation, publication, or reported date. Older and undated records remain in All history.</p>
                 )}
                 {view === "today" && (
-                  <p className="queue-note"><CalendarDays size={13} />Reports published or reported today and claims observed by their source today ({formatDate(utcDay(now))}, UTC). Claims are unverified and related records count separately.</p>
+                  <p className="queue-note"><CalendarDays size={13} />{officialOnly
+                    ? `Official-source notices and filings published or reported today (${formatDate(utcDay(now))}, UTC). Ransomware claims are excluded; related reports count separately.`
+                    : `Reports published or reported today and claims observed by their source today (${formatDate(utcDay(now))}, UTC). Claims are unverified and related records count separately.`}</p>
                 )}
                 {view === "saved" && (
                   <div className="saved-note">
@@ -1194,7 +1184,9 @@ export default function Dashboard() {
                       <div className="empty-state">
                         <FolderSearch size={31} strokeWidth={1.2} />
                         <h2>
-                          {filtersActive
+                          {todayOfficialPreset
+                            ? "No official reports dated today"
+                            : filtersActive
                             ? "No reports match these filters"
                             : view === "saved"
                               ? "Keep a report within reach"
@@ -1205,7 +1197,9 @@ export default function Dashboard() {
                                 : "No reports collected yet"}
                         </h2>
                         <p>
-                          {filtersActive
+                          {todayOfficialPreset
+                            ? "This snapshot has no official-source notices or filings published or reported today UTC. Collection can lag or be incomplete. Recent official reports are still available."
+                            : filtersActive
                             ? "Try a broader search or reset your filters. Unknown counts are included when “Any affected count” is selected."
                             : view === "saved"
                               ? "Use the bookmark beside any report to return to it here. Your saved list stays on this device."
@@ -1218,7 +1212,9 @@ export default function Dashboard() {
                         <button
                           className="secondary-button"
                           onClick={() =>
-                            filtersActive
+                            todayOfficialPreset
+                              ? changeView("recent")
+                              : filtersActive
                               ? clearFilters()
                               : changeView(
                                   view === "saved" || view === "recent"
@@ -1227,7 +1223,9 @@ export default function Dashboard() {
                                 )
                           }
                         >
-                          {filtersActive
+                          {todayOfficialPreset
+                            ? "View recent official reports"
+                            : filtersActive
                             ? "Reset filters"
                             : view === "saved" || view === "recent"
                               ? "Browse all reports"

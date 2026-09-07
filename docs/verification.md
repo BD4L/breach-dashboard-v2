@@ -138,3 +138,11 @@ Local validation: 295 Python tests completed with two opt-in browser tests skipp
 A bounded RansomLook metadata fetch at 16:51 UTC returned 71 rows: 55 usable claims, 16 withheld for future provider discovery timestamps. Those timestamps were not reinterpreted. The preview retained all 27,909 prior reports and added 55 claims; this is local integration evidence, not hosted-run proof.
 
 Email tests include real Requests request preparation without network, Store-export material-change selection, private outbox retry behavior, strict claim labeling and snapshot freshness. The SQL received independent static review but has not been applied or executed against Supabase. No provider requests or emails were sent. Successor secrets/variables were empty when checked; delivery remains disabled pending private setup and retirement of the old notification path.
+
+## Multiple filters and official Today shortcut, 2026-09-07
+
+All 47 frontend tests and 14 MCP/feed tests passed; Astro check and the project-path live-data build passed. Frontend fixture tests use the tracked synthetic dataset in a separate temporary copy; the browser preview/build uses collected public records. Public-boundary validation passed with the full 27,964-report preview. Existing Astro/Vite hints and deprecation notices remain.
+
+Browser checks confirmed source-checkbox combinations, Select all/Clear, source-option search, source-name-only report search, and the Today official preset clearing other filters. The preset showed zero official reports for September 7 UTC while Latest retained 75 official reports and 55 unverified claims. Recent official navigation retained the official filter. Escape restored trigger focus and Tab reached the next control. A 390-by-844 viewport kept the filter grid and scrolling popup on screen.
+
+Independent review identified and fixed a distinction between selecting every listed predicate and removing a filter: all status/count options are not exhaustive of every report. Browser regression verified that explicit selections retain their count and mixed Select all state; selecting unrestricted restores the Any caption. No dependency was added. The [dated source audit](source-status-2026-09-07.md) compares every original state source with current hosted outcomes and lists missing adapters.

@@ -59,20 +59,32 @@ export interface Dataset {
   sources: Source[];
   reports: Report[];
 }
+export type ReportKind = "official" | "claims";
+export type SearchField = "organization" | "ids" | "summary" | "dataTypes" | "source";
 export interface Filters {
   query: string;
-  source: string;
-  size: string;
-  quality: string;
+  source: string[] | null;
+  size: string[] | null;
+  quality: string[] | null;
+  kind: ReportKind[] | null;
+  searchFields: SearchField[] | null;
   sort: string;
 }
-export const INITIAL_FILTERS: Filters = {
+export const INITIAL_FILTERS: Readonly<Filters> = Object.freeze({
   query: "",
-  source: "all",
-  size: "all",
-  quality: "all",
+  source: null,
+  size: null,
+  quality: null,
+  kind: null,
+  searchFields: null,
   sort: "latest",
-};
+});
+export function freshInitialFilters(): Filters {
+  return { ...INITIAL_FILTERS };
+}
+export function todayOfficialFilters(): Filters {
+  return { ...INITIAL_FILTERS, kind: ["official"] };
+}
 export const DAY = 86_400_000;
 export const SAVED_KEY = "breach-watch:saved-report-ids:v1";
 
@@ -385,34 +397,38 @@ export function filterReports(
   filters: Filters,
   saved: Set<string>,
   now: number,
+  sources: Source[] = [],
 ): Report[] {
   const query = filters.query.trim().toLocaleLowerCase("en-US");
+  const sourceLabels = new Map(sources.map(source => [source.id, source.label]));
   return reports
     .filter((r) => {
       if (view === "recent" && !isRecentSignal(r, now)) return false;
       if (view === "today" && !isReportFromToday(r, now)) return false;
       if (view === "saved" && !saved.has(r.id)) return false;
-      if (filters.source !== "all" && r.sourceId !== filters.source)
+      if (filters.source !== null && !filters.source.includes(r.sourceId))
         return false;
-      if (filters.size === "unknown" && r.affected.count !== null) return false;
-      if (
-        ["1000", "100000"].includes(filters.size) &&
-        (r.affected.count === null ||
-          r.affected.count < Number(filters.size) ||
-          ["less_than", "unknown"].includes(r.affected.qualifier))
-      )
+      if (filters.size !== null && !filters.size.some(size =>
+        size === "unknown" ? r.affected.count === null :
+          ["1000", "100000"].includes(size) && r.affected.count !== null &&
+          r.affected.count >= Number(size) && ["exact", "at_least"].includes(r.affected.qualifier)))
         return false;
-      if (filters.quality === "flagged" && r.qualityFlags.length === 0)
+      if (filters.quality !== null && !filters.quality.some(quality =>
+        quality === "flagged" ? r.qualityFlags.length > 0 : quality === "updated" && r.revision > 1))
         return false;
-      if (filters.quality === "updated" && r.revision < 2) return false;
-      if (filters.quality === "claims" && r.signalType !== "ransomware_claim") return false;
-      return (
-        !query ||
-        [r.organization, r.nativeId, r.summary, ...r.dataTypes]
-          .join(" ")
-          .toLocaleLowerCase("en-US")
-          .includes(query)
-      );
+      if (filters.kind !== null && !filters.kind.includes(r.signalType === "ransomware_claim" ? "claims" : "official"))
+        return false;
+      if (filters.searchFields?.length === 0) return false;
+      if (!query) return true;
+      const searchable: Record<SearchField, string> = {
+        organization: r.organization,
+        ids: `${r.id} ${r.nativeId}`,
+        summary: r.summary,
+        dataTypes: r.dataTypes.join(" "),
+        source: `${r.sourceId} ${sourceLabels.get(r.sourceId) || ""}`,
+      };
+      const fields = filters.searchFields ?? Object.keys(searchable) as SearchField[];
+      return fields.some(field => searchable[field].toLocaleLowerCase("en-US").includes(query));
     })
     .sort((a, b) => {
       if (filters.sort === "organization")

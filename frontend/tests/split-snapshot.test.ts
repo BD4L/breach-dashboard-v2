@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { splitSnapshot, splitFile } from "../scripts/split-snapshot.mjs";
 import { readSnapshot, snapshotRecentCount, snapshotTodayCount, needsArchive } from "../src/lib/snapshot-format.ts";
-import { countTodayReports, filterReports, INITIAL_FILTERS, readDataset, isRecentSignal } from "../src/lib/dashboard.ts";
+import { countTodayReports, filterReports, INITIAL_FILTERS, readDataset, isRecentSignal, todayOfficialFilters, type Filters } from "../src/lib/dashboard.ts";
 
 const raw = await readFile(new URL("../public/data/dashboard.json", import.meta.url));
 const full = readDataset(JSON.parse(raw.toString()));
@@ -101,10 +101,34 @@ test("file splitting preserves the legacy URL and writes a separate lightweight 
 test("whole archive is required for full views and any filter or alternate sort", () => {
   assert.equal(needsArchive("recent", INITIAL_FILTERS), false);
   for (const view of ["all", "today", "saved"] as const) assert.equal(needsArchive(view, INITIAL_FILTERS), true);
-  for (const [key, value] of Object.entries({query:"history", source:"maine", size:"unknown", quality:"flagged", sort:"organization"})) {
-    assert.equal(needsArchive("recent", {...INITIAL_FILTERS, [key]:value}), true);
+  const selections: Partial<Filters>[] = [{ query: "history" }, { source: ["maine", "california"] },
+    { size: ["unknown", "1000"] }, { quality: ["flagged", "updated"] }, { kind: ["official"] },
+    { searchFields: ["organization", "source"] }, { sort: "organization" }];
+  for (const selection of selections) {
+    assert.equal(needsArchive("recent", { ...INITIAL_FILTERS, ...selection }), true);
   }
+  for (const field of ["source", "size", "quality", "kind", "searchFields"] as const)
+    assert.equal(needsArchive("recent", { ...INITIAL_FILTERS, [field]: [] }), true);
+  assert.equal(needsArchive("today", todayOfficialFilters()), true);
   assert.equal(needsArchive("sources", {...INITIAL_FILTERS, query:"anything"}), false);
+});
+
+test("Today official-only requires the archive when a claim fills the bootstrap", () => {
+  const data = structuredClone(full);
+  data.generatedAt = "2026-09-05T18:00:00Z";
+  const clock = Date.parse(data.generatedAt);
+  const official = { ...data.reports[0], id: "official", publishedDate: "2026-09-05" };
+  const claim = { ...official, id: "claim", sourceId: "ransomlook", signalType: "ransomware_claim" as const,
+    sourceObservedAt: data.generatedAt };
+  data.reports = [official, claim];
+  data.sources.push({ ...data.sources[0], id: "ransomlook", label: "RansomLook", homepage: "https://www.ransomlook.io/" });
+  const partial = readSnapshot(splitSnapshot(JSON.stringify(data), { recentLimit: 1 }).bootstrap);
+  assert.deepEqual(partial.data.reports.map(r => r.id), ["claim"]);
+  const shortcut = todayOfficialFilters();
+  assert.equal(filterReports(partial.data.reports, "today", shortcut, new Set(), clock).length, 0);
+  assert.equal(needsArchive("today", shortcut), true);
+  assert.deepEqual(filterReports(data.reports, "today", shortcut, new Set(), clock).map(r => r.id), ["official"]);
+  assert.equal(needsArchive("recent", shortcut), true, "official-only Latest also needs records outside the bootstrap");
 });
 
 test("malformed count summaries cannot make partial views appear complete", () => {

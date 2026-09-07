@@ -4,6 +4,7 @@ import {
   affectedCount,
   countTodayReports,
   filterReports,
+  freshInitialFilters,
   INITIAL_FILTERS,
   isRecent,
   isRecentSignal,
@@ -18,8 +19,10 @@ import {
   sourceHealth,
   sourceKind,
   signalTime,
+  todayOfficialFilters,
   utcDay,
   type Dataset,
+  type Filters,
   type Report,
   type Source,
 } from "../src/lib/dashboard.ts";
@@ -116,7 +119,7 @@ test("claim freshness uses the source observation timestamp with exact seven-day
 test("the claim filter and source labels distinguish allegations from official reports", () => {
   const claim = report({ id: "claim", sourceId: "ransomlook", signalType: "ransomware_claim", sourceObservedAt: "2026-09-05T17:00:00Z" });
   const disclosure = report({ id: "disclosure", sourceId: "sec", publishedDate: "2026-09-05" });
-  assert.deepEqual(filterReports([disclosure, claim], "recent", { ...INITIAL_FILTERS, quality: "claims" }, new Set(), now).map(r => r.id), ["claim"]);
+  assert.deepEqual(filterReports([disclosure, claim], "recent", { ...INITIAL_FILTERS, kind: ["claims"] }, new Set(), now).map(r => r.id), ["claim"]);
   assert.equal(sourceKind("ransomlook"), "Ransomware claims");
   assert.equal(sourceKind("sec"), "SEC filings");
   assert.equal(sourceKind("hhs"), "Federal portal");
@@ -186,7 +189,7 @@ test("minimum counts require a qualifying exact count or lower bound", () => {
     filterReports(
       rows,
       "all",
-      { ...INITIAL_FILTERS, size: "1000" },
+      { ...INITIAL_FILTERS, size: ["1000"] },
       new Set(),
       now,
     ).map((r) => r.id),
@@ -196,7 +199,7 @@ test("minimum counts require a qualifying exact count or lower bound", () => {
     filterReports(
       [report()],
       "all",
-      { ...INITIAL_FILTERS, size: "1000" },
+      { ...INITIAL_FILTERS, size: ["1000"] },
       new Set(),
       now,
     ).length,
@@ -206,13 +209,89 @@ test("minimum counts require a qualifying exact count or lower bound", () => {
     filterReports(
       [report()],
       "all",
-      { ...INITIAL_FILTERS, size: "unknown" },
+      { ...INITIAL_FILTERS, size: ["unknown"] },
       new Set(),
       now,
     ).length,
     1,
   );
   assert.equal(affectedCount({ ...affected, qualifier: "unknown" }), "1,000");
+});
+
+test("multiselect uses OR within each dropdown and AND across independent dropdowns", () => {
+  const flagged = [{ code: "review", message: "Check source" }];
+  const counted = { count: 1500, scope: "reported" as const, jurisdiction: null, qualifier: "exact" as const };
+  const rows = [
+    report({ id: "ma-flagged", sourceId: "ma", affected: counted, qualityFlags: flagged }),
+    report({ id: "ca-updated", sourceId: "california", revision: 2 }),
+    report({ id: "ma-plain", sourceId: "ma", affected: counted }),
+    report({ id: "other-source", sourceId: "hhs", affected: counted, qualityFlags: flagged }),
+    report({ id: "claim", sourceId: "ransomlook", signalType: "ransomware_claim", sourceObservedAt: "2026-09-05T17:00:00Z", qualityFlags: flagged }),
+  ];
+  const filters: Filters = { ...INITIAL_FILTERS, source: ["ma", "california", "ransomlook"],
+    size: ["1000", "unknown"], quality: ["flagged", "updated"], kind: ["official"] };
+  assert.deepEqual(filterReports(rows, "all", filters, new Set(), now).map(r => r.id), ["ma-flagged", "ca-updated"]);
+  assert.deepEqual(filterReports(rows, "all", { ...filters, kind: ["claims"], quality: ["flagged"] }, new Set(), now).map(r => r.id), ["claim"]);
+  assert.deepEqual(filterReports(rows, "all", { ...filters, kind: ["claims"], quality: ["updated"] }, new Set(), now), []);
+  assert.equal(filterReports(rows, "all", { ...INITIAL_FILTERS, kind: ["official", "claims"] }, new Set(), now).length, rows.length);
+});
+
+test("null selects all including future sources; an empty dropdown selection selects none", () => {
+  const rows = [report(), report({ id: "future-source", sourceId: "new-register" })];
+  assert.equal(filterReports(rows, "all", INITIAL_FILTERS, new Set(), now).length, 2);
+  assert.deepEqual(filterReports(rows, "all", { ...INITIAL_FILTERS, source: ["ma"] }, new Set(), now).map(r => r.id), ["one"]);
+  for (const field of ["source", "size", "quality", "kind", "searchFields"] as const) {
+    assert.deepEqual(filterReports(rows, "all", { ...INITIAL_FILTERS, [field]: [] }, new Set(), now), [], field);
+  }
+});
+
+test("combining size choices keeps unknown counts and preserves threshold qualifiers", () => {
+  const rows = [
+    report({ id: "unknown" }),
+    ...["exact", "at_least", "less_than", "unknown"].map(qualifier => report({ id: `bound-${qualifier}`,
+      affected: { count: 100000, scope: "reported", jurisdiction: null, qualifier: qualifier as Report["affected"]["qualifier"] } })),
+    report({ id: "small", affected: { count: 99, scope: "reported", jurisdiction: null, qualifier: "exact" } }),
+  ];
+  assert.deepEqual(filterReports(rows, "all", { ...INITIAL_FILTERS, size: ["1000", "100000", "unknown"] }, new Set(), now).map(r => r.id),
+    ["unknown", "bound-exact", "bound-at_least"]);
+});
+
+test("search is restricted to selected fields, including both identifiers and source labels", () => {
+  const item = report({ id: "stable-key", nativeId: "native-key", organization: "Sample Care", summary: "A vendor incident",
+    dataTypes: ["Medical information"], sourceId: "ma" });
+  const matches = (query: string, searchFields: Filters["searchFields"]) =>
+    filterReports([item], "all", { ...INITIAL_FILTERS, query, searchFields }, new Set(), now, [source]).length;
+  assert.equal(matches("vendor", ["summary"]), 1);
+  assert.equal(matches("vendor", ["organization", "ids"]), 0);
+  assert.equal(matches("sAmPlE", ["organization"]), 1);
+  assert.equal(matches("stable-key", ["ids"]), 1);
+  assert.equal(matches("native-key", ["ids"]), 1);
+  assert.equal(matches("medical", ["summary", "dataTypes"]), 1);
+  assert.equal(matches("massachusetts", ["source"]), 1);
+  assert.equal(matches("ma", ["source"]), 1);
+  assert.equal(matches("massachusetts", ["organization"]), 0);
+  assert.equal(matches("vendor", null), 1);
+  assert.equal(matches("vendor", []), 0);
+  assert.equal(filterReports([item], "all", { ...INITIAL_FILTERS, query: "ma", searchFields: ["source"] }, new Set(), now).length, 1,
+    "source IDs remain searchable without optional catalog metadata");
+});
+
+test("Today official shortcut resets filters and excludes claims and historical imports", () => {
+  const shortcut = todayOfficialFilters();
+  assert.deepEqual(shortcut, { ...INITIAL_FILTERS, kind: ["official"] });
+  const rows = [
+    report({ id: "published-today", publishedDate: "2026-09-05" }),
+    report({ id: "reported-today", reportedDate: "2026-09-05" }),
+    report({ id: "claim", sourceId: "ransomlook", signalType: "ransomware_claim", sourceObservedAt: "2026-09-05T17:00:00Z" }),
+    report({ id: "imported-today", publishedDate: "2020-01-01" }),
+  ];
+  assert.deepEqual(filterReports(rows, "today", shortcut, new Set(), now).map(r => r.id), ["published-today", "reported-today"]);
+  shortcut.kind!.push("claims");
+  assert.deepEqual(todayOfficialFilters().kind, ["official"], "shortcut selections are independent");
+  const fresh = freshInitialFilters();
+  fresh.source = ["ma"];
+  fresh.query = "changed";
+  assert.deepEqual(freshInitialFilters(), INITIAL_FILTERS);
 });
 
 test("revisions use observation time and do not infer recency from publication", () => {

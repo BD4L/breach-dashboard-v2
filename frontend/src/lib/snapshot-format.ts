@@ -69,7 +69,8 @@ export function snapshotTodayCount(index: SnapshotIndex, now: number): number {
 
 export function needsArchive(view: View, filters: Filters): boolean {
   return view !== "sources" && (view !== "recent" || filters.query.trim() !== "" ||
-    filters.source !== "all" || filters.size !== "all" || filters.quality !== "all" || filters.sort !== "latest");
+    filters.source !== null || filters.size !== null || filters.quality !== null ||
+    filters.kind !== null || filters.searchFields !== null || filters.sort !== "latest");
 }
 
 export function verifyArchive(value: unknown, bootstrap: Dataset, index: SnapshotIndex): Dataset {

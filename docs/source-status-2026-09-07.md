@@ -1,0 +1,61 @@
+# Original-source coverage audit — September 7, 2026
+
+**checkedAt:** 2026-09-07T17:15:05Z for the public snapshot; original-run logs checked immediately afterward. **Published snapshot:** 2026-09-07T17:02:32Z, 27,964 retained reports. This is a dated read-only audit, not an ongoing status promise.
+
+The successor contains **16 of the 18 state sources present across the original directories**, plus HHS and SEC. **Vermont and Hawaii are missing.** RansomLook is an additional source of explicitly unverified claims. The published source outcomes are **7 successful/unchanged, 11 partial, and 1 failed**. Partial frequently means usable records were collected with known limitations; it does not mean the website was inaccessible.
+
+Evidence: [published full snapshot](https://bd4l.github.io/breach-dashboard-v2/data/dashboard.json), [successor collection run 34145789206](https://github.com/BD4L/breach-dashboard-v2/actions/runs/34145789206), and [original parallel run 34124257806](https://github.com/BD4L/Breaches/actions/runs/34124257806). The successor's merge and Pages deployment succeeded. Its overall red result reflects 11 partial collectors and North Dakota's actual failure; no collector timeout was reported in this run.
+
+## Every original state source
+
+“Stored” includes preserved collection history, so it can exceed the latest accepted count. “Latest date” means the latest usable publication/report date in stored records, not collection time or proof of a newly occurring breach. Every connected source below was attempted in the cited successor run.
+
+| State / official source | Current result | Latest accepted / stored | Latest source date | What works and what remains missing |
+| --- | --- | ---: | --- | --- |
+| [California](https://oag.ca.gov/privacy/databreach/list) | Partial; listing works | 5,293 / 5,293 | 2026-09-04 | All 106 listing pages reached, covering 5,295 rows. Two rows withheld because organization names were absent. The old 300-report restriction is gone; PDF enrichment is excluded. |
+| [Delaware](https://data.delaware.gov/Public-Safety/Data-Security-Breach-Database/dir6-wx8v/data_preview) | Successful/unchanged | 459 / 644 | 2025-07-11 | Current official dataset count and revision reconciled. Older unmatched history is retained. 386 stored rows have no usable source date: healthy collection does not establish fresh 2026 reporting. |
+| [Hawaii](https://cca.hawaii.gov/ocp/notices/security-breach/) | **Missing from successor** | — | Unverified | Original scraper and registry entry exist. Original job found 55 potential table rows but processed 0/0; its configured cutoff is 2025-06-01. This is insufficient evidence of current coverage. |
+| [Indiana](https://www.in.gov/attorneygeneral/consumer-protection-division/id-theft-prevention/security-breaches/) | Partial; current-year PDF works | 784 / 784 | **Unknown for all rows** | All 25 pages of the linked 2026 report parsed; two rows rejected. Older annual reports and an independent completeness total are absent. Records cannot honestly enter source-dated Recent/Today views. |
+| [Iowa](https://www.iowaattorneygeneral.gov/for-consumers/security-breach-notifications) | Partial; annual archives work | 677 / 677 | 2026-08-13 | All 16 linked annual archives, 2011–2026, visited. Eleven rows rejected, including ten conflicting identities; 92 stored rows undated. PDF enrichment excluded. |
+| [Maine](https://www.maine.gov/ag/consumer-protection/data-security-breaches) | **Historical-only recovery** | 2,981 / 2,981 | 2020-09-11 | Both linked Excel archives recovered through September 14, 2020. Current database remains offline according to the collection outcome. 74 rows rejected; 1,998 stored rows undated. This does not provide current Maine monitoring. |
+| [Maryland](https://oag.maryland.gov/resources-info/Pages/security-breach-notices.aspx) | **Older published lists only** | 2,030 / 2,030 | 2025-03-21 | Eleven API pages across the published 2024/2025 lists read with matching independent totals; one row rejected. No 2026 list appears in the official catalog examined by the collector. Current 2026 coverage is unproven. |
+| [Massachusetts](https://www.mass.gov/lists/data-breach-notification-reports) | Partial; access works | 3,705 / 3,705 | 2026-09-04 | Linked 2025/2026 reports collected with PDF-page/source-ID checks. No rejected rows, but independent annual totals do not prove full coverage. This is not the old access-blocked state. |
+| [Montana](https://dojmt.gov/office-of-consumer-protection/reported-data-breaches/) | Successful/unchanged | 6,659 / 6,659 | 2026-05-15 | All public listing records parsed; linked documents excluded. 28 rows undated. The latest dated record is months old despite successful collection. |
+| [New Hampshire](https://www.doj.nh.gov/citizens/consumer-protection-antitrust-bureau/security-breach-notifications) | Partial; recent end works | 747 / 748 | 2026-08-20 | Fresh ordinary Chrome collected the newest 30 of 398 pages: 750 rows against 9,937 declared documents. Three unresolved Drupal links rejected. Historical backfill and PDFs remain outstanding; current access works. |
+| [New Jersey](https://www.cyber.nj.gov/threat-landscape/public-data-breaches) | Successful/unchanged | 56 / 56 | 2026-08-20 | Four listing pages reconciled: 21 current and 35 archive notices. Hosted ordinary Chrome works. Details and attachments excluded. |
+| [North Dakota](https://attorneygeneral.nd.gov/consumer-resources/data-breach-notices) | **Failed** | 0 / 0 | — | Directory returns HTTP 404; no verified current official replacement. This is an actual missing-source failure, not a completeness warning. |
+| [Oklahoma](https://oklahoma.gov/omes/divisions/information-services/cyber-command/notices/cybersecurity-breaches.html) | Successful/unchanged; narrow scope | 9 / 9 | 2026-04-07 | Nine listed notices and detail pages checked. Covers state-government incidents, not a statewide private-sector breach register. |
+| [South Carolina](https://consumer.sc.gov/identity-theft-unit/security-breach-notices) | Partial; listing works | 877 / 877 | 2026-09-04 | Full listing parsed; two ambiguous rows sharing source identities withheld. One stored row undated. Linked documents excluded. |
+| [Texas](https://oag.my.site.com/datasecuritybreachreport/apex/DataSecurityReportsPage) | Successful/unchanged | 625 / 625 | 2026-09-04 | All records returned by the official current-version public view processed. Historical versions excluded; no Apify dependency in the successor collector. |
+| [Vermont](https://ago.vermont.gov/categories/security-breach-notices) | **Missing from successor; original fetch works** | — | Original logs: 2026-06-13 | Original job discovered and processed 493 notices over ten pages; all 493 were skipped as already stored, not newly inserted. Observed document-URL dates span 2025-07-18–2026-06-13. This proves original listing retrieval, not complete statewide coverage. |
+| [Washington](https://www.atg.wa.gov/data-breach-notifications) | Partial; listing works | 1,845 / 1,856 | 2026-08-21 | Full listing parsed, but 12 repeated rows were rejected. Earlier history retained. Last fully successful run was September 5; current partial collection still returned usable records. |
+| [Wisconsin](https://datcp.wi.gov/Pages/Programs_Services/DataBreaches.aspx) | Partial; listings work | 230 / 230 | **Unknown for all rows** | Current listing and linked 2012–2023 archive collected. No independent total. Consumer notification dates remain separate from publication/report dates, so these records do not qualify for source-dated Recent/Today views. |
+
+The two missing-state observations come from the original [Hawaii job](https://github.com/BD4L/Breaches/actions/runs/34124257806/job/101749222292) and [Vermont job](https://github.com/BD4L/Breaches/actions/runs/34124257806/job/101749222273). No original scraper was executed for this audit.
+
+## Federal and added sources
+
+| Source | Current result | Latest accepted / stored | Scope and limitation |
+| --- | --- | ---: | --- |
+| [HHS OCR](https://ocrportal.hhs.gov/ocr/breach/breach_frontpage.jsf) | Successful/unchanged | 732 / 733 | HIPAA Under Investigation view reconciled at 732/732. Archive and Part 2 excluded. Latest stored source date: 2026-08-27. |
+| [SEC EDGAR](https://www.sec.gov/edgar/search/) | Successful/unchanged | 0 / 2 | September 5–7 Item 1.05 window reconciled at zero matching filings. This is a valid empty result; two earlier filings remain stored, latest September 1. Other disclosure items and enrichment excluded. |
+| [RansomLook](https://www.ransomlook.io/about) | Partial; added source | 55 / 55 | 72 metadata rows returned; 17 future discovery timestamps withheld. Latest accepted source observation: September 7 at 16:48:31Z. Claims remain unverified with CC BY 4.0 attribution. Three-day collection window only. |
+
+## Inventory evidence and other sources not carried over
+
+Compared local `Breaches/database_schema.sql`, `Breaches/config.yaml`, `Breaches/scrapers/fetch_*.py`, `Breaches/.github/workflows/paralell.yml`, `breach-dash-clean/scrapers/config.yaml`, its scraper files and collection workflow. The larger original directory has actual Hawaii/Vermont implementations; the clean directory lists many state entries in configuration but its state workflow only invokes California, Delaware and Washington. Configuration entries alone are not implemented coverage. South Carolina exists as an actual scraper/workflow entry even though the old SQL seed is incomplete.
+
+Other original families absent from the successor are **BreachSense; Have I Been Pwned; company investor-relations pages; cybersecurity news/RSS; CISA KEV; NVD; and the Privacy Rights CSV importer/configuration**. This audit establishes absence, not that their providers are broken. KEV/NVD are vulnerability catalogs rather than organization breach notifications. The old SQL comments say Privacy Rights was removed, while the clean directory retains an importer: those are historical repository facts, not a new instruction to remove or restore it.
+
+The original local remotes name `HackerManMarlin/Breaches` and `HackerManMarlin/breach-dash`. GitHub resolves the former to `BD4L/Breaches`; Actions queries for both the old and BD4L `breach-dash` names returned 404 with the current access, so that clean repository's hosted status is unverified. No inference of deletion or private accessibility is warranted from that response alone.
+
+The original parallel workflow was green, but it explicitly tolerates Maryland failure; the clean workflow also uses `continue-on-error`. Existing “excellent/working” labels in its old implementation-status document therefore are not current collection evidence. An original California run was still in progress at this check after starting at 16:08:55Z; its [previous completed run](https://github.com/BD4L/Breaches/actions/runs/34113602059) took approximately 3 hours 33 minutes. Those are original-run duration observations, not successor timeouts.
+
+## Recommended repair order
+
+1. Restore **Vermont** as an independent bounded successor adapter: there is fresh evidence of original listing retrieval, and it is entirely missing in v2.
+2. Re-find **current Maine, Maryland and North Dakota** official publication paths. Historical archives and a successful HTTP response must not stand in for current coverage. Diagnose Hawaii's zero-output run before claiming a working restoration.
+3. Improve **Indiana/Wisconsin date availability** only where the official source supports a true publication/report date; preserve unknown dates otherwise. Resolve California/Iowa/South Carolina ambiguities and Washington duplicate handling without discarding uncertain history.
+4. Prioritize timely publication dates, current notice details and newly discovered sources. Historical expansion of New Hampshire or HHS can wait; it does not advance the current recent-breach monitoring goal.
+
+No source collector, email delivery, or database mutation was invoked. Reads were limited to local code, the public dashboard snapshot, and GitHub run metadata/logs. Only the successor audit document was written; both original directories were left unchanged.

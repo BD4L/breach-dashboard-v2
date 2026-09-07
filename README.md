@@ -61,13 +61,15 @@ The merge job restores checksummed public history from the `collection-state` br
 
 The visible browser checks for a published snapshot every five minutes, when returning to the tab, and on manual refresh. Browser refresh does not trigger collection. Failed refreshes retain the last valid snapshot. The first load includes up to 200 reports; full searches, filters, saved reports, and downloads load the archive on demand. See [snapshot compatibility](frontend/SNAPSHOTS.md).
 
+**Today · official only** resets other filters and shows official notices and filings dated today UTC, excluding unverified claims. Checkbox dropdowns support multiple sources, report types, affected-count ranges and statuses, with Select all and Clear. Choices within one dropdown match any selected option; different dropdowns combine. Search can target organization names, report IDs, summaries, data involved and source names. Source options also have their own search. Selecting no options produces no matches.
+
 ## Data meaning and public boundary
 
 - Rows are source reports, not deduplicated incidents. Latest uses the last seven days of source observation/publication/reporting dates; importing an old report does not make it recent. All retains older and undated records.
 - Today uses UTC source dates, including the provider's observation time for ransomware claims. It does not establish when a breach occurred or confirm a claim.
 - RansomLook contributes public claim metadata only. Claims remain explicitly unverified throughout the UI, RSS, JSON, MCP and alerts. Data is attributed to [RansomLook](https://www.ransomlook.io/about) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), with normalization disclosed. No leak dumps, credentials, screenshots or onion content are collected.
 - Counts retain their scope and qualifiers; missing counts remain unknown. Corrections create revisions without changing first-seen time. Disappearing source rows are not deleted from history.
-- Coverage varies by source and collection window. See [coverage findings](docs/current-coverage.md), [source rediscovery](docs/collector-rediscovery.md), and [hosted access evidence](docs/source-access-diagnosis.md).
+- Coverage varies by source and collection window. See the [original-source status audit](docs/source-status-2026-09-07.md), [coverage findings](docs/current-coverage.md), [source rediscovery](docs/collector-rediscovery.md), and [hosted access evidence](docs/source-access-diagnosis.md).
 - Everything in the repository and Pages deployment is public. Do not add firm notes, assignments, client data, or credentials. Bookmarks store report IDs in this browser only. `noindex` is not access control.
 
 The public-boundary check validates selected private-field, link, and size constraints; it is not a general secret scanner. The [data contract](docs/data-contract.md) defines record and history semantics. [Verification evidence](docs/verification.md) and the [original baseline](docs/BASELINE.md) record completed checks and preservation boundaries.
