@@ -8,7 +8,8 @@ import unittest
 from unittest.mock import patch
 
 from ingestion.cli import main
-from ingestion.models import Collection, Report, SourceError, SOURCES
+from ingestion.models import ACTIVE_SOURCE_IDS, Collection, Report, SourceError, SOURCES
+from ingestion.additional_sources import expected_signal
 from ingestion.store import Store
 
 
@@ -18,7 +19,7 @@ NOW_TEXT = "2026-09-05T18:00:00Z"
 
 def collection(source="massachusetts", *, complete=True):
     item = Report(source, "sample-1", "Example", SOURCES[source]["homepage"], reported_date="2026-08-01",
-                  signal_type="ransomware_claim" if source == "ransomlook" else None,
+                  signal_type=expected_signal(SOURCES[source]),
                   source_observed_at="2026-08-01T00:00:00Z" if source == "ransomlook" else None)
     return Collection(source, [item], 1, complete=complete)
 
@@ -51,9 +52,10 @@ class CliTests(unittest.TestCase):
         with patch("ingestion.cli.collect", side_effect=fetch) as fetch_mock:
             result, _, _ = self.run_cli("collect", "--source", "all")
         self.assertEqual(result, 1)
-        self.assertEqual(fetch_mock.call_count, len(SOURCES))
+        self.assertEqual(fetch_mock.call_count, len(ACTIVE_SOURCE_IDS))
         data = json.loads(self.export.read_text())
-        self.assertEqual(len(data["reports"]), len(SOURCES))
+        self.assertEqual(len(data["reports"]), len(ACTIVE_SOURCE_IDS))
+        self.assertEqual(len(data["sources"]), len(SOURCES))
         hhs = next(source for source in data["sources"] if source["id"] == "hhs")
         self.assertEqual(hhs["status"], "failed")
         self.assertEqual(hhs["lastSuccess"], "2026-09-04T18:00:00Z")

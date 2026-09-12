@@ -277,11 +277,14 @@ class Store(AbstractContextManager):
             for source_id, metadata in SOURCES.items():
                 latest = self.connection.execute("SELECT * FROM source_runs WHERE source_id=? ORDER BY id DESC LIMIT 1", (source_id,)).fetchone()
                 success = self.connection.execute("SELECT attempted_at FROM source_runs WHERE source_id=? AND status IN ('healthy','unchanged') ORDER BY id DESC LIMIT 1", (source_id,)).fetchone()
+                collected = self.connection.execute("SELECT attempted_at FROM source_runs WHERE source_id=? AND status IN ('healthy','unchanged','partial') ORDER BY id DESC LIMIT 1", (source_id,)).fetchone()
                 sources.append({**metadata,
                     "status": latest["status"] if latest else "disabled",
                     "lastAttempt": latest["attempted_at"] if latest else None,
                     "lastSuccess": success[0] if success else None,
-                    "message": latest["message"] if latest else "Not collected in this database.",
+                    "lastCollected": collected[0] if collected else None,
+                    "latestReportDate": None,
+                    "message": latest["message"] if latest else metadata.get('disabledReason', "Not collected in this database."),
                     "counts": {"parsed": latest["parsed"] if latest else 0,
                                "accepted": latest["accepted"] if latest else 0,
                                "rejected": latest["rejected"] if latest else 0,
@@ -302,12 +305,19 @@ class Store(AbstractContextManager):
                     del history[0]
                 previous_content[identifier] = content
             reports = []
+            observed_day = timestamp(now)[:10]
+            source_metadata = {source['id']: source for source in sources}
             for row in self.connection.execute("SELECT * FROM reports ORDER BY last_changed DESC, id ASC"):
                 reports.append({**json.loads(row["content_json"]), "id": row["id"],
                     "firstSeen": row["first_seen"], "lastSeen": row["last_seen"],
                     "lastChanged": row["last_changed"], "revision": row["revision"],
                     "evidence": {"retrievedAt": row["retrieved_at"], "contentHash": row["content_hash"], "parserVersion": row["parser_version"]},
                     "history": list(reversed(histories.get(row["id"], [])))})
+                report = reports[-1]
+                source = source_metadata[report['sourceId']]
+                dated = report.get('sourceObservedAt') or report.get('publishedDate') or report.get('reportedDate')
+                if dated and dated[:10] <= observed_day and dated[:10] > (source['latestReportDate'] or ''):
+                    source['latestReportDate'] = dated[:10]
             self.connection.commit()
         except Exception:
             self.connection.rollback()

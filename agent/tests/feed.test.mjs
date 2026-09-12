@@ -166,6 +166,30 @@ test("report details bound output, explicitly count omitted history, and preserv
   assert.equal([...client.pages.values()][0][0].history.length, 8);
 });
 
+test("secondary catalog classification and HIBP attribution survive RSS and agent reads", async () => {
+  const value = fixture(1);
+  const source = { ...demo.sources[0], id: "hibp", label: "Have I Been Pwned", category: "secondary",
+    attribution: { name: "Have I Been Pwned", url: "https://haveibeenpwned.com/", license: "CC BY 4.0",
+      licenseUrl: "https://creativecommons.org/licenses/by/4.0/", changes: "Public catalog metadata normalized." } };
+  value.sources.push(source);
+  Object.assign(value.reports[0], { sourceId: "hibp", signalType: "secondary_report" });
+  const { client, feed } = setup(value);
+  assert.equal((await client.list()).reports[0].classification, "Secondary report; verify original evidence");
+  assert.match(feed.rss, /Secondary report: Synthetic 0/);
+  assert.match(feed.rss, /Have I Been Pwned/);
+  for (const attribution of [undefined, { ...source.attribution, license: "Unknown" }]) {
+    const invalid = { ...value, sources: value.sources.map(s => s.id === "hibp" ? { ...s, attribution } : s) };
+    assert.throws(() => makeAgentFeed(invalid), /attribution/);
+    const tampered = setup(value, (bytes, name) => {
+      if (name !== "index.json") return bytes;
+      const manifest = JSON.parse(bytes);
+      manifest.sources.find(s => s.id === "hibp").attribution = attribution;
+      return Buffer.from(JSON.stringify(manifest));
+    });
+    await assert.rejects(tampered.client.sources(), /inconsistent/);
+  }
+});
+
 test("oversized report core returns a bounded actionable error", async () => {
   const value = fixture(1);
   value.reports[0].summary = "x".repeat(MAX_REPORT_OUTPUT_BYTES);

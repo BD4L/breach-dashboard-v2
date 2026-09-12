@@ -253,6 +253,7 @@ h1, h2, h3, p { margin: 0; }
 }
 .filter-selects { display: flex; flex-basis: 100%; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .filter-selects > * { flex: 1; min-width: 160px; }
+.source-search { margin-bottom: var(--space-5); }
 .result-toolbar { display: flex; justify-content: space-between; align-items: center; min-height: var(--control-height); margin-bottom: var(--space-2); color: var(--color-secondary); font-size: var(--text-xs); }
 .result-toolbar p { display: flex; align-items: center; gap: var(--space-1); }
 .result-toolbar p strong { font-weight: var(--weight-semibold); color: var(--color-text); }

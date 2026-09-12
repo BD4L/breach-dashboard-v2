@@ -5,7 +5,7 @@ from pathlib import Path
 import sqlite3
 import sys
 
-from .models import Collection, SOURCES, SourceError
+from .models import ACTIVE_SOURCE_IDS, Collection, SOURCES, SourceError
 from .store import Store
 from .validation import timestamp, utc_now
 
@@ -86,7 +86,7 @@ def main(argv: list[str] | None = None) -> int:
             if args.command == "demo":
                 seed_demo(store, now, explicit_now=args.now is not None)
             elif args.command == "collect":
-                source_ids = list(SOURCES) if args.source == "all" else [args.source]
+                source_ids = list(ACTIVE_SOURCE_IDS) if args.source == "all" else [args.source]
                 for source_id in source_ids:
                     try:
                         options = {}

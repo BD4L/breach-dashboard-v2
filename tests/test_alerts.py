@@ -77,6 +77,16 @@ def claimed(token='4b333210-83df-48f1-87b9-b9c2c37f277b'):
 
 
 class AlertSelectionTests(unittest.TestCase):
+    def test_secondary_reports_keep_their_classification_and_references_cannot_alert(self):
+        item = report(id='hibp:example', sourceId='hibp', signalType='secondary_report')
+        data = {**snapshot(item), 'sources': [{'id': 'hibp', 'label': 'Have I Been Pwned', 'category': 'secondary'}]}
+        event = alerts.events_for_snapshot(data, now=NOW)[0]
+        self.assertIn('secondary breach report', event['subject'])
+        self.assertIn('https://creativecommons.org/licenses/by/4.0/', event['text'])
+        data['sources'][0]['category'] = 'reference'
+        item.pop('signalType')
+        with self.assertRaises(ValueError): alerts.events_for_snapshot(data, now=NOW)
+
     def test_old_or_unknown_source_dates_do_not_become_new_breaches_on_import(self):
         for dated in (None, '2019-01-01', '2026-09-08', 'not a date'):
             self.assertEqual(alerts.events_for_snapshot(snapshot(report(publishedDate=dated)), now=NOW), [])

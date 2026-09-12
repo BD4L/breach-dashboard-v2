@@ -14,7 +14,7 @@ PATTERNS = {
     "GitHub API in public app": re.compile(r"api\.github\.com", re.I),
     "public administrative token": re.compile(r"PUBLIC_GITHUB_TOKEN|SUPABASE_SERVICE|SERVICE_ROLE_KEY"),
     "credential literal": re.compile(r"(?:ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{30,}|sk-[A-Za-z0-9]{20,})"),
-    "original app reference": re.compile(r"HackerManMarlin|BD4L/Breaches\b|bd4l\.github\.io/Breaches\b|[\"']/Breaches/", re.I),
+    "original app reference": re.compile(r"HackerManMarlin|BD4L/Breaches\b|bd4l\.github\.io/Breaches\b|(?-i:[\"']/Breaches/)", re.I),
 }
 PRIVATE_KEYS = {"notes", "assigned_to", "assignedto", "user_id", "userid", "email", "subscribers", "access_token", "refresh_token"}
 

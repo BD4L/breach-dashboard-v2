@@ -284,6 +284,8 @@ test("Today official shortcut resets filters and excludes claims and historical 
     report({ id: "reported-today", reportedDate: "2026-09-05" }),
     report({ id: "claim", sourceId: "ransomlook", signalType: "ransomware_claim", sourceObservedAt: "2026-09-05T17:00:00Z" }),
     report({ id: "imported-today", publishedDate: "2020-01-01" }),
+    report({ id: "news", sourceId: "news_krebs", signalType: "secondary_report", publishedDate: "2026-09-05" }),
+    report({ id: "claim-date-only", sourceId: "breachsense", signalType: "ransomware_claim", reportedDate: "2026-09-05" }),
   ];
   assert.deepEqual(filterReports(rows, "today", shortcut, new Set(), now).map(r => r.id), ["published-today", "reported-today"]);
   shortcut.kind!.push("claims");
@@ -292,6 +294,24 @@ test("Today official shortcut resets filters and excludes claims and historical 
   fresh.source = ["ma"];
   fresh.query = "changed";
   assert.deepEqual(freshInitialFilters(), INITIAL_FILTERS);
+});
+
+test("secondary sources cannot be relabeled as official notices and references cannot emit reports", () => {
+  const secondary: Source = { ...source, id: "news_krebs", category: "secondary", method: "News / metadata feed" };
+  const item = report({ sourceId: secondary.id, signalType: "secondary_report", publishedDate: "2026-09-05" });
+  const value = { ...dataset([item]), sources: [secondary] };
+  assert.equal(readDataset(value).reports[0].signalType, "secondary_report");
+  assert.throws(() => readDataset({ ...value, reports: [{ ...item, signalType: undefined }] }));
+  assert.throws(() => readDataset({ ...value, sources: [{ ...secondary, category: "reference" }] }));
+  assert.equal(sourceKind(secondary.id, secondary), "News / metadata feed");
+  assert.deepEqual(filterReports([item], "today", { ...INITIAL_FILTERS, kind: ["secondary"] }, new Set(), now), [item]);
+});
+
+test("source health distinguishes a usable partial collection from complete coverage and reference datasets", () => {
+  const partial: Source = { ...source, status: "partial", lastSuccess: null, lastCollected: source.lastAttempt, latestReportDate: "2020-01-01" };
+  assert.deepEqual(sourceHealth(partial, now), { label: "Limited coverage", tone: "warn", stale: false });
+  assert.equal(sourceHealth({ ...partial, lastSuccess: "2029-01-01T00:00:00Z" }, now).label, "Unreliable timestamp");
+  assert.equal(sourceHealth({ ...source, status: "disabled", category: "reference", collectionEnabled: false }, now).label, "Reference only");
 });
 
 test("revisions use observation time and do not infer recency from publication", () => {

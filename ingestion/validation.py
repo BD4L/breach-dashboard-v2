@@ -4,6 +4,7 @@ import re
 from urllib.parse import urlsplit
 
 from .models import Report, SOURCES
+from .additional_sources import expected_signal
 
 
 class InvalidReport(ValueError):
@@ -43,6 +44,8 @@ def normalize_report(report: Report, *, source_id: str, now: datetime) -> dict:
     """Reject unusable records; quarantine questionable fields with explicit flags."""
     if report.source_id != source_id or source_id not in SOURCES:
         raise InvalidReport("Record source does not match the collection.")
+    if SOURCES[source_id].get('category') == 'reference':
+        raise InvalidReport('Reference catalogs cannot emit breach reports.')
     native_id = str(report.native_id or "").strip()
     organization = str(report.organization or "").strip()
     if not native_id or not organization:
@@ -64,9 +67,9 @@ def normalize_report(report: Report, *, source_id: str, now: datetime) -> dict:
     content = {"sourceId": source_id, "nativeId": native_id,
                "organization": organization, "sourceUrl": report.source_url}
     # Optional signal fields leave existing report fingerprints unchanged.
+    if report.signal_type != expected_signal(SOURCES[source_id]):
+        raise InvalidReport("Unrecognized signal classification for this source.")
     if report.signal_type is not None:
-        if report.signal_type != "ransomware_claim" or source_id != "ransomlook":
-            raise InvalidReport("Unrecognized signal classification for this source.")
         content["signalType"] = report.signal_type
     if source_id == "ransomlook" and report.signal_type != "ransomware_claim":
         raise InvalidReport("Ransomware claims must retain their unverified classification.")

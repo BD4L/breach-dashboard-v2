@@ -9,6 +9,7 @@ import requests
 from requests.auth import AuthBase
 
 from ingestion.models import SourceError
+from ingestion.additional_sources import FEEDS, COMPANY_PAGES
 
 OFFICIAL_HOSTS = {
     'www.mass.gov', 'mass.gov', 'ocrportal.hhs.gov', 'oag.ca.gov',
@@ -17,7 +18,10 @@ OFFICIAL_HOSTS = {
     'www.cyber.nj.gov', 'datcp.wi.gov', 'dojmt.gov', 'www.atg.wa.gov',
     'consumer.sc.gov', 'attorneygeneral.delaware.gov', 'data.delaware.gov', 'www.doj.nh.gov',
     'oag.my.site.com', 'www.sec.gov', 'efts.sec.gov', 'www.ransomlook.io',
+    'ago.vermont.gov', 'cca.hawaii.gov', 'haveibeenpwned.com', 'www.breachsense.com',
 }
+OFFICIAL_HOSTS.update(urlsplit(url).hostname for _, url in [*FEEDS.values(), *COMPANY_PAGES.values()])
+OFFICIAL_HOSTS.update({'www.databreaches.net', 'news.microsoft.com', 'investor.fb.com'})
 PROJECT_USER_AGENT = 'BreachDashboard/2.0 (+https://github.com/BD4L/breach-dashboard-v2)'
 
 @dataclass
@@ -67,7 +71,7 @@ class PublicClient:
                 raise SourceError('Source supplied an unsafe/non-HTTPS URL')
             host = parts.hostname or ''
             if host not in OFFICIAL_HOSTS:
-                raise SourceError('Source redirected outside the permitted official document hosts')
+                raise SourceError('Source redirected outside the permitted public-source hosts')
             for attempt in range(2):
                 if self.requests >= self.max_requests or time.monotonic() >= self.deadline:
                     raise SourceError('Public source request/time budget exhausted')

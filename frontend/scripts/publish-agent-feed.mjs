@@ -19,6 +19,11 @@ export function makeAgentFeed(value) {
     throw new Error("RansomLook attribution is required before publishing its metadata feed or RSS.");
   }
   const now = Date.parse(full.generatedAt);
+  if (full.sources.some(s => ['hibp', 'hibp_feed'].includes(s.id) &&
+      (s.attribution?.name !== 'Have I Been Pwned' || s.attribution?.url !== 'https://haveibeenpwned.com/' ||
+       s.attribution?.license !== 'CC BY 4.0' || s.attribution?.licenseUrl !== 'https://creativecommons.org/licenses/by/4.0/' || !s.attribution.changes.trim()))) {
+    throw new Error('Have I Been Pwned attribution is required before publishing its metadata.');
+  }
   const reports = full.reports.filter(r => signalTime(r) >= now - FEED_DAYS * DAY && signalTime(r) <= now)
     .sort((a, b) => signalTime(b) - signalTime(a) || a.id.localeCompare(b.id));
   const pages = [];
@@ -50,9 +55,10 @@ export function makeAgentFeed(value) {
     const claim = r.signalType === "ransomware_claim";
     const source = full.sources.find(s => s.id === r.sourceId);
     const attribution = source?.attribution;
-    const description = [claim ? "Unverified ransomware group claim." : "Public source report; not a distinct-incident count.",
+    const secondary = r.signalType === 'secondary_report';
+    const description = [claim ? "Unverified ransomware group claim." : secondary ? 'Secondary news/catalog report; verify the original incident evidence.' : "Public source report; not a distinct-incident count.",
       r.summary, attribution ? `Source: ${attribution.name} (${attribution.url}), ${attribution.license} (${attribution.licenseUrl}). ${attribution.changes}` : ""].filter(Boolean).join(" ");
-    return `<item><title>${xml(`${claim ? "Unverified claim: " : ""}${r.organization}`)}</title><link>${xml(r.sourceUrl)}</link><guid isPermaLink="false">${xml(`${r.id}:revision:${r.revision}`)}</guid><pubDate>${new Date(signalTime(r)).toUTCString()}</pubDate><description>${xml(description)}</description></item>`;
+    return `<item><title>${xml(`${claim ? "Unverified claim: " : secondary ? 'Secondary report: ' : ""}${r.organization}`)}</title><link>${xml(r.sourceUrl)}</link><guid isPermaLink="false">${xml(`${r.id}:revision:${r.revision}`)}</guid><pubDate>${new Date(signalTime(r)).toUTCString()}</pubDate><description>${xml(description)}</description></item>`;
   }).join("");
   const rss = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Breach Watch recent reports and claims</title><link>https://bd4l.github.io/breach-dashboard-v2/</link><description>Latest 100 source-dated reports in the last 30 days. Ransomware claims are unverified. Times describe public reporting or source observation, not necessarily when a breach happened.</description><lastBuildDate>${new Date(now).toUTCString()}</lastBuildDate>${items}</channel></rss>`;
   return { manifest, encoded, pages, rss };

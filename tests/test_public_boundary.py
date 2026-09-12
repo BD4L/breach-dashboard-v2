@@ -14,6 +14,11 @@ class PublicBoundaryTests(unittest.TestCase):
         self.assertIsNone(PATTERNS['original app reference'].search(
             'https://consumer.sc.gov/sites/consumer/files/Documents/Related%20Laws/Breaches/2020/notice.pdf'))
 
+    def test_lowercase_provider_native_path_is_not_the_case_sensitive_pages_app_path(self):
+        self.assertIsNone(PATTERNS['original app reference'].search(
+            '{"nativeId":"/breaches/example-data-breach/"}'))
+        self.assertIsNotNone(PATTERNS['original app reference'].search('https://github.com/bd4l/breaches'))
+
 
 if __name__ == '__main__':
     unittest.main()

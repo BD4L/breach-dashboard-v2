@@ -2,6 +2,7 @@
 from dataclasses import dataclass, field
 from typing import Any
 from .source_catalog import EXTRA_SOURCES
+from .additional_sources import SOURCES as ADDITIONAL_SOURCES
 
 SOURCES = {
     "massachusetts": {"id": "massachusetts", "label": "Massachusetts", "jurisdiction": "MA", "method": "Annual report / official letter archive", "homepage": "https://www.mass.gov/lists/data-breach-notification-reports"},
@@ -9,6 +10,10 @@ SOURCES = {
     "california": {"id": "california", "label": "California", "jurisdiction": "CA", "method": "Public notices", "homepage": "https://oag.ca.gov/privacy/databreach/list"},
 }
 SOURCES.update(EXTRA_SOURCES)
+SOURCES.update(ADDITIONAL_SOURCES)
+
+ACTIVE_SOURCE_IDS = tuple(source_id for source_id, metadata in SOURCES.items()
+                          if metadata.get('collectionEnabled', True))
 
 class SourceError(RuntimeError):
     """Fetching or parsing failed; this is not an empty successful run."""

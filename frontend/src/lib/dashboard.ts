@@ -8,6 +8,10 @@ export interface Source {
   status: "healthy" | "unchanged" | "partial" | "failed" | "disabled";
   lastAttempt: string | null;
   lastSuccess: string | null;
+  lastCollected?: string | null;
+  latestReportDate?: string | null;
+  category?: "official" | "claims" | "secondary" | "reference";
+  collectionEnabled?: boolean;
   message: string;
   counts: {
     parsed: number;
@@ -42,7 +46,7 @@ export interface Report {
   sourceUrl: string;
   noticeUrl: string | null;
   summary: string;
-  signalType?: "ransomware_claim";
+  signalType?: "ransomware_claim" | "secondary_report";
   sourceObservedAt?: string;
   qualityFlags: { code: string; message: string }[];
   evidence: { retrievedAt: string; contentHash: string; parserVersion: string };
@@ -59,7 +63,7 @@ export interface Dataset {
   sources: Source[];
   reports: Report[];
 }
-export type ReportKind = "official" | "claims";
+export type ReportKind = "official" | "claims" | "secondary";
 export type SearchField = "organization" | "ids" | "summary" | "dataTypes" | "source";
 export interface Filters {
   query: string;
@@ -147,12 +151,17 @@ export function readDataset(value: unknown): Dataset {
     )
       return invalid();
     if (!safeUrl(s.homepage as string)) return invalid();
+    if ((s.category !== undefined && !['official', 'claims', 'secondary', 'reference'].includes(String(s.category))) ||
+        (s.collectionEnabled !== undefined && typeof s.collectionEnabled !== 'boolean') ||
+        (s.lastCollected !== undefined && s.lastCollected !== null && !validTimestamp(s.lastCollected)) ||
+        (s.latestReportDate !== undefined && s.latestReportDate !== null && !validDate(s.latestReportDate))) return invalid();
     if (s.attribution !== undefined && (!object(s.attribution) ||
         !["name", "url", "license", "licenseUrl", "changes"].every(
           key => typeof (s.attribution as Record<string, unknown>)[key] === "string",
         ) || !safeUrl(s.attribution.url as string) || !safeUrl(s.attribution.licenseUrl as string))) return invalid();
   }
   const sourceIds = new Set(value.sources.map((s) => s.id));
+  const sourceCategories = new Map(value.sources.map(s => [s.id, s.category ?? (s.id === 'ransomlook' ? 'claims' : 'official')]));
   const reportIds = new Set<string>();
   for (const r of value.reports) {
     if (
@@ -211,9 +220,10 @@ export function readDataset(value: unknown): Dataset {
     )
       return invalid();
     reportIds.add(r.id as string);
-    if ((r.signalType !== undefined && r.signalType !== "ransomware_claim") ||
+    const expectedSignal = sourceCategories.get(r.sourceId) === 'claims' ? 'ransomware_claim' :
+      sourceCategories.get(r.sourceId) === 'secondary' ? 'secondary_report' : undefined;
+    if (r.signalType !== expectedSignal || sourceCategories.get(r.sourceId) === 'reference' ||
         (r.sourceId === "ransomlook" && (r.signalType !== "ransomware_claim" || !validTimestamp(r.sourceObservedAt))) ||
-        (r.signalType === "ransomware_claim" && r.sourceId !== "ransomlook") ||
         (r.sourceObservedAt !== undefined && !validTimestamp(r.sourceObservedAt))) return invalid();
     if (
       !["firstSeen", "lastSeen", "lastChanged"].every((k) =>
@@ -305,19 +315,20 @@ export function sourceHealth(
   tone: "good" | "warn" | "bad" | "neutral";
   stale: boolean;
 } {
-  const success = timestamp(source.lastSuccess);
+  const success = timestamp(source.lastCollected ?? source.lastSuccess);
   const stale = !Number.isFinite(success) || now - success > 48 * 60 * 60_000;
   if (source.status === "disabled")
-    return { label: "Disabled", tone: "neutral", stale };
+    return { label: source.category === 'reference' ? "Reference only" : "Not collected", tone: "neutral", stale };
   if (
     success > now + 5 * 60_000 ||
+    timestamp(source.lastSuccess) > now + 5 * 60_000 ||
     timestamp(source.lastAttempt) > now + 5 * 60_000
   )
     return { label: "Unreliable timestamp", tone: "warn", stale: true };
   if (source.status === "failed")
     return { label: "Collection failed", tone: "bad", stale };
   if (source.status === "partial")
-    return { label: "Needs review", tone: "warn", stale };
+    return { label: "Limited coverage", tone: "warn", stale };
   if (stale) return { label: "Stale", tone: "warn", stale };
   return {
     label: source.status === "unchanged" ? "No changes" : "Current",
@@ -369,8 +380,10 @@ export function affectedCount(affected: Report["affected"]): string {
   return prefix + affected.count.toLocaleString("en-US");
 }
 
-export function sourceKind(sourceId: string): string {
-  if (sourceId === "ransomlook") return "Ransomware claims";
+export function sourceKind(sourceId: string, source?: Source): string {
+  if (sourceId === "ransomlook" || source?.category === 'claims') return "Ransomware claims";
+  if (source?.category === 'secondary') return source.method;
+  if (source?.category === 'reference') return "Reference catalog";
   if (sourceId === "sec") return "SEC filings";
   if (sourceId === "hhs") return "Federal portal";
   return "State register";
@@ -379,7 +392,7 @@ export function sourceKind(sourceId: string): string {
 export function reportSourceDate(report: Report, now: number): { label: "Observed" | "Published" | "Reported"; date: string } | null {
   const at = signalTime(report);
   if (!Number.isFinite(at) || at > now) return null;
-  if (report.sourceObservedAt) return { label: "Observed", date: report.sourceObservedAt };
+  if (report.sourceObservedAt) return { label: report.signalType === 'secondary_report' ? "Published" : "Observed", date: report.sourceObservedAt };
   if (report.publishedDate) return { label: "Published", date: report.publishedDate };
   return { label: "Reported", date: report.reportedDate! };
 }
@@ -416,7 +429,7 @@ export function filterReports(
       if (filters.quality !== null && !filters.quality.some(quality =>
         quality === "flagged" ? r.qualityFlags.length > 0 : quality === "updated" && r.revision > 1))
         return false;
-      if (filters.kind !== null && !filters.kind.includes(r.signalType === "ransomware_claim" ? "claims" : "official"))
+      if (filters.kind !== null && !filters.kind.includes(r.signalType === "ransomware_claim" ? "claims" : r.signalType === 'secondary_report' ? 'secondary' : "official"))
         return false;
       if (filters.searchFields?.length === 0) return false;
       if (!query) return true;

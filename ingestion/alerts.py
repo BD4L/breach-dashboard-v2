@@ -18,6 +18,7 @@ from requests.auth import AuthBase
 
 from .store import MAX_EXPORTED_HISTORY
 from .validation import safe_url, timestamp, utc_now
+from .additional_sources import expected_signal
 
 MAX_SNAPSHOT_BYTES = 50_000_000
 MAX_REPLY_BYTES = 1_000_000
@@ -189,10 +190,10 @@ def events_for_snapshot(snapshot, *, now=None, since=None, recent_days=7):
         identities.add(identifier)
         first_seen = instant(report.get('firstSeen'))
         signal = report.get('signalType')
-        if signal not in (None, 'ransomware_claim') or (source_id == 'ransomlook') != (signal == 'ransomware_claim'):
+        if sources[source_id].get('category') == 'reference' or signal != expected_signal(sources[source_id]):
             raise ValueError('Invalid source signal classification')
         claimed = signal == 'ransomware_claim'
-        if claimed and instant(report.get('sourceObservedAt')) > generated:
+        if (claimed and source_id == 'ransomlook' and instant(report.get('sourceObservedAt')) > generated) or (report.get('sourceObservedAt') and instant(report['sourceObservedAt']) > generated):
             raise ValueError('Invalid claim observation timestamp')
         material = latest_material_revision(report, generated)
         if material is None:
@@ -201,7 +202,7 @@ def events_for_snapshot(snapshot, *, now=None, since=None, recent_days=7):
         dated = source_date(report)
         if dated is None or not cutoff <= dated <= now.date() or (since and observed < since):
             continue
-        label = 'Unverified ransomware claim' if claimed else 'Official breach notice'
+        label = 'Unverified ransomware claim' if claimed else 'Secondary breach report' if signal == 'secondary_report' else 'Official breach notice'
         status = 'Updated' if event_revision > 1 else 'New'
         organization = text_value(report.get('organization'), 180)
         if not organization or not safe_url(report.get('sourceUrl')):
@@ -222,7 +223,11 @@ def events_for_snapshot(snapshot, *, now=None, since=None, recent_days=7):
         if safe_url(report.get('noticeUrl')):
             lines.append(f'Notice: {report["noticeUrl"]}')
         if claimed:
-            lines.extend(['This is a third-party ransomware claim, not an independently confirmed breach.', ATTRIBUTION])
+            lines.append('This is a third-party ransomware claim, not an independently confirmed breach.')
+        if source_id == 'ransomlook':
+            lines.append(ATTRIBUTION)
+        elif source_id in {'hibp', 'hibp_feed'}:
+            lines.append('Data: Have I Been Pwned (https://haveibeenpwned.com/), CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Public metadata normalized and filtered.')
         lines.append('Dashboard: https://bd4l.github.io/breach-dashboard-v2/')
         body = '\n'.join(lines)
         event_key = hashlib.sha256(json.dumps([source_id, identifier, event_revision], separators=(',', ':')).encode()).hexdigest()

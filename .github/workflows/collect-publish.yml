@@ -5,10 +5,13 @@ on:
     - cron: '17 0 * * *'
     - cron: '17 1-23 * * *'
     - cron: '47 * * * *'
+    - cron: '2,32 * * * *'
+  repository_dispatch:
+    types: [refresh-sources]
   workflow_dispatch:
     inputs:
       source:
-        description: 'One source ID, or all (see README)'
+        description: 'One active source ID, recent, or all (see README)'
         default: all
         required: true
         type: string
@@ -39,16 +42,14 @@ jobs:
           persist-credentials: false
       - id: sources
         env:
-          REQUESTED_SOURCE: ${{ inputs.source || 'all' }}
+          REQUESTED_SOURCE: ${{ inputs.source || github.event.client_payload.source || 'all' }}
+          TRIGGER_EVENT: ${{ github.event_name }}
+          TRIGGER_SCHEDULE: ${{ github.event.schedule }}
         run: |
           python3 - <<'PY'
           import json, os
-          from ingestion.models import SOURCES
-          requested = os.environ['REQUESTED_SOURCE']
-          if requested != 'all' and requested not in SOURCES:
-              raise SystemExit('Unknown source ID')
-          priority = ['ransomlook', 'sec', 'california', 'new_hampshire', 'massachusetts']
-          sources = priority + [source for source in SOURCES if source not in priority] if requested == 'all' else [requested]
+          from ingestion.scheduling import plan_sources
+          sources = plan_sources(os.environ['REQUESTED_SOURCE'], event=os.environ['TRIGGER_EVENT'], schedule=os.environ['TRIGGER_SCHEDULE'])
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('sources=' + json.dumps(sources) + '\n')
           PY
@@ -181,6 +182,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      actions: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -188,6 +190,16 @@ jobs:
       - name: Publish validated snapshot
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+      - name: Remove consumed transport artifacts after durable save and successful deployment
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" --paginate \
+            --jq '.artifacts[] | select(.name == "github-pages" or (.name | startswith("source-"))) | .id' |
+          while read -r artifact_id; do
+            gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id"
+          done
 
   health:
     needs: merge

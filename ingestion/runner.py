@@ -25,6 +25,7 @@ DEFAULT_TIMEOUT = 600
 
 def dispatch(source_id: str, *, max_pages: int | None = None) -> Collection:
     groups = {
+        'restored_sources': {'vermont', 'hawaii', 'hibp', 'breachsense'},
         'early_signals': {'ransomlook'},
         'rediscovered_delaware': {'delaware'},
         'rediscovered_nj': {'new_jersey'},
@@ -37,6 +38,9 @@ def dispatch(source_id: str, *, max_pages: int | None = None) -> Collection:
         'other_portals': {'montana', 'washington', 'south_carolina'},
         'special_portals': {'texas'},
     }
+    from .additional_sources import FEEDS, COMPANY_PAGES
+    if source_id in FEEDS or source_id in COMPANY_PAGES:
+        return import_module('ingestion.syndicated_sources').collect(source_id, max_pages=max_pages)
     for name, sources in groups.items():
         if source_id in sources:
             # Import only this source's parser family; unrelated parser imports
@@ -110,6 +114,9 @@ def collect_bounded(source_id: str, *, timeout: float = DEFAULT_TIMEOUT,
                     max_pages: int | None = None) -> Collection:
     if source_id not in SOURCES or not 0 < timeout <= 900:
         raise ValueError('Unknown source or deadline outside (0, 900] seconds')
+    from .additional_sources import SOURCES as ADDITIONAL_SOURCES
+    if source_id in ADDITIONAL_SOURCES:
+        timeout = min(timeout, 120)
     with tempfile.TemporaryDirectory(prefix='breach-source-') as directory:
         output = Path(directory) / 'worker.json'
         command = [sys.executable, '-m', 'ingestion.runner', '_worker', '--source', source_id,

@@ -17,6 +17,7 @@ import {
   FileText,
   FolderSearch,
   Info,
+  Newspaper,
   Pause,
   Plus,
   Plug,
@@ -31,7 +32,6 @@ import {
   affectedScope,
   changeValue,
   countTodayReports,
-  DAY,
   fieldLabel,
   filterReports,
   formatDate,
@@ -77,6 +77,7 @@ const STATUS_OPTIONS = [
 const KIND_OPTIONS = [
   { value: "official", label: "Official notices and filings" },
   { value: "claims", label: "Unverified ransomware claims" },
+  { value: "secondary", label: "News and third-party reports" },
 ];
 const SEARCH_OPTIONS = [
   { value: "organization", label: "Organization" },
@@ -138,6 +139,8 @@ function HealthLabel({ source, now }: { source: Source; now: number }) {
 function ReportBadge({ report, now }: { report: Report; now: number }) {
   if (report.signalType === "ransomware_claim")
     return <span className="report-badge claim"><AlertTriangle size={13} aria-hidden="true" />Unverified claim</span>;
+  if (report.signalType === "secondary_report")
+    return <span className="report-badge"><Newspaper size={13} aria-hidden="true" />Secondary report</span>;
   if (report.revision > 1)
     return (
       <span className="report-badge revised" role="img" aria-label={`Updated report, revision ${report.revision}`} title={`Updated report, revision ${report.revision}`}>
@@ -218,7 +221,8 @@ function DetailPane({
         <p className="detail-source">
           {source?.label || "Source not available"}
         </p>
-        {report.signalType === "ransomware_claim" && <p className="detail-hint">A ransomware group’s allegation observed by RansomLook. This claim has not been independently verified.</p>}
+        {report.signalType === "ransomware_claim" && <p className="detail-hint">A ransomware group’s allegation indexed by {source?.label || 'the source'}. This claim has not been independently verified.</p>}
+        {report.signalType === "secondary_report" && <p className="detail-hint">A news headline, catalog entry or company-page link. Verify the original evidence; this is not an official regulator filing.</p>}
         <SourceAttribution source={source} />
         {source && sourceHealth(source, now).tone !== "good" && (
           <div className="detail-source-health">
@@ -265,7 +269,7 @@ function DetailPane({
           <h3>Reported timeline</h3>
           <dl className="timeline-fields">
             {report.sourceObservedAt && <div>
-              <dt>Observed by source</dt>
+              <dt>{report.signalType === 'secondary_report' ? 'Publication timestamp' : 'Observed by source'}</dt>
               <dd>{formatDate(report.sourceObservedAt, { hour: "numeric", minute: "2-digit" })} UTC</dd>
             </div>}
             <div>
@@ -422,22 +426,30 @@ function DetailPane({
 }
 
 function SourcesView({ data, now }: { data: Dataset; now: number }) {
+  const [query, setQuery] = useState("");
+  const visibleSources = data.sources.filter(source =>
+    `${source.label} ${source.jurisdiction} ${source.method}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase()))
+    .sort((a, b) => a.label.localeCompare(b.label));
   return (
     <div className="sources-content">
       <div className="sources-intro">
         <div>
           <h2>Know what’s current.</h2>
           <p>
-            A successful collection and an empty result are different things.
-            Each source reports its own outcome.
+            {data.sources.length} sources from the original projects and added feeds.
+            Collection, coverage and report dates are shown separately.
           </p>
         </div>
         <span className="neutral-note">
           <Clock3 size={14} /> Stale after 48 hours
         </span>
       </div>
+      <div className="source-search search-box">
+        <Search size={17} aria-hidden="true" />
+        <input aria-label="Search source catalog" placeholder="Search sources…" value={query} onChange={event => setQuery(event.target.value)} />
+      </div>
       <div className="source-list">
-        {data.sources.map((source) => {
+        {visibleSources.map((source) => {
           const health = sourceHealth(source, now);
           return (
             <article className="source-item" key={source.id}>
@@ -463,7 +475,17 @@ function SourcesView({ data, now }: { data: Dataset; now: number }) {
                   </dd>
                 </div>
                 <div>
-                  <dt>Last success</dt>
+                  <dt>Last usable collection</dt>
+                  <dd title={source.lastCollected || source.lastSuccess || ""}>
+                    {relativeTime(source.lastCollected ?? source.lastSuccess, now)}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Latest report date</dt>
+                  <dd>{formatDate(source.latestReportDate)}</dd>
+                </div>
+                <div>
+                  <dt>Last complete run</dt>
                   <dd title={source.lastSuccess || ""}>
                     {relativeTime(source.lastSuccess, now)}
                   </dd>
@@ -493,14 +515,15 @@ function SourcesView({ data, now }: { data: Dataset; now: number }) {
               </dl>
               <div className="source-item-footer">
                 <span>
-                  {health.label === "Unreliable timestamp"
+                  {source.category === 'reference' ? "Catalog entry only; excluded from breach counts."
+                    : health.label === "Unreliable timestamp"
                     ? "Collection timestamps need verification."
                     : health.stale
                       ? "Last valid collection is older than 48 hours or unavailable."
                       : "Last valid collection is within 48 hours."}
                 </span>
                 <ExternalLink url={source.homepage}>
-                  {source.id === "ransomlook" ? "RansomLook" : "Official source"}
+                  Open source
                 </ExternalLink>
               </div>
               <SourceAttribution source={source} />
@@ -508,6 +531,7 @@ function SourcesView({ data, now }: { data: Dataset; now: number }) {
           );
         })}
       </div>
+      {visibleSources.length === 0 && <p className="queue-note">No sources match this search.</p>}
       <div className="source-footnote">
         <Info size={17} />
         <div>
@@ -620,7 +644,7 @@ export default function Dashboard() {
   // Before the archive loads this is a device bookmark count, not a matched-report count.
   const savedCount = archiveLoaded ? data?.reports.filter((report) => saved.has(report.id)).length || 0 : saved.size;
   const unhealthy =
-    data?.sources.filter((source) => sourceHealth(source, now).tone !== "good")
+    data?.sources.filter((source) => source.category !== 'reference' && sourceHealth(source, now).tone !== "good")
       .length || 0;
   const filtersActive =
     filters.query !== "" ||
@@ -632,7 +656,7 @@ export default function Dashboard() {
   const officialOnly = filters.kind?.length === 1 && filters.kind[0] === "official";
   const todayOfficialPreset = view === "today" && officialOnly && !filters.query &&
     filters.source === null && filters.size === null && filters.quality === null && filters.searchFields === null;
-  const snapshotStale = !!data && now - timestamp(data.generatedAt) > 2 * DAY;
+  const snapshotStale = !!data && now - timestamp(data.generatedAt) > 90 * 60_000;
   const snapshotFuture =
     !!data && timestamp(data.generatedAt) > now + 5 * 60_000;
   const todayCoverage = data?.mode === "demo" ? "Demo data" : snapshotFuture ? "Timestamp needs review" : snapshotStale ? "Stale snapshot" : unhealthy ? `${unhealthy} ${unhealthy === 1 ? "source needs" : "sources need"} attention` : "Published snapshot";
@@ -853,7 +877,7 @@ export default function Dashboard() {
                 {snapshotFuture
                   ? "Snapshot timestamp is in the future"
                   : snapshotStale
-                    ? "Snapshot is stale"
+                    ? `Publication delayed · snapshot ${relativeTime(data.generatedAt, now)}`
                     : `Snapshot generated ${relativeTime(data.generatedAt, now)}`}
                 {view === "recent" && (
                   <span className="freshness-context">
@@ -972,7 +996,7 @@ export default function Dashboard() {
                 )}
                 {view === "today" && (
                   <p className="queue-note"><CalendarDays size={13} />{officialOnly
-                    ? `Official-source notices and filings published or reported today (${formatDate(utcDay(now))}, UTC). Ransomware claims are excluded; related reports count separately.`
+                    ? `Official-source notices and filings published or reported today (${formatDate(utcDay(now))}, UTC). Third-party reports and ransomware claims are excluded; related reports count separately.`
                     : `Reports published or reported today and claims observed by their source today (${formatDate(utcDay(now))}, UTC). Claims are unverified and related records count separately.`}</p>
                 )}
                 {view === "saved" && (
@@ -1084,7 +1108,7 @@ export default function Dashboard() {
                                     )}
                                   </span>
                                   <span className="cell-subtext">
-                                    {sourceKind(report.sourceId)}
+                                    {sourceKind(report.sourceId, sourceMap.get(report.sourceId))}
                                   </span>
                                 </td>
                                 <td className="count-cell">
