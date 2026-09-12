@@ -303,6 +303,7 @@ test("secondary sources cannot be relabeled as official notices and references c
   assert.equal(readDataset(value).reports[0].signalType, "secondary_report");
   assert.throws(() => readDataset({ ...value, reports: [{ ...item, signalType: undefined }] }));
   assert.throws(() => readDataset({ ...value, sources: [{ ...secondary, category: "reference" }] }));
+  assert.throws(() => readDataset({ ...dataset(), sources: [{ ...source, category: ["official"] }] }));
   assert.equal(sourceKind(secondary.id, secondary), "News / metadata feed");
   assert.deepEqual(filterReports([item], "today", { ...INITIAL_FILTERS, kind: ["secondary"] }, new Set(), now), [item]);
 });

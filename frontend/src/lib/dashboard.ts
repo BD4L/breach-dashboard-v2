@@ -151,7 +151,7 @@ export function readDataset(value: unknown): Dataset {
     )
       return invalid();
     if (!safeUrl(s.homepage as string)) return invalid();
-    if ((s.category !== undefined && !['official', 'claims', 'secondary', 'reference'].includes(String(s.category))) ||
+    if ((s.category !== undefined && (typeof s.category !== 'string' || !['official', 'claims', 'secondary', 'reference'].includes(s.category))) ||
         (s.collectionEnabled !== undefined && typeof s.collectionEnabled !== 'boolean') ||
         (s.lastCollected !== undefined && s.lastCollected !== null && !validTimestamp(s.lastCollected)) ||
         (s.latestReportDate !== undefined && s.latestReportDate !== null && !validDate(s.latestReportDate))) return invalid();
